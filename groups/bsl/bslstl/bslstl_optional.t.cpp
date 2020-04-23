@@ -227,6 +227,7 @@ class MyClass1 {
     }
     // ACCESSORS
     int value() const { return d_def.d_value; }
+
 };
 bool operator==(const MyClass1& lhs,
                 const MyClass1& rhs)
@@ -552,6 +553,10 @@ class MyClass2 {
 
     // ACCESSORS
     int value() const { return d_def.d_value; }
+
+    bslma::Allocator * get_allocator() const {
+      return d_def.d_allocator_p;
+    }
 };
 // CLASS DATA
 int MyClass2::copyConstructorInvocations       = 0;
@@ -783,6 +788,10 @@ class MyClass2a {
     }
     // ACCESSORS
     int value() const { return d_data.value(); }
+
+    bslma::Allocator * get_allocator() const {
+      return d_data.get_allocator();
+    }
 };
 
 bool operator==(const MyClass2a& lhs,
@@ -860,6 +869,10 @@ class MyClass2b {
     }
     // ACCESSORS
     int value() const { return d_data.value(); }
+
+    bslma::Allocator * get_allocator() const {
+      return d_data.get_allocator();
+    }
 };
 bool operator==(const MyClass2b& lhs,
                 const MyClass2b& rhs)
@@ -946,6 +959,10 @@ class MyClass2c {
     }
     // ACCESSORS
     int value() const { return d_data.value(); }
+
+    bslma::Allocator * get_allocator() const {
+      return d_data.get_allocator();
+    }
 };
 bool operator==(const MyClass2c& lhs,
                 const MyClass2c& rhs)
@@ -4795,11 +4812,74 @@ bool isConstPtr(const T*) { return true;}
       ASSERTV(hashValue_1, hashValue_2, hashValue_1 == hashValue_2);          \
   }
 
-//=============================================================================
-//                              MAIN PROGRAM
-//-----------------------------------------------------------------------------
 
-void bslstl_optional_test1()
+template <class TYPE, bool USES_BSLMA_ALLOC =
+                           BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
+class Test_Util {
+    // This class provided test utilities which have different behaviour
+    // depending on whether 'TYPE is allocator aware or not.  The main template
+    // is for allocator aware types.
+
+  public:
+    static bool check_allocator(const TYPE &obj, bslma::Allocator *expected);
+        // Check if, for the specified 'obj', 'obj.get_allocator()' returns
+        // the specified 'expected' allocator.
+};
+
+template <class TYPE>
+class Test_Util<TYPE, false> {
+    // This class provided test utilities which have different behaviour
+    // depending on whether 'TYPE is allocator aware or not.  This
+    // specialization is for non allocator aware types.
+
+  public:
+    static bool check_allocator(const TYPE &, bslma::Allocator *);
+        // return 'true'.
+};
+
+template <class TYPE, bool USES_BSLMA_ALLOC>
+inline bool
+Test_Util<TYPE, USES_BSLMA_ALLOC>::check_allocator(const TYPE       &obj,
+                                                   bslma::Allocator *expected)
+{
+    return (expected == obj.get_allocator());
+}
+
+template <class TYPE>
+inline bool
+Test_Util<TYPE, false>::check_allocator(const TYPE       &,
+                                        bslma::Allocator *)
+{
+    return true;
+}
+
+template<class TYPE>
+bool check_allocator(const TYPE &obj, bslma::Allocator *allocator)
+{
+    return Test_Util<TYPE>::check_allocator(obj,allocator);
+}
+
+// ============================================================================
+//                          TEST DRIVER TEMPLATE
+// ----------------------------------------------------------------------------
+
+
+template <class TYPE>
+class TestDriver {
+    // This class template provides a namespace for testing the 'optional'
+    // type.
+  public:
+    static void bslstl_optional_test1();
+        // BREATHING TEST
+
+    static void bslstl_optional_test2();
+        // PRIMARY MANIPULATORS AND ACCESSORS. Note that this test requires
+        // <TYPE> to provide a 'destructorInvocations' static variable which
+        // counts the number of times destructor has been invoked.
+};
+
+template <class TYPE>
+void TestDriver<TYPE>::bslstl_optional_test1()
 {
 
     // --------------------------------------------------------------------
@@ -4811,16 +4891,16 @@ void bslstl_optional_test1()
     //:   testing in subsequent test cases.
     //
     // Plan:
-    //: 1 Create a disengaged 'optional' of allocator aware type
-    //: 2 Check that 'get_allocator' method returns the alloctor used
-    //:   to construct the 'optional' object.
+    //: 1 Create a disengaged 'optional'
+    //: 2 For allocator aware 'value_type, check that 'get_allocator' method
+    //:   returns the allocator used to construct the 'optional' object.
     //: 3 Test that 'has_value' on a disengaged 'optional' returns 'false'
     //: 4 Test that dissengaged 'optional' evaluates to 'false'
     //: 5 Emplace a value into the 'optional' object and check that
     //:   'value()' method returns the emplaced value.
     //: 6 Verify reset() method disengages an engaged 'optional.
-    //: 7 Create an engaged 'optional' of non allocator aware type and verify
-    //:   'value()' returns the expected value
+    //: 7 Create an engaged 'optional' and verify that 'value()' returns the
+    //:   expected value
     //: 8 Test that an engaged 'optional' evaluates to 'true'
     //
     // Testing:
@@ -4830,29 +4910,32 @@ void bslstl_optional_test1()
     if (verbose) printf("\nBREATHING TEST"
                         "\n==============\n");
     bslma::TestAllocator da("default", veryVeryVeryVerbose);
-    bslma::TestAllocator ta("test", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard dag(&da);
 
-    bsl::optional<MyClass2> X(bsl::allocator_arg, &ta);
-    ASSERT(X.get_allocator() == &ta);
+    bsl::optional<TYPE> X;
+    ASSERT(check_allocator(X, &da));
     ASSERT(!X.has_value());
     ASSERT_IF_BOOL_CONVERSION(!X);
 
-    X.emplace(V2);
-    ASSERT(X.value().d_def.d_allocator_p == &ta);
+    TYPE obj;
+    X.emplace(obj);
+    ASSERT(check_allocator(X, &da));
     ASSERT(X.has_value());
-    ASSERT(X.value() == V2);
+    ASSERT(X.value() == obj);
 
     X.reset();
     ASSERT(!X.has_value());
 
-    bsl::optional<int> Y = 5;
+    bsl::optional<TYPE> Y = obj;
     ASSERT(Y.has_value());
-    ASSERT(Y.value() == 5);
+    ASSERT(check_allocator(X, &da));
+    ASSERT(Y.value() == obj);
     ASSERT_IF_BOOL_CONVERSION(Y);
 
 }
-void bslstl_optional_test2()
+
+template <class TYPE>
+void TestDriver<TYPE>::bslstl_optional_test2()
 {
     // --------------------------------------------------------------------
     // PRIMARY MANIPULATORS AND ACCESSORS
@@ -4885,38 +4968,31 @@ void bslstl_optional_test2()
     //:   'value_type' is invoked.
     //
     // Plan:
-    //: 1 Construct an 'optional' object of a non allocator aware type using
-    //:   default construction and, for concern 1, verify that the 'optional'
+    //: 1 Construct an 'optional' object using default construction and, for
+    //:   concern 1, verify that the 'optional' object is disengaged.
+    //: 2 Construct an 'optional' object using the constructor that takes
+    //:   'nullopt_t' argument and, for concern 2, verify that the 'optional'
     //:   object is disengaged.
-    //: 2 Construct an 'optional' object of an allocator aware type using
-    //:   default construction and, for concern 1, verify that the 'optional'
-    //:   object is disengaged.
-    //: 3 Construct an 'optional' object of a non allocator aware type using
-    //:   the constructor that takes 'nullopt_t' argument and, for concern 2,
-    //:   verify that the 'optional' object is disengaged.
-    //: 4 Construct an 'optional' object of an allocator aware type using
-    //:   using the constructor that takes 'nullopt_t' argument, and for
-    //:   concern 2, verify that the 'optional' object is disengaged.
-    //: 5 In step 2 and 4, for concern 3 verify that the 'get_allocator' method
-    //:   returns the default allocator.
-    //: 6 Call 'emplace' on a disengaged 'optional' of non allocator aware type
-    //:   using an object of 'value_type' type. For concern 5, verify the
-    //:   'get_value' returns 'true and that the 'value' method returns the
-    //:   value of the source object.
-    //: 7 Repeat step 6 for an allocator aware 'value_type'. Additionally, for
-    //:   concern 6, check that the allocator of the object referenced by
-    //:   the result of 'value' method is the default allocator.
-    //: 8 For concern 7, in steps 1 and 2, verify the disengaged 'optional'
-    //:   objects converted to 'bool' evaluate to false. Additionaly, in steps
-    //:   6 and 7, verify the engaged 'optional' objects converted to 'bool'
-    //:   evaluate to true.
-    //: 9 Call reset on an engaged 'optional' object of non allocator aware
-    //:   type. For concern 8, verify that 'get_value' returns 'false'. Repeat
-    //:   the step for an 'optional' of allocator aware type.
-    //:10 In a separate scope, create an engaged 'optional' of non allocator
-    //:   aware type. For concern 9, when the scope ends, verify the destructor
-    //:   of the 'value_type' has been called. Repeat the step for an
-    //:   allocator aware type.
+    //: 3 In step 1 and 2, for concern 3 verify that, if the 'value_type' is
+    //:   allocator aware, the 'get_allocator' method returns the default
+    //:   allocator.
+    //: 4 Call 'emplace' on a disengaged 'optional' using an object of
+    //:   'value_type' type.  For concern 5, verify the 'get_value' returns
+    //:   'true' and that the 'value' method returns the value of the source
+    //:   object.
+    //: 5 In step 4, for concern 6, if the 'value_type is allocator aware,
+    //:   check that the allocator of the object referenced by the result of
+    //:   'value' method is the default allocator.
+    //: 6 For concern 7, in step 1, verify the disengaged 'optional' object
+    //:   converted to 'bool' evaluates to false.  Additionaly, in step 4,
+    //:   verify that the engaged 'optional' objects converted to 'bool'
+    //:   evaluates to true.
+    //: 7 Call reset on an engaged 'optional' object and, for concern 8, verify
+    //:   that 'get_value' returns 'false'.
+    //:8  In a separate scope, create an engaged 'optional' object.  For
+    //:   concern 9, when the scope ends, verify the destructor of the
+    //:   'value_type' has been called if the 'value_type' is trivially
+    //:   destructible.
     //
     // Testing:
     //   typedef TYPE value_type;
@@ -4936,48 +5012,12 @@ void bslstl_optional_test2()
                        "\n=================================="
                        "\n");
 
-    if (veryVerbose) printf("\tUsing non allocator aware 'value_type'.\n");
-    {
-        typedef MyClass1                 ValueType;
-        typedef bsl::optional<ValueType> Obj;
-
-        {
-            Obj mX;
-            const Obj& X = mX;
-            ASSERT(!X.has_value());
-            ASSERT_IF_BOOL_CONVERSION(!X);
-        }
-        {
-            Obj mX = Obj(nullopt);
-            const Obj& X = mX;
-            ASSERT(!X.has_value());
-            ASSERT_IF_BOOL_CONVERSION(!X);
-
-            mX.emplace(MyClass1(5));
-            ASSERT(mX.has_value());
-            ASSERT_IF_BOOL_CONVERSION(mX);
-            ASSERT(mX.value() == MyClass1(5));
-
-            mX.reset();
-            ASSERT(!X.has_value());
-            ASSERT_IF_BOOL_CONVERSION(!X);
-        }
-        int dI;
-        {
-            Obj mX = MyClass1(5);
-            ASSERT(mX.has_value());
-            ASSERT_IF_BOOL_CONVERSION(mX);
-            dI = ValueType::destructorInvocations;
-        }
-        ASSERT(dI == ValueType::destructorInvocations -1);
-    }
-
     if (veryVerbose) printf("\tUsing allocator aware type.\n");
     {
         bslma::TestAllocator da("default", veryVeryVeryVerbose);
         bslma::DefaultAllocatorGuard dag(&da);
 
-        typedef MyClass2                        ValueType;
+        typedef TYPE                            ValueType;
         typedef bsl::optional<ValueType>        Obj;
 
         {
@@ -4987,7 +5027,7 @@ void bslstl_optional_test2()
             const Obj& X = mX;
             ASSERT(!X.has_value());
             ASSERT_IF_BOOL_CONVERSION(!X);
-            ASSERT(X.get_allocator() == &da);
+            ASSERT(check_allocator(X, &da));
             ASSERT(dam.isTotalSame());
 
         }
@@ -4998,14 +5038,14 @@ void bslstl_optional_test2()
             const Obj& X = mX;
             ASSERT(!X.has_value());
             ASSERT_IF_BOOL_CONVERSION(!X);
-            ASSERT(X.get_allocator() == &da);
+            ASSERT(check_allocator(X, &da));
             ASSERT(dam.isTotalSame());
 
-            mX.emplace(MyClass1(5));
+            mX.emplace(ValueType(5));
             ASSERT(mX.has_value());
             ASSERT_IF_BOOL_CONVERSION(mX);
-            ASSERT(mX.value() == MyClass1(5));
-            ASSERT(X.value().d_def.d_allocator_p == &da);
+            ASSERT(mX.value() == ValueType(5));
+            ASSERT(check_allocator(X.value(), &da));
 
             mX.reset();
             ASSERT(!X.has_value());
@@ -5013,7 +5053,7 @@ void bslstl_optional_test2()
         }
         int dI;
         {
-            Obj mX = MyClass1(5);
+            Obj mX = ValueType(5);
             ASSERT(mX.has_value());
             ASSERT_IF_BOOL_CONVERSION(mX);
             dI = ValueType::destructorInvocations;
@@ -14633,6 +14673,9 @@ void bslstl_optional_test36()
     }
 
 }
+//=============================================================================
+//                              MAIN PROGRAM
+//-----------------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
@@ -14762,10 +14805,16 @@ int main(int argc, char **argv)
          bslstl_optional_test3();
          break;
       case 2:
-        bslstl_optional_test2();
+        TestDriver<MyClass1>::bslstl_optional_test1();
+        TestDriver<MyClass2>::bslstl_optional_test1();
+        TestDriver<MyClass2a>::bslstl_optional_test1();
         break;
       case 1:
-        bslstl_optional_test1();
+        TestDriver<int>::bslstl_optional_test1();
+        TestDriver<MyClass1>::bslstl_optional_test1();
+        TestDriver<MyClass2>::bslstl_optional_test1();
+        TestDriver<MyClass2a>::bslstl_optional_test1();
+
         break;
       default: {
         printf( "WARNING: CASE `%d' NOT FOUND.\n", test);

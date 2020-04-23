@@ -165,7 +165,7 @@ using std::in_place;
                         // =========================
 struct nullopt_t {
     // 'nullopt_t' is a tag type used to create 'optional' objects in a
-    // disengaged state.  It should not be implicitly constructible so the
+    // disengaged state.  It should not be default constructible so the
     // following assignment isn't ambiguous :
     //..
     //   optional<SomeType> o;
@@ -175,7 +175,7 @@ struct nullopt_t {
 
 
     // CREATORS
-    explicit BSLS_KEYWORD_CONSTEXPR nullopt_t() BSLS_KEYWORD_NOEXCEPT;
+    explicit BSLS_KEYWORD_CONSTEXPR nullopt_t(int) BSLS_KEYWORD_NOEXCEPT;
         // constructor must be explicit to prevent accidental creation of
         // nullopt_t objects.
 };
@@ -185,10 +185,10 @@ struct nullopt_t {
 // bde_verify requires an out of class definition.  It also requires the tag
 // variable below not to be extern.  The variable itself requires a constructor
 // definition before its own definition.
-inline BSLS_KEYWORD_CONSTEXPR nullopt_t::nullopt_t() BSLS_KEYWORD_NOEXCEPT
+inline BSLS_KEYWORD_CONSTEXPR nullopt_t::nullopt_t(int) BSLS_KEYWORD_NOEXCEPT
 {}
 
-static const BSLS_KEYWORD_CONSTEXPR nullopt_t nullopt = nullopt_t();
+extern const BSLS_KEYWORD_CONSTEXPR nullopt_t nullopt = nullopt_t(0);
     // Value of type 'nullopt_t' used as an argument to functions  that take
     // an 'nullopt_t' argument.
 
@@ -198,26 +198,8 @@ static const BSLS_KEYWORD_CONSTEXPR nullopt_t nullopt = nullopt_t();
 struct in_place_t {
     // 'in_place_t' is a tag type that is passed to the constructors of
     // 'optional' to indicate that the contained object should be constructed
-    //  in-place.  It should not be implicitly constructible so the
-    // following construction isn't ambiguous :
-    //..
-    //   optional<SomeType> o = {};
-    //..
-    // where 'o' is an 'optional' object.
-
-    // CREATORS
-    explicit BSLS_KEYWORD_CONSTEXPR in_place_t() BSLS_KEYWORD_NOEXCEPT;
-        // constructor must be explicit to prevent accidental creation of
-        // in_place_t objects.
+    //  in-place.
 };
-
-// CREATORS
-
-// bde_verify requires an out of class definition.  It also requires the tag
-// variable below not to be extern.  The variable itself requires a constructor
-// definition before its own definition.
-BSLS_KEYWORD_CONSTEXPR in_place_t::in_place_t() BSLS_KEYWORD_NOEXCEPT
-{}
 
 static const BSLS_KEYWORD_CONSTEXPR in_place_t in_place = in_place_t();
     // Value of type 'in_place_t' used as an argument to functions  that take
@@ -240,7 +222,7 @@ namespace bslstl {
 
 struct Optional_OptNoSuchType {
         // Type to distinguish between arguments passed by a user, and an
-        // 'enable_if' argument.  It should not be implicitly constructible so
+        // 'enable_if' argument.  It should not be default constructible so
         // the following construction never invokes a constrained single
         // parameter constructor :
         //..
@@ -248,7 +230,7 @@ struct Optional_OptNoSuchType {
         //..
 
     // CREATORS
-    explicit BSLS_KEYWORD_CONSTEXPR Optional_OptNoSuchType()
+    explicit BSLS_KEYWORD_CONSTEXPR Optional_OptNoSuchType(int)
         BSLS_KEYWORD_NOEXCEPT;
         // constructor must be explicit to prevent accidental creation of
         // Optional_OptNoSuchType objects.
@@ -259,12 +241,12 @@ struct Optional_OptNoSuchType {
 // bde_verify requires an out of class definition.  It also requires the tag
 // variable below not to be extern.  The variable itself requires a constructor
 // definition before its own definition.
-inline BSLS_KEYWORD_CONSTEXPR Optional_OptNoSuchType::Optional_OptNoSuchType()
-        BSLS_KEYWORD_NOEXCEPT
+inline BSLS_KEYWORD_CONSTEXPR
+Optional_OptNoSuchType::Optional_OptNoSuchType(int) BSLS_KEYWORD_NOEXCEPT
 {}
 
 static const BSLS_KEYWORD_CONSTEXPR Optional_OptNoSuchType optNoSuchType =
-                                                      Optional_OptNoSuchType{};
+                                                     Optional_OptNoSuchType{0};
     // Value of type 'Optional_OptNoSuchType' used as the default argument in
     // functions that are constrained using a function argument.
 
