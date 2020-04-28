@@ -7,7 +7,7 @@
 // should not be used as an example for new development.
 // ----------------------------------------------------------------------------
 
-#include "../../bsl/bslstl/bslstl_optional.h"
+#include "bslstl_optional.h"
 
 #include <bsls_ident.h>
 BSLS_IDENT_RCSID(bslstl_optional_cpp,"$Id$ $CSID$")
@@ -23,7 +23,7 @@ namespace bslstl {
 
 // todo : update copyright
 // ----------------------------------------------------------------------------
-// Copyright 2015 Bloomberg Finance L.P.
+// Copyright 2020 Bloomberg Finance L.P.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
