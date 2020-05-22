@@ -24,6 +24,7 @@
 
 #include <bslmf_assert.h>
 #include <bslmf_matchanytype.h>
+#include <bslmf_usesallocator.h>
 
 #include <bsls_asserttest.h>
 #include <bsls_nameof.h>
@@ -66,7 +67,7 @@ using bsls::NameOf;
 //
 // CREATORS
 // [ 3] NullableValue();
-// [ 3] NullableValue(bslma::Allocator *basicAllocator);
+// [ 3] NullableValue(const bsl::allocator<char>& allocator);
 // [ 6] NullableValue(const NullableValue& original);
 // [ 6] NullableValue(const NullableValue& original, *ba);
 // [20] NullableValue(NullableValue&& original);
@@ -4453,6 +4454,9 @@ void TestDriver<TEST_TYPE>::testCase18_withoutAllocator()
     typedef bdlb::NullableValue<TmvipSa<TEST_TYPE> > Obj;
     typedef bsltf::TemplateTestFacility              Util;
 
+    ASSERT(!bslma::UsesBslmaAllocator<Obj>::value);
+    ASSERT(!(bsl::uses_allocator<Obj, bsl::allocator<char> >::value));
+
     const TEST_TYPE v1 = Util::create<TEST_TYPE>(1);
     const TEST_TYPE v2 = Util::create<TEST_TYPE>(2);
     const TEST_TYPE v3 = Util::create<TEST_TYPE>(3);
@@ -4558,6 +4562,9 @@ void TestDriver<TEST_TYPE>::testCase18_withAllocator()
     typedef TmvipAa<TEST_TYPE>                       Helper;
     typedef bdlb::NullableValue<TmvipAa<TEST_TYPE> > Obj;
     typedef bsltf::TemplateTestFacility              Util;
+
+    ASSERT(bslma::UsesBslmaAllocator<Obj>::value);
+    ASSERT((bsl::uses_allocator<Obj, bsl::allocator<char> >::value));
 
     const TEST_TYPE v1 = Util::create<TEST_TYPE>(1);
     const TEST_TYPE v2 = Util::create<TEST_TYPE>(2);
@@ -7542,11 +7549,13 @@ int main(int argc, char *argv[])
             {
                 const Obj A(VALUE1, &oa);
                 ASSERT(VALUE1 == A.value());
+                ASSERT(&oa == A.get_allocator());
                 ASSERT(dam.isTotalSame());         // no temporaries
                 ASSERT(0 == oa.numBlocksTotal());
 
                 const Obj B(VALUE2, &oa);
                 ASSERT(VALUE2 == B.value());
+                ASSERT(&oa == B.get_allocator());
                 ASSERT(dam.isTotalSame());         // no temporaries
                 ASSERT(0 != oa.numBlocksInUse());
             }
@@ -8318,7 +8327,7 @@ int main(int argc, char *argv[])
         // Testing:
         //   typedef TYPE ValueType;
         //   NullableValue();
-        //   NullableValue(bslma::Allocator *basicAllocator);
+        //   NullableValue(const bsl::allocator<char>& allocator);
         //   ~NullableValue();
         //   TYPE& makeValue();
         //   TYPE& makeValue(const TYPE& value);

@@ -81,7 +81,6 @@ BSLS_IDENT("$Id: $")
 
 #include <bslma_allocator.h>
 #include <bslma_constructionutil.h>
-#include <bslma_default.h>
 #include <bslma_usesbslmaallocator.h>
 
 #include <bslmf_conditional.h>
@@ -144,7 +143,11 @@ class NullableValue {
 
     // PRIVATE TYPES
 
+    typedef typename Imp::AllocType                               AllocType;
+
     typedef bslmf::MovableRefUtil                                 MoveUtil;
+
+    struct EnableType { };
 
     // DATA
     bsl::optional<TYPE> d_imp;  // managed nullable 'TYPE' object
@@ -159,6 +162,8 @@ class NullableValue {
         // 'ValueType' is an alias for the underlying 'TYPE' upon which this
         // template class is instantiated, and represents the type of the
         // managed object.
+
+    typedef AllocType allocator_type;
 
     // TRAITS
     BSLMF_NESTED_TRAIT_DECLARATION_IF(NullableValue,
@@ -181,12 +186,11 @@ class NullableValue {
         // optional allocator at construction, use the currently installed
         // default allocator to supply memory.
 
-    explicit NullableValue(bslma::Allocator *basicAllocator)
-                                                         BSLS_KEYWORD_NOEXCEPT;
+    explicit NullableValue(const AllocType& allocator) BSLS_KEYWORD_NOEXCEPT;
         // Create a nullable object that has the null value and that uses the
-        // specified 'basicAllocator' to supply memory.  Note that this method
-        // will fail to compile if 'TYPE' does not take an optional allocator
-        // at construction.
+        // specified 'allocator' to supply memory.  Note that this constructor
+        // will not be found by overload resolution if 'TYPE' does not take an
+        // optional allocator at construction.
 
     NullableValue(const NullableValue& original);
         // Create a nullable object having the value of the specified
@@ -203,47 +207,47 @@ class NullableValue {
         // but unspecified state.
 
     NullableValue(const NullableValue&  original,
-                  bslma::Allocator     *basicAllocator);
+                  const AllocType&      allocator);
         // Create a nullable object that has the value of the specified
         // 'original' object and that uses the specified 'basicAllocator' to
-        // supply memory.  Note that this method will fail to compile if 'TYPE'
-        // does not take an optional allocator at construction.
+        // supply memory.  Note that this constructor will not be found by
+        // overload resolution if 'TYPE' does not take an optional allocator
+        // at construction.
 
     NullableValue(bslmf::MovableRef<NullableValue>  original,
-                  bslma::Allocator                 *basicAllocator);
+                  const AllocType&                  allocator);
         // Create a nullable object having the same value as the specified
-        // 'original' object that uses the specified 'basicAllocator' to supply
-        // memory.  If 'basicAllocator' is 0, the default allocator is used.
-        // The contents of 'original' are moved to the newly-created object.
-        // 'original' is left in a valid but unspecified state.  Note that this
-        // method will fail to compile if 'TYPE' does not take an optional
-        // allocator at construction.
+        // 'original' object that uses the specified 'allocator' to supply
+        // memory.  The contents of 'original' are moved to the newly-created
+        // object using the extended move constructor for 'TYPE'.  'original'
+        // is left in a valid but unspecified state.  Note that this
+        // constructor will not be found by overload resolution if 'TYPE' does
+        // not take an optional allocator at construction.
 
     template <class BDE_OTHER_TYPE>
     NullableValue(BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value,
                   typename bsl::enable_if<
                       bsl::is_convertible<BDE_OTHER_TYPE, TYPE>::value
                       &&
-                      !bsl::is_convertible<BDE_OTHER_TYPE,
-                                           bslma::Allocator *>::value,
-                      void>::type * = 0);                           // IMPLICIT
+                      !bsl::is_convertible<BDE_OTHER_TYPE, AllocType>::value,
+                      EnableType>::type = EnableType());             // IMPLICIT
         // Create a nullable object having the specified 'value' (of
         // 'BDE_OTHER_TYPE') converted to 'TYPE'.  If 'TYPE' takes an optional
         // allocator at construction, use the currently installed default
         // allocator to supply memory.  Note that this constructor does not
         // participate in overload resolution unless 'BDE_OTHER_TYPE' is
-        // convertible to 'TYPE' and not convertible to 'bslma::Allocator *'.
+        // convertible to 'TYPE' and not convertible to 'allocator_type'.
 
     template <class BDE_OTHER_TYPE>
     NullableValue(
              BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE)  value,
-             bslma::Allocator                                  *basicAllocator,
+             const AllocType&                                   allocator,
              typename bsl::enable_if<
                  bsl::is_convertible<BDE_OTHER_TYPE, TYPE>::value,
-                 void>::type * = 0);
+                 EnableType>::type = EnableType());
         // Create a nullable object that has the specified 'value' (of
         // 'BDE_OTHER_TYPE') converted to 'TYPE', and that uses the specified
-        // 'basicAllocator' to supply memory.  Note that this method will fail
+        // 'allocator' to supply memory.  Note that this method will fail
         // to compile if 'TYPE' does not take an optional allocator at
         // construction.  Also note that this constructor does not participate
         // in overload resolution unless 'BDE_OTHER_TYPE' is convertible to
@@ -260,13 +264,14 @@ class NullableValue {
 
     template <class BDE_OTHER_TYPE>
     NullableValue(const NullableValue<BDE_OTHER_TYPE>&  original,
-                  bslma::Allocator                     *basicAllocator);
+                  const AllocType&                      allocator);
         // Create a nullable object that has the null value if the specified
         // 'original' object is null, and the value of 'original.value()' (of
         // 'BDE_OTHER_TYPE') converted to 'TYPE' otherwise; use the specified
-        // 'basicAllocator' to supply memory.  Note that this method will fail
-        // to compile if 'TYPE' does not take an optional allocator at
-        // construction, or if 'TYPE and 'BDE_OTHER_TYPE' are not compatible.
+        // 'allocator' to supply memory.  Note that this constructor will not
+        // be found by overload resolution if 'TYPE' does not take an optional
+        // allocator at construction or if 'TYPE and 'BDE_OTHER_TYPE' are not
+        // compatible.
 
     NullableValue(const NullOptType&) BSLS_KEYWORD_NOEXCEPT;        // IMPLICIT
         // Create a nullable object having the null value.  If 'TYPE' takes an
@@ -275,11 +280,12 @@ class NullableValue {
         // this object.
 
     NullableValue(const NullOptType& ,
-                  bslma::Allocator   *basicAllocator) BSLS_KEYWORD_NOEXCEPT;
+                  const AllocType&   allocator) BSLS_KEYWORD_NOEXCEPT;
         // Create a nullable object that has the null value; use the specified
-        // 'basicAllocator' to supply memory for subsequent values assigned to
-        // this object.  Note that this method will fail to compile if 'TYPE'
-        // does not take an optional allocator at construction.
+        // 'allocator' to supply memory for subsequent values assigned to this
+        // object.  Note that this constructor will not be found by overload
+        // resolution if 'TYPE' does not take an optional allocator at
+        // construction.
 
     // ~NullableValue();
         // Destroy this object.  Note that this destructor is generated by the
@@ -371,24 +377,39 @@ class NullableValue {
 #elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
 // {{{ BEGIN GENERATED CODE
 // The following section is automatically generated.  **DO NOT EDIT**
-// Generator command line: sim_cpp11_features.pl bdlb_nullablevalue.h
+// Generator command line: old_sim_cpp11_features.pl bdlb_nullablevalue.h
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT 5
+#endif
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#endif
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 0
     TYPE& makeValueInplace();
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 0
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 1
     template <class ARGS_1>
     TYPE& makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 1
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 2
     template <class ARGS_1,
               class ARGS_2>
     TYPE& makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 2
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 3
     template <class ARGS_1,
               class ARGS_2,
               class ARGS_3>
     TYPE& makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 3
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 4
     template <class ARGS_1,
               class ARGS_2,
               class ARGS_3,
@@ -397,7 +418,9 @@ class NullableValue {
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 4
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 5
     template <class ARGS_1,
               class ARGS_2,
               class ARGS_3,
@@ -408,6 +431,7 @@ class NullableValue {
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4,
                            BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_5) args_5);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_A >= 5
 
 #else
 // The generated code below is a workaround for the absence of perfect
@@ -511,6 +535,10 @@ class NullableValue {
         // Return an address providing non-modifiable access to the underlying
         // object of a (template parameter) 'TYPE' if this object is non-null,
         // and 0 otherwise.
+
+    AllocType get_allocator() const;
+        // Return the allocator used to construct this object.  Will not
+        // compile if called for a 'TYPE' that does not use allocators.
 };
 
 // FREE OPERATORS
@@ -763,6 +791,404 @@ void swap(NullableValue<TYPE>& a, NullableValue<TYPE>& b);
     // 'isNull' method for 'a' and 'b' is the same.  The behavior is undefined
     // unless both objects were created with the same allocator, if any.
 
+<<<<<<< HEAD
+=======
+               // =======================================
+               // class NullableValue_WithAllocator<TYPE>
+               // =======================================
+
+template <class TYPE>
+class NullableValue_WithAllocator {
+    // This template class provides the implementation of 'NullableValue' for
+    // types that require an allocator.
+
+    // DATA
+    bsls::ObjectBuffer<TYPE>  d_buffer;       // in-place 'TYPE' object
+
+    bool                      d_isNull;       // 'true' if null, otherwise
+                                              // 'false'
+
+    bsl::allocator<char>      d_allocator;
+
+    // PRIVATE TYPES
+    typedef bsl::allocator<char> AllocType;
+        // This type is used as the allocator argument type in the
+        // 'NullableValue' class. The presence of this type and the fact that
+        // it is publically-constructible enables constructor overloads taking
+        // allocator arguments.
+
+    typedef bslmf::MovableRefUtil MoveUtil;
+
+    // FRIENDS
+    friend class NullableValue<TYPE>;
+
+    // PRIVATE MANIPULATORS
+    template <class BDE_OTHER_TYPE>
+    void makeValueRaw(BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value);
+        // Assign to this object the specified 'value' (of 'BDE_OTHER_TYPE')
+        // converted to 'TYPE'.  The behavior is undefined unless this object
+        // is null.  Note that this method will fail to compile if 'TYPE and
+        // 'BDE_OTHER_TYPE' are not compatible.
+
+  public:
+    // TYPES
+    typedef AllocType allocator_type;
+
+    // CREATORS
+    explicit NullableValue_WithAllocator(
+                                const allocator_type& allocator = AllocType());
+        // Create a nullable object having the null value using the specified
+        // 'allocator' used to supply memory. If an allocator is not
+        // specified, the default allocator is used.
+
+    NullableValue_WithAllocator(
+                   const NullableValue_WithAllocator& original,
+                   const allocator_type&              allocator = AllocType());
+        // Create a nullable object having the value of the specified
+        // 'original' object using the specified 'allocator' to supply
+        // memory. If an allocator is not specified, the default allocator is
+        // used.
+
+    NullableValue_WithAllocator(
+                      bslmf::MovableRef<NullableValue_WithAllocator> original);
+        // Create a nullable object having the same value as the specified
+        // 'original' object by moving the contents of 'original' to the
+        // newly-created object.  The allocator associated with 'original' is
+        // propagated for use in the newly-created object.  'original' is left
+        // in a valid but unspecified state.
+
+    NullableValue_WithAllocator(
+                     bslmf::MovableRef<NullableValue_WithAllocator> original,
+                     const allocator_type&                          allocator);
+        // Create a nullable object having the same value as the specified
+        // 'original' object that uses the specified 'allocator' to supply
+        // memory.  The contents of 'original' are moved to the newly-created
+        // object.  'original' is left in a valid but unspecified state.
+
+    ~NullableValue_WithAllocator();
+        // Destroy this object.
+
+    // MANIPULATORS
+    NullableValue_WithAllocator& operator=(
+                                       const NullableValue_WithAllocator& rhs);
+        // Assign to this object the value of the specified 'rhs', and return a
+        // reference providing modifiable access to this object.
+
+    NullableValue_WithAllocator& operator=(
+                           bslmf::MovableRef<NullableValue_WithAllocator> rhs);
+        // Assign to this object the value of the specified 'rhs', and return a
+        // reference providing modifiable access to this object.  The contents
+        // of 'rhs' are either move-inserted into or move-assigned to this
+        // object.  'rhs' is left in a valid but unspecified state.
+
+    void swap(NullableValue_WithAllocator& other);
+        // Efficiently exchange the value of this object with the value of the
+        // specified 'other' object.  This method provides the no-throw
+        // exception-safety guarantee if the template parameter 'TYPE' provides
+        // that guarantee and the result of the 'isNull' method for the two
+        // objects being swapped is the same.  The behavior is undefined unless
+        // this object was created with the same allocator as 'other'.
+
+    template <class BDE_OTHER_TYPE>
+    void makeValue(BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value);
+        // Assign to this object the specified 'value' (of 'BDE_OTHER_TYPE')
+        // converted to 'TYPE'.  Note that this method will fail to compile if
+        // 'TYPE and 'BDE_OTHER_TYPE' are not compatible.
+
+    void makeValue();
+        // Assign to this object the default value for 'TYPE'.
+
+#if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
+    template <class... ARGS>
+    void makeValueInplace(ARGS&&... args);
+        // Assign to this nullable object the value of the (template parameter)
+        // 'TYPE' (which has the 'bslma::UsesBslmaAllocator' trait) created in
+        // place using the specified 'args'.  The object is also accessible via
+        // the 'value' method.  If this nullable object already contains a
+        // object ('false == isNull())', that object is destroyed before the
+        // new object is created.  The allocator specified at the construction
+        // of this nullable object is used to supply memory to the value
+        // object.  Attempts to explicitly specify via 'args' another allocator
+        // to supply memory to the created (value) object are disallowed by the
+        // compiler.  Note that if the constructor of 'TYPE' throws an
+        // exception this object is left in the null state.
+#elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
+// {{{ BEGIN GENERATED CODE
+// The following section is automatically generated.  **DO NOT EDIT**
+// Generator command line: old_sim_cpp11_features.pl bdlb_nullablevalue.h
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT 5
+#endif
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#endif
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 0
+    void makeValueInplace();
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 0
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 1
+    template <class ARGS_1>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 1
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 2
+    template <class ARGS_1,
+              class ARGS_2>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 2
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 3
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 3
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 4
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3,
+              class ARGS_4>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 4
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 5
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3,
+              class ARGS_4,
+              class ARGS_5>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_5) args_5);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_B >= 5
+
+#else
+// The generated code below is a workaround for the absence of perfect
+// forwarding in some compilers.
+    template <class... ARGS>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args);
+// }}} END GENERATED CODE
+#endif
+
+    void reset();
+        // Reset this object to the default constructed state (i.e., to have
+        // the null value).
+
+    TYPE& value();
+        // Return a reference providing modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined unless this object is
+        // non-null.
+
+    // ACCESSORS
+    const TYPE *address() const;
+        // Return the address of the  underlying 'TYPE' object.  The behavior
+        // is undefined unless this object is non-null.
+
+    bool isNull() const;
+        // Return 'true' if this object is null, and 'false' otherwise.
+
+    const TYPE& value() const;
+        // Return a reference providing non-modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined unless this object is
+        // non-null.
+
+    allocator_type get_allocator() const;
+        // Return the allocator used to construct this object.
+};
+
+              // ==========================================
+              // class NullableValue_WithoutAllocator<TYPE>
+              // ==========================================
+
+template <class TYPE>
+class NullableValue_WithoutAllocator {
+    // This template class provides the implementation of 'NullableValue' for
+    // types that do *not* require an allocator.
+
+    // DATA
+    bsls::ObjectBuffer<TYPE> d_buffer;  // in-place 'TYPE' object
+    bool                     d_isNull;  // 'true' if null, otherwise 'false'
+
+    // PRIVATE TYPES
+    typedef bslmf::MovableRefUtil MoveUtil;
+
+    // FRIENDS
+    struct AllocType
+    {
+        // This empty 'struct' is used as an optional argument type in the
+        // 'NullableValue' class. Because it is not constructible by end
+        // clients, constructor overloads using 'AllocType' are effectively
+        // disabled (do not participate in overload resolution).
+    };
+
+    friend class NullableValue<TYPE>;
+
+    // PRIVATE MANIPULATORS
+    template <class BDE_OTHER_TYPE>
+    void makeValueRaw(BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value);
+        // Assign to this object the specified 'value' (of 'BDE_OTHER_TYPE')
+        // converted to 'TYPE'.  The behavior is undefined unless this object
+        // is null.  Note that this method will fail to compile if 'TYPE and
+        // 'BDE_OTHER_TYPE' are not compatible.
+
+  public:
+    // CREATORS
+    NullableValue_WithoutAllocator();
+        // Create a nullable object having the null value.
+
+    NullableValue_WithoutAllocator(
+                               const NullableValue_WithoutAllocator& original);
+        // Create a nullable object having the value of the specified
+        // 'original' object.
+
+    NullableValue_WithoutAllocator(
+                   bslmf::MovableRef<NullableValue_WithoutAllocator> original);
+        // Create a nullable object having the same value as the specified
+        // 'original' object by moving the contents of 'original' to the
+        // newly-created object.  'original' is left in a valid but unspecified
+        // state.
+
+    ~NullableValue_WithoutAllocator();
+        // Destroy this object.
+
+    // MANIPULATORS
+    NullableValue_WithoutAllocator& operator=(
+                                    const NullableValue_WithoutAllocator& rhs);
+        // Assign to this object the value of the specified 'rhs', and return a
+        // reference providing modifiable access to this object.
+
+    NullableValue_WithoutAllocator& operator=(
+                        bslmf::MovableRef<NullableValue_WithoutAllocator> rhs);
+        // Assign to this object the value of the specified 'rhs', and return a
+        // reference providing modifiable access to this object.  The contents
+        // of 'rhs' are either move-inserted into or move-assigned to this
+        // object.  'rhs' is left in a valid but unspecified state.
+
+    void swap(NullableValue_WithoutAllocator& other);
+        // Efficiently exchange the value of this object with the value of the
+        // specified 'other' object.  This method provides the no-throw
+        // exception-safety guarantee if the template parameter 'TYPE' provides
+        // that guarantee and the result of the 'isNull' method for the two
+        // objects being swapped is the same.
+
+    template <class BDE_OTHER_TYPE>
+    void makeValue(BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value);
+        // Assign to this object the specified 'value' (of 'BDE_OTHER_TYPE')
+        // converted to 'TYPE'.  Note that this method will fail to compile if
+        // 'TYPE and 'BDE_OTHER_TYPE' are not compatible.
+
+    void makeValue();
+        // Assign to this object the default value for 'TYPE'.
+
+#if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
+    template <class... ARGS>
+    void makeValueInplace(ARGS&&... args);
+        // Assign to this nullable object the value of the (template parameter)
+        // 'TYPE' (which does not have the 'bslma::UsesBslmaAllocator' trait)
+        // created in place using the specified 'args'.  (The object is also
+        // accessible via the 'value' method).  If this nullable object already
+        // contains an object ('false == isNull())', that object is destroyed
+        // before the new object is created.  Note that if the constructor of
+        // 'TYPE' throws an exception this object is left in the null state.
+#elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
+// {{{ BEGIN GENERATED CODE
+// The following section is automatically generated.  **DO NOT EDIT**
+// Generator command line: old_sim_cpp11_features.pl bdlb_nullablevalue.h
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT 5
+#endif
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#endif
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 0
+    void makeValueInplace();
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 0
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 1
+    template <class ARGS_1>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 1
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 2
+    template <class ARGS_1,
+              class ARGS_2>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 2
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 3
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 3
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 4
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3,
+              class ARGS_4>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 4
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 5
+    template <class ARGS_1,
+              class ARGS_2,
+              class ARGS_3,
+              class ARGS_4,
+              class ARGS_5>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4,
+                          BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_5) args_5);
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_C >= 5
+
+#else
+// The generated code below is a workaround for the absence of perfect
+// forwarding in some compilers.
+    template <class... ARGS>
+    void makeValueInplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args);
+// }}} END GENERATED CODE
+#endif
+
+    void reset();
+        // Reset this object to the default constructed state (i.e., to have
+        // the null value).
+
+    TYPE& value();
+        // Return a reference providing modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined unless this object is
+        // non-null.
+
+    // ACCESSORS
+    const TYPE *address() const;
+        // Return the address of the  underlying 'TYPE' object.  The behavior
+        // is undefined unless this object is non-null.
+
+    bool isNull() const;
+        // Return 'true' if this object is null, and 'false' otherwise.
+
+    const TYPE& value() const;
+        // Return a reference providing non-modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined unless this object is
+        // non-null.
+};
+>>>>>>> pablos allocator changes
 
 // ============================================================================
 //                           INLINE DEFINITIONS
@@ -781,9 +1207,13 @@ NullableValue<TYPE>::NullableValue() BSLS_KEYWORD_NOEXCEPT
 
 template <class TYPE>
 inline
-NullableValue<TYPE>::NullableValue(bslma::Allocator *basicAllocator)
+NullableValue<TYPE>::NullableValue(const AllocType& allocator)
                                                           BSLS_KEYWORD_NOEXCEPT
+<<<<<<< HEAD
 : d_imp(bsl::allocator_arg, basicAllocator)
+=======
+: d_imp(allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -797,8 +1227,13 @@ NullableValue<TYPE>::NullableValue(const NullableValue& original)
 template <class TYPE>
 inline
 NullableValue<TYPE>::NullableValue(const NullableValue&  original,
+<<<<<<< HEAD
                                    bslma::Allocator     *basicAllocator)
 : d_imp(bsl::allocator_arg, basicAllocator, original.d_imp)
+=======
+                                   const AllocType&      allocator)
+: d_imp(original.d_imp, allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -811,12 +1246,18 @@ NullableValue<TYPE>::NullableValue(bslmf::MovableRef<NullableValue> original)
 
 template <class TYPE>
 inline
+<<<<<<< HEAD
 NullableValue<TYPE>::NullableValue(
                               bslmf::MovableRef<NullableValue>  original,
                               bslma::Allocator                 *basicAllocator)
 : d_imp(bsl::allocator_arg,
         basicAllocator,
         MoveUtil::move(MoveUtil::access(original).d_imp))
+=======
+NullableValue<TYPE>::NullableValue(bslmf::MovableRef<NullableValue> original,
+                                   const AllocType&                 allocator)
+: d_imp(MoveUtil::move(MoveUtil::access(original).d_imp), allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -828,9 +1269,14 @@ NullableValue<TYPE>::NullableValue(
        typename bsl::enable_if<bsl::is_convertible<BDE_OTHER_TYPE, TYPE>::value
                                &&
                                !bsl::is_convertible<BDE_OTHER_TYPE,
+<<<<<<< HEAD
                                                     bslma::Allocator *>::value,
                                void>::type               *)
 :d_imp(BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value))
+=======
+                                                    AllocType>::value,
+                               EnableType>::type)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -839,12 +1285,17 @@ template <class BDE_OTHER_TYPE>
 inline
 NullableValue<TYPE>::NullableValue(
       BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE)  value,
-      bslma::Allocator                                  *basicAllocator,
+      const AllocType&                                   allocator,
       typename bsl::enable_if<bsl::is_convertible<BDE_OTHER_TYPE, TYPE>::value,
+<<<<<<< HEAD
                               void>::type               *)
 : d_imp(bsl::allocator_arg,
         basicAllocator,
         BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value))
+=======
+                              EnableType>::type)
+: d_imp(allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -861,9 +1312,15 @@ template <class TYPE>
 template <class BDE_OTHER_TYPE>
 inline
 NullableValue<TYPE>::NullableValue(
+<<<<<<< HEAD
                           const NullableValue<BDE_OTHER_TYPE>&  original,
                           bslma::Allocator                     *basicAllocator)
 : d_imp(bsl::allocator_arg, basicAllocator, original.d_imp)
+=======
+                                const NullableValue<BDE_OTHER_TYPE>& original,
+                                const AllocType&                     allocator)
+: d_imp(allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -878,10 +1335,14 @@ NullableValue<TYPE>::NullableValue(const NullOptType&) BSLS_KEYWORD_NOEXCEPT
 
 template <class TYPE>
 inline
-NullableValue<TYPE>::NullableValue(const NullOptType& ,
-                                   bslma::Allocator   *basicAllocator)
+NullableValue<TYPE>::NullableValue(const NullOptType&             ,
+                                   const AllocType& allocator)
                                                           BSLS_KEYWORD_NOEXCEPT
+<<<<<<< HEAD
 : d_imp(bsl::allocator_arg, basicAllocator)
+=======
+: d_imp(allocator)
+>>>>>>> pablos allocator changes
 {
 }
 
@@ -1011,7 +1472,14 @@ TYPE& NullableValue<TYPE>::makeValueInplace(ARGS&&... args)
 #elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
 // {{{ BEGIN GENERATED CODE
 // The following section is automatically generated.  **DO NOT EDIT**
-// Generator command line: sim_cpp11_features.pl bdlb_nullablevalue.h
+// Generator command line: old_sim_cpp11_features.pl bdlb_nullablevalue.h
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT 5
+#endif
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#endif
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 0
 template <class TYPE>
 inline
 TYPE& NullableValue<TYPE>::makeValueInplace(
@@ -1020,7 +1488,9 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
     d_imp.emplace();
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 0
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 1
 template <class TYPE>
 template <class ARGS_1>
 inline
@@ -1030,7 +1500,9 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
     d_imp.emplace(BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1));
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 1
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 2
 template <class TYPE>
 template <class ARGS_1,
           class ARGS_2>
@@ -1043,7 +1515,9 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2));
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 2
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 3
 template <class TYPE>
 template <class ARGS_1,
           class ARGS_2,
@@ -1059,7 +1533,9 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3));
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 3
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 4
 template <class TYPE>
 template <class ARGS_1,
           class ARGS_2,
@@ -1078,7 +1554,9 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_4, args_4));
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 4
 
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 5
 template <class TYPE>
 template <class ARGS_1,
           class ARGS_2,
@@ -1100,6 +1578,7 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_5, args_5));
     return d_imp.value();
 }
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_D >= 5
 
 #else
 // The generated code below is a workaround for the absence of perfect
@@ -1242,6 +1721,15 @@ inline
 const TYPE *NullableValue<TYPE>::valueOrNull() const
 {
     return d_imp.has_value() ? this->d_imp.operator->(): 0;
+}
+
+template <class TYPE>
+inline
+typename NullableValue<TYPE>::AllocType
+NullableValue<TYPE>::get_allocator() const
+{
+    // Will not compile if 'd_imp' does not have a 'get_allocator' method.
+    return d_imp.get_allocator();
 }
 
 }  // close package namespace
@@ -1528,6 +2016,755 @@ void bdlb::swap(NullableValue<TYPE>& a, NullableValue<TYPE>& b)
     a.swap(b);
 }
 
+<<<<<<< HEAD
+=======
+namespace bdlb {
+
+               // ---------------------------------------
+               // class NullableValue_WithAllocator<TYPE>
+               // ---------------------------------------
+
+// PRIVATE MANIPULATORS
+template <class TYPE>
+template <class BDE_OTHER_TYPE>
+void NullableValue_WithAllocator<TYPE>::makeValueRaw(
+                       BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value)
+{
+    BSLS_ASSERT_SAFE(d_isNull);
+
+    bslma::ConstructionUtil::construct(
+                         d_buffer.address(),
+                         d_allocator.mechanism(),
+                         BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value));
+    d_isNull = false;
+}
+
+// CREATORS
+template <class TYPE>
+inline
+NullableValue_WithAllocator<TYPE>::NullableValue_WithAllocator(
+                                                    const AllocType& allocator)
+: d_isNull(true)
+, d_allocator(allocator)
+{
+}
+
+template <class TYPE>
+inline
+NullableValue_WithAllocator<TYPE>::NullableValue_WithAllocator(
+                                  const NullableValue_WithAllocator& original,
+                                  const AllocType&                   allocator)
+: d_isNull(true)
+, d_allocator(allocator)
+{
+    if (!original.isNull()) {
+        makeValueRaw(original.value());
+    }
+}
+
+template <class TYPE>
+inline
+NullableValue_WithAllocator<TYPE>::NullableValue_WithAllocator(
+                       bslmf::MovableRef<NullableValue_WithAllocator> original)
+: d_isNull(true)
+, d_allocator(MoveUtil::access(original).d_allocator)
+{
+    NullableValue_WithAllocator& lvalue = original;
+
+    if (!lvalue.isNull()) {
+        makeValueRaw(MoveUtil::move(lvalue.value()));
+    }
+}
+
+template <class TYPE>
+inline
+NullableValue_WithAllocator<TYPE>::NullableValue_WithAllocator(
+                      bslmf::MovableRef<NullableValue_WithAllocator> original,
+                      const AllocType&                               allocator)
+: d_isNull(true)
+, d_allocator(allocator)
+{
+    NullableValue_WithAllocator& lvalue = original;
+
+    if (!lvalue.isNull()) {
+        makeValueRaw(MoveUtil::move(lvalue.value()));
+    }
+}
+
+template <class TYPE>
+inline
+NullableValue_WithAllocator<TYPE>::~NullableValue_WithAllocator()
+{
+    reset();
+}
+
+// MANIPULATORS
+template <class TYPE>
+NullableValue_WithAllocator<TYPE>&
+NullableValue_WithAllocator<TYPE>::operator=(
+                                        const NullableValue_WithAllocator& rhs)
+{
+    if (!rhs.isNull()) {
+        makeValue(rhs.value());
+    }
+    else {
+        reset();
+    }
+
+    return *this;
+}
+
+template <class TYPE>
+NullableValue_WithAllocator<TYPE>&
+NullableValue_WithAllocator<TYPE>::operator=(
+                            bslmf::MovableRef<NullableValue_WithAllocator> rhs)
+{
+    NullableValue_WithAllocator& lvalue = rhs;
+
+    if (!lvalue.isNull()) {
+        makeValue(MoveUtil::move(lvalue.value()));
+    }
+    else {
+        reset();
+    }
+
+    return *this;
+}
+
+template <class TYPE>
+void NullableValue_WithAllocator<TYPE>::swap(
+                                            NullableValue_WithAllocator& other)
+{
+    // 'swap' is undefined for non-equal allocators.
+
+    BSLS_ASSERT(d_allocator == other.d_allocator);
+
+    // same 'isNull' flags
+
+    if (isNull() && other.isNull()) {
+        return;                                                       // RETURN
+    }
+
+    if (!isNull() && !other.isNull()) {
+        // swap underlying values
+
+        bslalg::SwapUtil::swap(&this->value(), &other.value());
+        return;                                                       // RETURN
+    }
+
+    // different 'isNull' flags
+
+    NullableValue_WithAllocator *nullObj;
+    NullableValue_WithAllocator *nonNullObj;
+
+    if (isNull()) {
+        nullObj    = this;
+        nonNullObj = &other;
+    }
+    else {
+        nullObj    = &other;
+        nonNullObj = this;
+    }
+
+    // Copy-construct and reset.
+
+    nullObj->makeValue(nonNullObj->value());  // This can throw, so 'swap' is
+                                              // only strongly exception-safe.
+    nonNullObj->reset();
+}
+
+template <class TYPE>
+template <class BDE_OTHER_TYPE>
+void NullableValue_WithAllocator<TYPE>::makeValue(
+                       BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value)
+{
+    if (d_isNull) {
+        makeValueRaw(BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value));
+    }
+    else {
+        d_buffer.object() =
+            BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value);
+    }
+}
+
+template <class TYPE>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValue()
+{
+    reset();
+
+    bslma::ConstructionUtil::construct(d_buffer.address(),
+                                       d_allocator.mechanism());
+    d_isNull = false;
+}
+
+#if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
+template <class TYPE>
+template <class... ARGS>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(ARGS&&... args)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
+    d_isNull = false;
+}
+#elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
+// {{{ BEGIN GENERATED CODE
+// The following section is automatically generated.  **DO NOT EDIT**
+// Generator command line: old_sim_cpp11_features.pl bdlb_nullablevalue.h
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT 5
+#endif
+#ifndef BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E
+#define BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E BDLB_NULLABLEVALUE_VARIADIC_LIMIT
+#endif
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 0
+template <class TYPE>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                               )
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism());
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 0
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 1
+template <class TYPE>
+template <class ARGS_1>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1));
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 1
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 2
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2));
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 2
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 3
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3));
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 3
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 4
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3,
+          class ARGS_4>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_4, args_4));
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 4
+
+#if BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 5
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3,
+          class ARGS_4,
+          class ARGS_5>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_5) args_5)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_4, args_4),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_5, args_5));
+    d_isNull = false;
+}
+#endif  // BDLB_NULLABLEVALUE_VARIADIC_LIMIT_E >= 5
+
+#else
+// The generated code below is a workaround for the absence of perfect
+// forwarding in some compilers.
+template <class TYPE>
+template <class... ARGS>
+inline
+void NullableValue_WithAllocator<TYPE>::makeValueInplace(
+                               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        d_allocator.mechanism(),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
+    d_isNull = false;
+}
+// }}} END GENERATED CODE
+#endif
+
+template <class TYPE>
+inline
+void NullableValue_WithAllocator<TYPE>::reset()
+{
+    if (!d_isNull) {
+        d_buffer.object().~TYPE();
+        d_isNull = true;
+    }
+}
+
+template <class TYPE>
+inline
+TYPE& NullableValue_WithAllocator<TYPE>::value()
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.object();
+}
+
+// ACCESSORS
+template <class TYPE>
+inline
+const TYPE *NullableValue_WithAllocator<TYPE>::address() const
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.address();
+}
+
+template <class TYPE>
+inline
+bool NullableValue_WithAllocator<TYPE>::isNull() const
+{
+    return d_isNull;
+}
+
+template <class TYPE>
+inline
+const TYPE& NullableValue_WithAllocator<TYPE>::value() const
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.object();
+}
+
+              // ------------------------------------------
+              // class NullableValue_WithoutAllocator<TYPE>
+              // ------------------------------------------
+
+// PRIVATE MANIPULATORS
+template <class TYPE>
+template <class BDE_OTHER_TYPE>
+void NullableValue_WithoutAllocator<TYPE>::makeValueRaw(
+                       BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value)
+{
+    BSLS_ASSERT_SAFE(d_isNull);
+
+    bslma::ConstructionUtil::construct(
+                         d_buffer.address(),
+                         (void *)0,
+                         BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value));
+    d_isNull = false;
+}
+
+// CREATORS
+template <class TYPE>
+inline
+NullableValue_WithoutAllocator<TYPE>::NullableValue_WithoutAllocator()
+: d_isNull(true)
+{
+}
+
+template <class TYPE>
+inline
+NullableValue_WithoutAllocator<TYPE>::
+NullableValue_WithoutAllocator(const NullableValue_WithoutAllocator& original)
+: d_isNull(true)
+{
+    if (!original.isNull()) {
+        makeValueRaw(original.value());
+    }
+}
+
+template <class TYPE>
+inline
+NullableValue_WithoutAllocator<TYPE>::NullableValue_WithoutAllocator(
+                    bslmf::MovableRef<NullableValue_WithoutAllocator> original)
+: d_isNull(true)
+{
+    NullableValue_WithoutAllocator& lvalue = original;
+
+    if (!lvalue.isNull()) {
+        makeValueRaw(MoveUtil::move(lvalue.value()));
+    }
+}
+
+template <class TYPE>
+inline
+NullableValue_WithoutAllocator<TYPE>::~NullableValue_WithoutAllocator()
+{
+    reset();
+}
+
+// MANIPULATORS
+template <class TYPE>
+NullableValue_WithoutAllocator<TYPE>&
+NullableValue_WithoutAllocator<TYPE>::operator=(
+                                     const NullableValue_WithoutAllocator& rhs)
+{
+    if (!rhs.isNull()) {
+        makeValue(rhs.value());
+    }
+    else {
+        reset();
+    }
+
+    return *this;
+}
+
+template <class TYPE>
+NullableValue_WithoutAllocator<TYPE>&
+NullableValue_WithoutAllocator<TYPE>::operator=(
+                         bslmf::MovableRef<NullableValue_WithoutAllocator> rhs)
+{
+    NullableValue_WithoutAllocator& lvalue = rhs;
+
+    if (!lvalue.isNull()) {
+        makeValue(MoveUtil::move(lvalue.value()));
+    }
+    else {
+        reset();
+    }
+
+    return *this;
+}
+
+template <class TYPE>
+template <class BDE_OTHER_TYPE>
+void NullableValue_WithoutAllocator<TYPE>::makeValue(
+                       BSLS_COMPILERFEATURES_FORWARD_REF(BDE_OTHER_TYPE) value)
+{
+    if (d_isNull) {
+        makeValueRaw(BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value));
+    }
+    else {
+        d_buffer.object() =
+            BSLS_COMPILERFEATURES_FORWARD(BDE_OTHER_TYPE, value);
+    }
+}
+
+template <class TYPE>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValue()
+{
+    reset();
+
+    bslma::ConstructionUtil::construct(d_buffer.address(), (void *)0);
+    d_isNull = false;
+}
+
+#if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
+template <class TYPE>
+template <class... ARGS>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(ARGS&&... args)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
+    d_isNull = false;
+}
+#elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
+// {{{ BEGIN GENERATED CODE
+// The following section is automatically generated.  **DO NOT EDIT**
+// Generator command line: sim_cpp11_features.pl bdlb_nullablevalue.h
+template <class TYPE>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                               )
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0);
+    d_isNull = false;
+}
+
+template <class TYPE>
+template <class ARGS_1>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1));
+    d_isNull = false;
+}
+
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2));
+    d_isNull = false;
+}
+
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3));
+    d_isNull = false;
+}
+
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3,
+          class ARGS_4>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_4, args_4));
+    d_isNull = false;
+}
+
+template <class TYPE>
+template <class ARGS_1,
+          class ARGS_2,
+          class ARGS_3,
+          class ARGS_4,
+          class ARGS_5>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_1) args_1,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_2) args_2,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_3) args_3,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_4) args_4,
+                              BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_5) args_5)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_1, args_1),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_2, args_2),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_3, args_3),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_4, args_4),
+        BSLS_COMPILERFEATURES_FORWARD(ARGS_5, args_5));
+    d_isNull = false;
+}
+
+#else
+// The generated code below is a workaround for the absence of perfect
+// forwarding in some compilers.
+template <class TYPE>
+template <class... ARGS>
+inline
+void NullableValue_WithoutAllocator<TYPE>::makeValueInplace(
+                               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
+{
+    reset();
+    bslma::ConstructionUtil::construct(
+        d_buffer.address(),
+        (void *)0,
+        BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
+    d_isNull = false;
+}
+// }}} END GENERATED CODE
+#endif
+
+template <class TYPE>
+inline
+void NullableValue_WithoutAllocator<TYPE>::reset()
+{
+    if (!d_isNull) {
+        d_buffer.object().~TYPE();
+        d_isNull = true;
+    }
+}
+
+template <class TYPE>
+void NullableValue_WithoutAllocator<TYPE>::swap(
+                                         NullableValue_WithoutAllocator& other)
+{
+    // same 'isNull' flags
+
+    if (isNull() && other.isNull()) {
+        return;                                                       // RETURN
+    }
+
+    if (!isNull() && !other.isNull()) {
+        // swap underlying values
+
+        bslalg::SwapUtil::swap(&this->value(), &other.value());
+        return;                                                       // RETURN
+    }
+
+    // different 'isNull' flags
+
+    NullableValue_WithoutAllocator *nullObj;
+    NullableValue_WithoutAllocator *nonNullObj;
+
+    if (isNull()) {
+        nullObj    = this;
+        nonNullObj = &other;
+    }
+    else {
+        nullObj    = &other;
+        nonNullObj = this;
+    }
+
+    // Copy-construct and reset.
+
+    nullObj->makeValue(nonNullObj->value());  // This can throw, so 'swap' is
+                                              // only strongly exception-safe.
+    nonNullObj->reset();
+}
+
+template <class TYPE>
+inline
+TYPE& NullableValue_WithoutAllocator<TYPE>::value()
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.object();
+}
+
+// ACCESSORS
+template <class TYPE>
+inline
+const TYPE *NullableValue_WithoutAllocator<TYPE>::address() const
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.address();
+}
+
+template <class TYPE>
+inline
+bool NullableValue_WithoutAllocator<TYPE>::isNull() const
+{
+    return d_isNull;
+}
+
+template <class TYPE>
+inline
+const TYPE& NullableValue_WithoutAllocator<TYPE>::value() const
+{
+    BSLS_ASSERT_SAFE(!d_isNull);
+
+    return d_buffer.object();
+}
+
+template <class TYPE>
+inline
+typename NullableValue_WithAllocator<TYPE>::AllocType
+NullableValue_WithAllocator<TYPE>::get_allocator() const
+{
+    return d_allocator;
+}
+
+}  // close package namespace
+>>>>>>> pablos allocator changes
 }  // close enterprise namespace
 
 #endif
