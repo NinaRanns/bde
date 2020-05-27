@@ -1202,7 +1202,7 @@ NullableValue<TYPE>::NullableValue(const AllocType& allocator)
 template <class TYPE>
 inline
 NullableValue<TYPE>::NullableValue(const NullableValue& original)
-: bsl::optional<TYPE>(original.value())
+: bsl::optional<TYPE>(static_cast<const bsl::optional<TYPE> &>(original))
 {
 }
 
@@ -1210,14 +1210,18 @@ template <class TYPE>
 inline
 NullableValue<TYPE>::NullableValue(const NullableValue&  original,
                                    const AllocType&      allocator)
-: bsl::optional<TYPE>(bsl::allocator_arg, allocator, original.value())
+: bsl::optional<TYPE>(bsl::allocator_arg, allocator, static_cast<const bsl::optional<TYPE> &>(original))
 {
 }
 
 template <class TYPE>
 inline
 NullableValue<TYPE>::NullableValue(bslmf::MovableRef<NullableValue> original)
-: bsl::optional<TYPE>(MoveUtil::move(MoveUtil::access(original).value()))
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES )
+: bsl::optional<TYPE>(static_cast<bsl::optional<TYPE> &&>(original))
+#else
+: bsl::optional<TYPE>(MoveUtil::move(static_cast<bsl::optional<TYPE> &>(MoveUtil::access(original))))
+#endif
 {
 }
 
@@ -1228,7 +1232,11 @@ NullableValue<TYPE>::NullableValue(
                               const AllocType&                 allocator)
 : bsl::optional<TYPE>(bsl::allocator_arg,
         allocator,
-        MoveUtil::move(MoveUtil::access(original).value()))
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES )
+        static_cast<bsl::optional<TYPE> &&>(original))
+#else
+        MoveUtil::move(static_cast<bsl::optional<TYPE> &>(MoveUtil::access(original))))
+#endif
 {
 }
 
@@ -1265,7 +1273,7 @@ template <class BDE_OTHER_TYPE>
 inline
 NullableValue<TYPE>::NullableValue(
                                  const NullableValue<BDE_OTHER_TYPE>& original)
-: bsl::optional<TYPE>(original.value())
+: bsl::optional<TYPE>(static_cast<const bsl::optional<BDE_OTHER_TYPE> &>(original))
 {
 }
 
@@ -1275,7 +1283,7 @@ inline
 NullableValue<TYPE>::NullableValue(
                                 const NullableValue<BDE_OTHER_TYPE>& original,
                                 const AllocType&                     allocator)
-: bsl::optional<TYPE>(bsl::allocator_arg, allocator, original.value())
+: bsl::optional<TYPE>(bsl::allocator_arg, allocator, static_cast<const bsl::optional<BDE_OTHER_TYPE> &>(original))
 {
 }
 
@@ -1303,17 +1311,27 @@ template <class TYPE>
 inline
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(const NullableValue& rhs)
 {
-    bsl::optional<TYPE>::operator=(rhs);
-
+    if (rhs) {
+        bsl::optional<TYPE>::operator=(rhs.value());
+    } else {
+        this->reset();
+    }
     return *this;
 }
+
 
 template <class TYPE>
 inline
 NullableValue<TYPE>&
 NullableValue<TYPE>::operator=(bslmf::MovableRef<NullableValue> rhs)
 {
-    bsl::optional<TYPE>::operator=(MoveUtil::move(rhs));
+    NullableValue& lvalue = rhs;
+
+    if (lvalue) {
+        bsl::optional<TYPE>::operator=(MoveUtil::move(lvalue.value()));
+    } else {
+        this->reset();
+    }
     return *this;
 }
 
@@ -1322,7 +1340,11 @@ template <class BDE_OTHER_TYPE>
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(
                                       const NullableValue<BDE_OTHER_TYPE>& rhs)
 {
-    bsl::optional<TYPE>::operator=(rhs);
+    if (rhs) {
+        bsl::optional<TYPE>::operator=(MoveUtil::move(rhs.value()));
+    } else {
+        this->reset();
+    }
     return *this;
 }
 

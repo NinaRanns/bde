@@ -102,6 +102,8 @@ BSLS_IDENT("$Id: $")
 #include <bslmf_movableref.h>
 #include <bslmf_nestedtraitdeclaration.h>
 #include <bslmf_removeconst.h>
+#include <bslmf_removecv.h>
+#include <bslmf_removereference.h>
 
 #include <bsls_assert.h>
 #include <bsls_compilerfeatures.h>
@@ -335,7 +337,7 @@ struct Optional_AssignsFromOptional
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_ANYTYPE  ,                   \
     typename bsl::enable_if<                                                  \
                       !bsl::is_same<ANY_TYPE, TYPE>::value &&                 \
-                      !bsl::is_same<ANY_TYPE, bsl::optional<TYPE> >::value && \
+                      !bsl::is_same<typename bsl::remove_cv<typename bsl::remove_reference<ANY_TYPE>::type>::type, optional >::value && \
                       !bsl::is_same<ANY_TYPE, bsl::nullopt_t>::value &&       \
                       !bsl::is_same<ANY_TYPE, bsl::in_place_t>::value &&      \
                       !bsl::is_same<ANY_TYPE, bsl::allocator_arg_t>::value    \
