@@ -464,7 +464,10 @@ void testRelationalOperations(const INIT_TYPE& lesserVal,
                               const INIT_TYPE& greaterVal)
 {
     typedef bdlb::NullableValue< FIRST_TYPE>  FIRST_NV_TYPE;
-    typedef bdlb::NullableValue<SECOND_TYPE> SECOND_NV_TYPE;
+    typedef bdlb::NullableValue<SECOND_TYPE>  SECOND_NV_TYPE;
+
+    typedef bsl::optional< FIRST_TYPE>        FIRST_BO_TYPE;
+    typedef bsl::optional<SECOND_TYPE>        SECOND_BO_TYPE;
 
     testRelationalOperationsNonNull<FIRST_TYPE,    SECOND_NV_TYPE>(lesserVal,
                                                                    greaterVal);
@@ -472,13 +475,21 @@ void testRelationalOperations(const INIT_TYPE& lesserVal,
                                                                    greaterVal);
     testRelationalOperationsNonNull<FIRST_NV_TYPE, SECOND_NV_TYPE>(lesserVal,
                                                                    greaterVal);
+    testRelationalOperationsNonNull<FIRST_BO_TYPE, SECOND_NV_TYPE>(lesserVal,
+                                                                   greaterVal);
+    testRelationalOperationsNonNull<FIRST_NV_TYPE, SECOND_BO_TYPE>(lesserVal,
+                                                                   greaterVal);
 
     testRelationalOperationsOneNull<FIRST_NV_TYPE,  SECOND_TYPE   >(lesserVal);
     testRelationalOperationsOneNull<FIRST_NV_TYPE,  SECOND_NV_TYPE>(lesserVal);
     testRelationalOperationsOneNull<SECOND_NV_TYPE, FIRST_TYPE    >(lesserVal);
     testRelationalOperationsOneNull<SECOND_NV_TYPE, FIRST_NV_TYPE >(lesserVal);
+    testRelationalOperationsOneNull<FIRST_BO_TYPE,  SECOND_NV_TYPE>(lesserVal);
+    testRelationalOperationsOneNull<SECOND_NV_TYPE, FIRST_BO_TYPE >(lesserVal);
 
-    testRelationalOperationsBothNull<FIRST_NV_TYPE, SECOND_NV_TYPE>();
+    testRelationalOperationsBothNull<FIRST_NV_TYPE, SECOND_BO_TYPE>();
+    testRelationalOperationsBothNull<FIRST_BO_TYPE, SECOND_NV_TYPE>();
+
 }
 
 // ============================================================================

@@ -158,9 +158,11 @@ class NullableValue : public bsl::optional<TYPE> {
         // disabled (do not participate in overload resolution).
     };
     
+    // We can't refer to 'optional::allocator_type' because the conditional
+    // needs the type to exist even for non allocator aware types.
     typedef typename
     bsl::conditional<bslma::UsesBslmaAllocator<TYPE>::value,
-                     bsl::allocator<char>,  //TODO - fix this. Can't refer to optional::allocator_type because the type is accessed even for non allocator aware types
+                     bsl::allocator<char>,
                      NoAlloc >::type                               AllocType;
 
     
@@ -534,6 +536,12 @@ class NullableValue : public bsl::optional<TYPE> {
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator==(const NullableValue<LHS_TYPE>& lhs,
                 const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator==(const NullableValue<LHS_TYPE>& lhs,
+                const bsl::optional<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator==(const bsl::optional<LHS_TYPE>& lhs,
+                const NullableValue<RHS_TYPE>& rhs);
     // Return 'true' if the specified 'lhs' and 'rhs' nullable objects have the
     // same value, and 'false' otherwise.  Two nullable objects have the same
     // value if both are null, or if both are non-null and the values of their
@@ -543,7 +551,13 @@ bool operator==(const NullableValue<LHS_TYPE>& lhs,
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator!=(const NullableValue<LHS_TYPE>& lhs,
                 const NullableValue<RHS_TYPE>& rhs);
-    // Return 'true' if the specified 'lhs' and 'rhs' nullable objects do not
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator!=(const bsl::optional<LHS_TYPE>& lhs,
+                const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator!=(const NullableValue<LHS_TYPE>& lhs,
+                const bsl::optional<RHS_TYPE>& rhs);
+                // Return 'true' if the specified 'lhs' and 'rhs' nullable objects do not
     // have the same value, and 'false' otherwise.  Two nullable objects do not
     // have the same value if one is null and the other is non-null, or if both
     // are non-null and the values of their underlying objects do not compare
@@ -579,6 +593,12 @@ bool operator==(const LHS_TYPE&                lhs,
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator<(const NullableValue<LHS_TYPE>& lhs,
                const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator<(const bsl::optional<LHS_TYPE>& lhs,
+               const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator<(const NullableValue<LHS_TYPE>& lhs,
+               const bsl::optional<RHS_TYPE>& rhs);
     // Return 'true' if the specified 'lhs' nullable object is ordered before
     // the specified 'rhs' nullable object, and 'false' otherwise.  'lhs' is
     // ordered before 'rhs' if 'lhs' is null and 'rhs' is non-null or if both
@@ -603,6 +623,12 @@ bool operator<(const LHS_TYPE&                lhs,
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator>(const NullableValue<LHS_TYPE>& lhs,
                const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator>(const bsl::optional<LHS_TYPE>& lhs,
+               const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator>(const NullableValue<LHS_TYPE>& lhs,
+               const bsl::optional<RHS_TYPE>& rhs);
     // Return 'true' if the specified 'lhs' nullable object is ordered after
     // the specified 'rhs' nullable object, and 'false' otherwise.  'lhs' is
     // ordered after 'rhs' if 'lhs' is non-null and 'rhs' is null or if both
@@ -630,6 +656,12 @@ bool operator>(const LHS_TYPE&                lhs,
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator<=(const NullableValue<LHS_TYPE>& lhs,
                 const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator<=(const bsl::optional<LHS_TYPE>& lhs,
+                const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator<=(const NullableValue<LHS_TYPE>& lhs,
+                const bsl::optional<RHS_TYPE>& rhs);
     // Return 'true' if the specified 'lhs' nullable object is ordered before
     // the specified 'rhs' nullable object or 'lhs' and 'rhs' have the same
     // value, and 'false' otherwise.  (See 'operator<' and 'operator=='.)  Note
@@ -655,6 +687,12 @@ bool operator<=(const LHS_TYPE&                lhs,
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator>=(const NullableValue<LHS_TYPE>& lhs,
                 const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator>=(const bsl::optional<LHS_TYPE>& lhs,
+                const NullableValue<RHS_TYPE>& rhs);
+template <class LHS_TYPE, class RHS_TYPE>
+bool operator>=(const NullableValue<LHS_TYPE>& lhs,
+                const bsl::optional<RHS_TYPE>& rhs);
     // Return 'true' if the specified 'lhs' nullable object is ordered after
     // the specified 'rhs' nullable object or 'lhs' and 'rhs' have the same
     // value, and 'false' otherwise.  (See 'operator>' and 'operator=='.)  Note
@@ -1311,9 +1349,15 @@ template <class TYPE>
 inline
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(const NullableValue& rhs)
 {
-    if (rhs) {
-        bsl::optional<TYPE>::operator=(rhs.value());
-    } else {
+    if (rhs.has_value()) {
+        if (this->has_value()) {
+            this->value() = rhs.value();
+        }
+        else {
+            this->emplace(rhs.value());
+        }
+    }
+    else {
         this->reset();
     }
     return *this;
@@ -1327,9 +1371,15 @@ NullableValue<TYPE>::operator=(bslmf::MovableRef<NullableValue> rhs)
 {
     NullableValue& lvalue = rhs;
 
-    if (lvalue) {
-        bsl::optional<TYPE>::operator=(MoveUtil::move(lvalue.value()));
-    } else {
+    if (lvalue.has_value()) {
+        if (this->has_value()) {
+            this->value() = MoveUtil::move(lvalue.value());
+        }
+        else {
+            this->emplace(MoveUtil::move(lvalue.value()));
+        }
+    }
+    else {
         this->reset();
     }
     return *this;
@@ -1340,9 +1390,15 @@ template <class BDE_OTHER_TYPE>
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(
                                       const NullableValue<BDE_OTHER_TYPE>& rhs)
 {
-    if (rhs) {
-        bsl::optional<TYPE>::operator=(MoveUtil::move(rhs.value()));
-    } else {
+    if (rhs.has_value()) {
+        if (this->has_value()) {
+            this->value() = rhs.value();
+        }
+        else {
+            this->emplace(rhs.value());
+        }
+    }
+    else {
         this->reset();
     }
     return *this;
@@ -1352,7 +1408,12 @@ template <class TYPE>
 inline
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(const TYPE& rhs)
 {
-    bsl::optional<TYPE>::operator=(rhs);
+    if (this->has_value()) {
+        this->value() = rhs;
+    }
+    else {
+        this->emplace(rhs);
+    }
     return *this;
 }
 
@@ -1385,8 +1446,12 @@ inline
 NullableValue<TYPE>&
 NullableValue<TYPE>::operator=(bslmf::MovableRef<TYPE> rhs)
 {
-    bsl::optional<TYPE>::operator=(MoveUtil::move(rhs));
-
+    if (this->has_value()) {
+        this->value() = MoveUtil::move(rhs);
+    }
+    else {
+        this->emplace(MoveUtil::move(rhs));
+    }
     return *this;
 }
 
@@ -1395,8 +1460,12 @@ template <class BDE_OTHER_TYPE>
 inline
 NullableValue<TYPE>& NullableValue<TYPE>::operator=(const BDE_OTHER_TYPE& rhs)
 {
-    bsl::optional<TYPE>::operator=(rhs);
-
+    if (this->has_value()) {
+        this->value() = rhs;
+    }
+    else {
+        this->emplace(rhs);
+    }
     return *this;
 }
 
@@ -1682,6 +1751,30 @@ bool bdlb::operator==(const NullableValue<LHS_TYPE>& lhs,
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline
+bool bdlb::operator==(const bsl::optional<LHS_TYPE>& lhs,
+                      const NullableValue<RHS_TYPE>& rhs)
+{
+    if (lhs.has_value() && !rhs.isNull()) {
+        return lhs.value() == rhs.value();                            // RETURN
+    }
+
+    return !lhs.has_value() == rhs.isNull();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator==(const NullableValue<LHS_TYPE>& lhs,
+                      const bsl::optional<RHS_TYPE>& rhs)
+{
+    if (!lhs.isNull() && rhs.has_value()) {
+        return lhs.value() == rhs.value();                            // RETURN
+    }
+
+    return lhs.isNull() == !rhs.has_value();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
 bool bdlb::operator!=(const NullableValue<LHS_TYPE>& lhs,
                       const NullableValue<RHS_TYPE>& rhs)
 {
@@ -1690,6 +1783,30 @@ bool bdlb::operator!=(const NullableValue<LHS_TYPE>& lhs,
     }
 
     return lhs.isNull() != rhs.isNull();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator!=(const bsl::optional<LHS_TYPE>& lhs,
+                      const NullableValue<RHS_TYPE>& rhs)
+{
+    if (lhs.has_value() && !rhs.isNull()) {
+        return lhs.value() != rhs.value();                            // RETURN
+    }
+
+    return !lhs.has_value() != rhs.isNull();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator!=(const NullableValue<LHS_TYPE>& lhs,
+                      const bsl::optional<RHS_TYPE>& rhs)
+{
+    if (!lhs.isNull() && rhs.has_value()) {
+        return lhs.value() != rhs.value();                            // RETURN
+    }
+
+    return lhs.isNull() != !rhs.has_value();
 }
 
 template <class LHS_TYPE, class RHS_TYPE>
@@ -1738,6 +1855,30 @@ bool bdlb::operator<(const NullableValue<LHS_TYPE>& lhs,
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline
+bool bdlb::operator<(const bsl::optional<LHS_TYPE>& lhs,
+                     const NullableValue<RHS_TYPE>& rhs)
+{
+    if (rhs.isNull()) {
+        return false;                                                 // RETURN
+    }
+
+    return !lhs.has_value() || lhs.value() < rhs.value();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator<(const NullableValue<LHS_TYPE>& lhs,
+                     const bsl::optional<RHS_TYPE>& rhs)
+{
+    if (!rhs.has_value()) {
+        return false;                                                 // RETURN
+    }
+
+    return !lhs.has_value() || lhs.value() < rhs.value();
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
 bool bdlb::operator<(const NullableValue<LHS_TYPE>& lhs,
                      const RHS_TYPE&                rhs)
 {
@@ -1759,6 +1900,23 @@ bool bdlb::operator>(const NullableValue<LHS_TYPE>& lhs,
 {
     return rhs < lhs;
 }
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator>(const bsl::optional<LHS_TYPE>& lhs,
+                     const NullableValue<RHS_TYPE>& rhs)
+{
+    return rhs < lhs;
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator>(const NullableValue<LHS_TYPE>& lhs,
+                     const bsl::optional<RHS_TYPE>& rhs)
+{
+    return rhs < lhs;
+}
+
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline
@@ -1786,6 +1944,22 @@ bool bdlb::operator<=(const NullableValue<LHS_TYPE>& lhs,
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline
+bool bdlb::operator<=(const bsl::optional<LHS_TYPE>& lhs,
+                      const NullableValue<RHS_TYPE>& rhs)
+{
+    return !(rhs < lhs);
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator<=(const NullableValue<LHS_TYPE>& lhs,
+                      const bsl::optional<RHS_TYPE>& rhs)
+{
+    return !(rhs < lhs);
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
 bool bdlb::operator<=(const NullableValue<LHS_TYPE>& lhs,
                       const RHS_TYPE&                rhs)
 {
@@ -1804,6 +1978,22 @@ template <class LHS_TYPE, class RHS_TYPE>
 inline
 bool bdlb::operator>=(const NullableValue<LHS_TYPE>& lhs,
                       const NullableValue<RHS_TYPE>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator>=(const bsl::optional<LHS_TYPE>& lhs,
+                      const NullableValue<RHS_TYPE>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+template <class LHS_TYPE, class RHS_TYPE>
+inline
+bool bdlb::operator>=(const NullableValue<LHS_TYPE>& lhs,
+                      const bsl::optional<RHS_TYPE>& rhs)
 {
     return !(lhs < rhs);
 }
