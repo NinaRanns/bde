@@ -283,7 +283,8 @@ class MyClass1a {
     MyClass1a(bslmf::MovableRef<const MyClass1a> rhs)
     : d_data(MovUtl::access(rhs).d_data)
     {
-        ++moveConstructorInvocations;
+        // moving from a const object is a copy
+        ++copyConstructorInvocations;
     }
 #endif //#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
 
@@ -487,7 +488,8 @@ class MyClass2 {
         else {
             d_def.d_allocator_p = otherRef.d_def.d_allocator_p;
         }
-        moveConstructorInvocations++;
+        // invoking a move with a const object is a copy
+        copyConstructorInvocations++;
     }
 #endif //#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
 
