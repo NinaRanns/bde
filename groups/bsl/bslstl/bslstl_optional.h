@@ -2033,7 +2033,7 @@ class optional {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
         if (lvalue.has_value()) {
             emplace(MoveUtil::move(lvalue.value()));
         }
@@ -2051,7 +2051,7 @@ class optional {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
         if (lvalue.has_value()) {
             emplace(MoveUtil::move(lvalue.value()));
         }
@@ -3601,7 +3601,7 @@ class optional {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
 
         if (lvalue.has_value()) {
             if (this->has_value()) {
@@ -4233,7 +4233,7 @@ class optional<TYPE, false> {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
         if (lvalue.has_value()) {
             emplace(MoveUtil::move(lvalue.value()));
         }
@@ -4250,7 +4250,7 @@ class optional<TYPE, false> {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
         if (lvalue.has_value()) {
             emplace(MoveUtil::move(lvalue.value()));
         }
@@ -5085,7 +5085,7 @@ class optional<TYPE, false> {
     {
         // Must be in-place inline because the use of 'enable_if' will
         // otherwise break the MSVC 2010 compiler.
-        optional<ANY_TYPE> lvalue = rhs;
+        optional<ANY_TYPE>& lvalue = rhs;
         if (lvalue.has_value()) {
             if (this->has_value()) {
                 this->value() = MoveUtil::move(lvalue.value());
