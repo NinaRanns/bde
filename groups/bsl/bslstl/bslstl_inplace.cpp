@@ -1,28 +1,15 @@
-// bslstl_optional.cpp                                                -*-C++-*-
-
-#include <bslstl_optional.h>
+// bslstl_inplace.cpp                                                 -*-C++-*-
+#include <bslstl_inplace.h>
 
 #include <bsls_ident.h>
-BSLS_IDENT_RCSID(bslstl_optional_cpp, "$Id$ $CSID$")
-
+BSLS_IDENT_RCSID(bslstl_inplace_cpp, "$Id$ $CSID$")
 namespace bsl {
 
 #if !defined(BSLS_COMPILERFEATURES_SUPPORT_CONSTEXPR)
-const nullopt_t nullopt = nullopt_t(0);
+const in_place_t in_place = in_place_t();
 #endif
 
 }  // close namespace bsl
-
-namespace BloombergLP {
-namespace bslstl {
-
-#if !defined(BSLS_COMPILERFEATURES_SUPPORT_CONSTEXPR)
-const Optional_OptNoSuchType optNoSuchType = Optional_OptNoSuchType(0);
-#endif
-
-}  // close package namespace
-}  // close enterprise namespace
-
 // ----------------------------------------------------------------------------
 // Copyright 2020 Bloomberg Finance L.P.
 //
