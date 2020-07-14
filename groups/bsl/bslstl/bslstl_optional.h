@@ -1060,6 +1060,13 @@ class optional {
         BloombergLP::bslmf::IsBitwiseMoveable,
         BloombergLP::bslmf::IsBitwiseMoveable<TYPE>::value);
 
+#ifndef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+    BSLMF_NESTED_TRAIT_DECLARATION_IF(optional,
+                                      bsl::is_trivially_copyable,
+                                      bsl::is_trivially_copyable<TYPE>::value);
+    // Workaround for C++03 'bsl::is_trivially_copyable' trait.
+#endif  //BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+
     // CREATORS
     optional();
         // Create a disengaged 'optional' object.  Use the currently installed
@@ -3355,6 +3362,14 @@ class optional<TYPE, false> {
         optional,
         BloombergLP::bslmf::IsBitwiseMoveable,
         BloombergLP::bslmf::IsBitwiseMoveable<TYPE>::value);
+
+#ifndef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+    BSLMF_NESTED_TRAIT_DECLARATION_IF(optional,
+                                      bsl::is_trivially_copyable,
+                                      bsl::is_trivially_copyable<TYPE>::value);
+    // Workaround for C++03 'bsl::is_trivially_copyable' trait.
+#endif  //BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+
 
     // CREATORS
     optional();

@@ -5243,6 +5243,22 @@ bool isConstPtr(const T *)
     return true;
 }
 
+#define CHECK_INSTANCES_EMPLACE_EMPTY                                         \
+    {                                                                         \
+        int       expCopy = ValueType::s_copyConstructorInvocations;          \
+        int       expMove = ValueType::s_moveConstructorInvocations;          \
+        ValueType expVal();                                                   \
+        expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
+        expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
+        int numCopy = ValueType::s_copyConstructorInvocations;                \
+        int numMove = ValueType::s_moveConstructorInvocations;                \
+        mX.emplace();                                                         \
+        numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
+        numMove = ValueType::s_moveConstructorInvocations - numMove;          \
+        ASSERT(expCopy == numCopy);                                           \
+        ASSERT(expMove == numMove);                                           \
+    }
+
 #define CHECK_INSTANCES_EMPLACE(args)                                         \
     {                                                                         \
         int       expCopy = ValueType::s_copyConstructorInvocations;          \
@@ -5714,73 +5730,84 @@ bool isConstPtr(const T *)
         ASSERT(checkAllocator(obj.value(), expAlloc));                        \
     }
 
-#define TEST_COPY(valtype, optype, init, expArgs)                             \
+#define TEST_MAKE_OPTIONAL_DEDUCED(source)                                    \
     {                                                                         \
-        valtype EXP expArgs;                                                  \
-        int         CCI = valtype::s_copyConstructorInvocations;              \
-        int         MCI = valtype::s_moveConstructorInvocations;              \
-        optype obj init;                                                      \
-        ASSERT(EXP == obj.value());                                           \
-        ASSERT(CCI ==                                                         \
-               ConstructTestTypeAllocArgT::s_copyConstructorInvocations);     \
-        ASSERT(MCI ==                                                         \
-               ConstructTestTypeAllocArgT::s_moveConstructorInvocations);     \
-        ASSERT(createdAlike(EXP, obj.value()) == true);                       \
-    }
-#define TEST_COPYA(valtype, optype, init, expArgs, alloc)                     \
-    {                                                                         \
-        /* Expects allocator at end of argument list */                       \
-        valtype EXP expArgs;                                                  \
-        int         CCI = valtype::s_copyConstructorInvocations;              \
-        int         MCI = valtype::s_moveConstructorInvocations;              \
-        optype obj init;                                                      \
-        ASSERT(EXP == obj.value());                                           \
-        ASSERT(CCI ==                                                         \
-               ConstructTestTypeAllocArgT::s_copyConstructorInvocations);     \
-        ASSERT(MCI ==                                                         \
-               ConstructTestTypeAllocArgT::s_moveConstructorInvocations);     \
-        ASSERT(alloc == obj.value().d_allocator_p);                           \
+        int       expCopy = ValueType::s_copyConstructorInvocations;          \
+        int       expMove = ValueType::s_moveConstructorInvocations;          \
+        bsl::optional<ValueType> expObj(bsl::in_place, source);               \
+        expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
+        expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
+        int numCopy = ValueType::s_copyConstructorInvocations;                \
+        int numMove = ValueType::s_moveConstructorInvocations;                \
+        bsl::optional<ValueType> obj = bsl::make_optional(source);            \
+        numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
+        numMove = ValueType::s_moveConstructorInvocations - numMove;          \
+        ASSERTV(expCopy, numCopy, expCopy == numCopy);                        \
+        ASSERTV(expMove, numMove, expMove == numMove);                        \
+        ASSERT(obj.has_value());                                              \
+        ASSERT(obj.value() == source);                                        \
+        ASSERT(checkAllocator(obj, &da));                                     \
+        ASSERT(checkAllocator(obj.value(), &da));                             \
     }
 
-#define TEST_MAKEOP(expArgs, alloc)                                           \
+#define TEST_MAKE_OPTIONAL(expArgs, args)                                     \
     {                                                                         \
-        ConstructTestTypeNoAlloc EXP expArgs;                                 \
-        int CCI = ConstructTestTypeNoAlloc::s_copyConstructorInvocations;     \
-        int MCI = ConstructTestTypeNoAlloc::s_moveConstructorInvocations;     \
-        bsl::optional<ConstructTestTypeNoAlloc>          X =                  \
-            bsl::make_optional<ConstructTestTypeNoAlloc> expArgs;             \
-        ASSERT(EXP == X.value());                                             \
-        ASSERT(CCI ==                                                         \
-               ConstructTestTypeNoAlloc::s_copyConstructorInvocations);       \
-        ASSERT(MCI ==                                                         \
-               ConstructTestTypeNoAlloc::s_moveConstructorInvocations);       \
-        ASSERT(createdAlike(EXP, X.value()) == true);                         \
-    }                                                                         \
-    {                                                                         \
-        ConstructTestTypeAlloc EXP expArgs;                                   \
-        int CCI = ConstructTestTypeAlloc::s_copyConstructorInvocations;       \
-        int MCI = ConstructTestTypeAlloc::s_moveConstructorInvocations;       \
-        bsl::optional<ConstructTestTypeAlloc>          X =                    \
-            bsl::make_optional<ConstructTestTypeAlloc> expArgs;               \
-        ASSERT(EXP == X.value());                                             \
-        ASSERT(alloc == X.value().d_allocator_p);                             \
-        ASSERT(CCI == ConstructTestTypeAlloc::s_copyConstructorInvocations);  \
-        ASSERT(MCI == ConstructTestTypeAlloc::s_moveConstructorInvocations);  \
-        ASSERT(createdAlike(EXP, X.value()) == true);                         \
+        int              expCopy = ValueType::s_copyConstructorInvocations;   \
+        int              expMove = ValueType::s_moveConstructorInvocations;   \
+        bsl::optional<ValueType> expObj expArgs;                              \
+        expCopy = ValueType::s_copyConstructorInvocations - expCopy;          \
+        expMove = ValueType::s_moveConstructorInvocations - expMove;          \
+        int              numCopy = ValueType::s_copyConstructorInvocations;   \
+        int              numMove = ValueType::s_moveConstructorInvocations;   \
+        bsl::optional<ValueType> obj = bsl::make_optional<ValueType> args;    \
+        numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
+        numMove = ValueType::s_moveConstructorInvocations - numMove;          \
+        ASSERT(expCopy == numCopy);                                           \
+        ASSERTV(expMove, expMove == numMove);                                 \
+        ASSERTV(numMove, expMove == numMove);                                 \
+        ASSERT(checkAllocator(obj, &da));                                     \
+        ASSERT(checkAllocator(obj.value(), &da));                             \
+        ASSERT(createdAlike(expObj.value(), obj.value()) == true);            \
     }
 
-#define TEST_ALLOCOP(op, expArgs, alloc)                                      \
+#define TEST_ALLOC_OPTIONAL_DEDUCED(source)                                   \
     {                                                                         \
-        ConstructTestTypeAlloc EXP expArgs;                                   \
-        int CCI = ConstructTestTypeAlloc::s_copyConstructorInvocations;       \
-        int MCI = ConstructTestTypeAlloc::s_moveConstructorInvocations;       \
-        bsl::optional<ConstructTestTypeAlloc>           X =                   \
-            bsl::alloc_optional<ConstructTestTypeAlloc> op;                   \
-        ASSERT(EXP == X.value());                                             \
-        ASSERT(alloc == X.value().d_allocator_p);                             \
-        ASSERT(CCI == ConstructTestTypeAlloc::s_copyConstructorInvocations);  \
-        ASSERT(MCI == ConstructTestTypeAlloc::s_moveConstructorInvocations);  \
-        ASSERT(createdAlike(EXP, X.value()) == true);                         \
+        int       expCopy = ValueType::s_copyConstructorInvocations;          \
+        int       expMove = ValueType::s_moveConstructorInvocations;          \
+        bsl::optional<ValueType> expObj(bsl::in_place, source);               \
+        expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
+        expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
+        int numCopy = ValueType::s_copyConstructorInvocations;                \
+        int numMove = ValueType::s_moveConstructorInvocations;                \
+        bsl::optional<ValueType> obj = bsl::alloc_optional(&ta, source);       \
+        numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
+        numMove = ValueType::s_moveConstructorInvocations - numMove;          \
+        ASSERTV(expCopy, numCopy, expCopy == numCopy);                        \
+        ASSERTV(expMove, numMove, expMove == numMove);                        \
+        ASSERT(obj.has_value());                                              \
+        ASSERT(obj.value() == source);                                        \
+        ASSERT(checkAllocator(obj, &ta));                                     \
+        ASSERT(checkAllocator(obj.value(), &ta));                             \
+    }
+
+#define TEST_ALLOC_OPTIONAL(expArgs, args, alloc)                             \
+    {                                                                         \
+        int              expCopy = ValueType::s_copyConstructorInvocations;   \
+        int              expMove = ValueType::s_moveConstructorInvocations;   \
+        bsl::optional<ValueType> expObj expArgs;                              \
+        expCopy = ValueType::s_copyConstructorInvocations - expCopy;          \
+        expMove = ValueType::s_moveConstructorInvocations - expMove;          \
+        int              numCopy = ValueType::s_copyConstructorInvocations;   \
+        int              numMove = ValueType::s_moveConstructorInvocations;   \
+        bsl::optional<ValueType> obj = bsl::alloc_optional<ValueType> args;   \
+        numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
+        numMove = ValueType::s_moveConstructorInvocations - numMove;          \
+        ASSERT(expCopy == numCopy);                                           \
+        ASSERTV(expMove, expMove == numMove);                                 \
+        ASSERTV(numMove, expMove == numMove);                                 \
+        ASSERT(checkAllocator(obj, alloc));                                   \
+        ASSERT(checkAllocator(obj.value(), alloc));                           \
+        ASSERT(createdAlike(expObj.value(), obj.value()) == true);            \
     }
 
 template <class TYPE,
@@ -5890,6 +5917,24 @@ class TestDriver {
         // Array of test values of 'TEST_TYPE'.
 
   public:
+
+    static void testCase32();
+        // TESTING type deduction
+
+    static void testCase30();
+    static void testCase30b();
+        // TESTING 'alloc_optional' FACILITY
+
+    static void testCase29();
+    static void testCase29b();
+        // TESTING 'make_optional' FACILITY
+
+    static void testCase28();
+        // TESTING TRAITS AND TYPEDEFS
+
+    static void testCase27();
+        // TESTING 'operator=' OVERLOAD RESOLUTION
+
     static void testCase26();
         // TESTING 'initializer_list' 'in_place_t' CONSTRUCTOR
 
@@ -5937,7 +5982,6 @@ class TestDriver {
     static void testCase14();
         // TESTING operator=(nullopt_t) MEMBER FUNCTION
 
-    static void testCase13_imp();
     static void testCase13();
     static void testCase13b();
     static void testCase13c();
@@ -6004,6 +6048,1953 @@ class TestDriver {
     static void testCase1();
         // Optional_Data TEST
 };
+
+
+
+template <class TYPE>
+void bslstl_optional_value_type_deduce(const bsl::optional<TYPE>&)
+{
+}
+
+template <class TYPE>
+void bslstl_optional_optional_type_deduce(const TYPE&)
+{
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase32()
+{
+    // --------------------------------------------------------------------
+    // TESTING type deduction
+    //
+    //  In this test, we check that type deduction with 'bsl::optional'
+    //  works.
+    //
+    // Concerns:
+    //: 1 Invoking a template function which takes 'bsl::optional<TYPE>'
+    //    deduces the TYPE
+    //: 2 Invoking a template function which takes 'TYPE' with 'bsl::optional'
+    //    will be able to deduce 'TYPE' as 'bsl::optional'
+    //
+    // Plan:
+    //: 2 Call a template function which takes bsl::optinal<TYPE> with an
+    //    object of type bsl::optional<TestType>
+    //: 3 Call a template function which takes TYPE with an object of type
+    //    bsl::optional<TestType>
+    //
+    //
+    // Testing:
+    //    Type deduction
+    //
+
+    Obj x;
+
+    bslstl_optional_value_type_deduce(x);
+    bslstl_optional_optional_type_deduce(x);
+}
+
+
+template <class OPT_TYPE1, class OPT_TYPE2>
+void testCase31_imp_a()
+{
+    OPT_TYPE1 X;
+    OPT_TYPE2 Y;
+
+    //comparing two disengaged optionals
+    ASSERT(X == Y);     // If bool(x) != bool(y), false;
+    ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false;
+    ASSERT(!(X > Y));   // If !x, false;
+    ASSERT(X <= Y);     // If !x, true;
+    ASSERT(X >= Y);     // If !y, true;
+
+    //rhs disengaged, lhs engaged
+    Y.emplace(3);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(X > Y));   // If !x, false;
+    ASSERT(X <= Y);     // If !x, true;
+    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
+
+    //rhs engaged, lhs disengaged
+    X.emplace(5);
+    Y.reset();
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
+    ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
+    ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
+    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
+
+    //both engaged, compare the values
+    X.emplace(1);
+    Y.emplace(3);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
+    ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
+    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
+}
+
+template <class OPT_TYPE, class VAL_TYPE>
+void testCase31_imp_b()
+{
+    OPT_TYPE                             X;
+    VAL_TYPE                             Y = 3;
+
+    //comparison with a disengaged optional on rhs
+    ASSERT(!(X == Y));  // return bool(x) ? *x == v : false;
+    ASSERT((X != Y));   // return bool(x) ? *x != v : true;
+    ASSERT((X < Y));    // return bool(x) ? *x < v : true;
+    ASSERT(!(X > Y));   // return bool(x) ? *x > v : false;
+    ASSERT((X <= Y));   // return bool(x) ? *x <= v : true;
+    ASSERT(!(X >= Y));  // return bool(x) ? *x >= v : false;
+
+    //comparison with a disengaged optional on lhs
+    ASSERT(!(Y == X));  // return bool(x) ? v == *x : false;
+    ASSERT((Y != X));   // return bool(x) ? v != *x : true;
+    ASSERT(!(Y < X));   // return bool(x) ? v < *x : false;
+    ASSERT((Y > X));    // return bool(x) ? v > *x : true;
+    ASSERT(!(Y <= X));  // return bool(x) ? v <= *x : false;
+    ASSERT((Y >= X));   // return bool(x) ? v >= *x : true;
+
+    //comparison with an engaged optional on rhs
+    X.emplace(7);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
+    ASSERT((X > Y));    // If !x, false;
+    ASSERT(!(X <= Y));  // If !x, true;
+    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
+
+    //comparison with an engaged optional on lhs
+    ASSERT(!(Y == X));  // If bool(x) != bool(y), false;
+    ASSERT((Y != X));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((Y < X));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(Y > X));   // If !x, false;
+    ASSERT((Y <= X));   // If !x, true;
+    ASSERT(!(Y >= X));  // If !y, true; otherwise, if !x, false;
+}
+
+template <class VAL_TYPE>
+void testCase31_imp_c()
+{
+    bsl::optional<VAL_TYPE> X;
+
+    //comparison with a disengaged optional on rhs
+    ASSERT((X == bsl::nullopt));   // !x
+    ASSERT(!(X != bsl::nullopt));  // bool(x)
+    ASSERT(!(X < bsl::nullopt));   // false
+    ASSERT(!(X > bsl::nullopt));   // bool(x)
+    ASSERT((X <= bsl::nullopt));   // !x
+    ASSERT((X >= bsl::nullopt));   // true
+
+    //comparison with a disengaged optional on lhs
+    ASSERT((bsl::nullopt == X));   // !x
+    ASSERT(!(bsl::nullopt != X));  // bool(x)
+    ASSERT(!(bsl::nullopt < X));   // bool(x)
+    ASSERT(!(bsl::nullopt > X));   // false
+    ASSERT((bsl::nullopt <= X));   // true
+    ASSERT((bsl::nullopt >= X));   // !x
+
+    //comparison with an engaged optional on rhs
+    X.emplace(7);
+    ASSERT(!(X == bsl::nullopt));  // !x
+    ASSERT((X != bsl::nullopt));   // bool(x)
+    ASSERT(!(X < bsl::nullopt));   // false
+    ASSERT((X > bsl::nullopt));    // bool(x)
+    ASSERT(!(X <= bsl::nullopt));  // !x
+    ASSERT((X >= bsl::nullopt));   // true
+
+    //comparison with an engaged optional on lhs
+    ASSERT(!(bsl::nullopt == X));  // !x
+    ASSERT((bsl::nullopt != X));   // bool(x)
+    ASSERT((bsl::nullopt < X));    // bool(x)
+    ASSERT(!(bsl::nullopt > X));   // false
+    ASSERT((bsl::nullopt <= X));   // true
+    ASSERT(!(bsl::nullopt >= X));  // !x
+}
+void testCase31()
+{
+    // --------------------------------------------------------------------
+    // TESTING RELATIONAL OPERATORS
+    //
+    // Concerns:
+    //: 1 Two 'optional' objects can be compared if their 'value_type's are
+    //:   comparable. The result depends on whether the objects are engaged
+    //:   or not.
+    //: 2 We can compare an 'optional' object of 'value_type' V and a non
+    //:   'optional' object of type U if U and V are comparable types. The
+    //:   result depends on whether the 'optional' object is engaged or not.
+    //: 3 We can compare any 'optional' object with nulllopt_t. The result
+    //:   depends on whether the 'optional' object is engaged or not.
+    //
+    // Plan:
+    //: 1 For each relation operator, for concern 1, compare two 'optional'
+    //:   objects of comparable valye types. Execute tests for a combination of
+    //:   engaged and disengaged 'optional' objects.
+    //: 2 For each relation operator, for concern 2, compare an 'optional'
+    //:   object of type 'TYPE', and an object of type comparable to TYPE.
+    //:   Execute tests for an engaged and disengaged 'optional' object.
+    //: 3 For each relation operator, for concern 3, compare an 'optional'
+    //:   object and a 'nullopt_t' object. Execute tests for an engaged and
+    //:   disengaged 'optional' object.
+    //
+    // Testing:
+    //   bool operator==(const optional<LHS>&, const optional<RHS>&)
+    //   bool operator==(const optional<LHS>&, const RHS&)
+    //   bool operator==(const LHS&, const optional<RHS>&)
+    //   bool operator==(const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator==(bsl::nullopt_t,         const optional<RHS>&)
+    //   bool operator!=(const optional<LHS>&, const optional<RHS>&)
+    //   bool operator!=(const optional<LHS>&, const RHS&)
+    //   bool operator!=(const LHS&, const optional<RHS>&)
+    //   bool operator!=(const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator!=(bsl::nullopt_t,         const optional<RHS>&)
+    //   bool operator<=(const optional<LHS>&, const optional<RHS>&)
+    //   bool operator<=(const optional<LHS>&, const RHS&)
+    //   bool operator<=(const LHS&, const optional<RHS>&)
+    //   bool operator<=(const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator<=(bsl::nullopt_t,         const optional<RHS>&)
+    //   bool operator>=(const optional<LHS>&, const optional<RHS>&)
+    //   bool operator>=(const optional<LHS>&, const RHS&)
+    //   bool operator>=(const LHS&, const optional<RHS>&)
+    //   bool operator>=(const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator>=(bsl::nullopt_t,         const optional<RHS>&)
+    //   bool operator< (const optional<LHS>&, const optional<RHS>&)
+    //   bool operator< (const optional<LHS>&, const RHS&)
+    //   bool operator< (const LHS&, const optional<RHS>&)
+    //   bool operator< (const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator< (bsl::nullopt_t,         const optional<RHS>&)
+    //   bool operator> (const optional<LHS>&, const optional<RHS>&)
+    //   bool operator> (const optional<LHS>&, const RHS&)
+    //   bool operator> (const LHS&, const optional<RHS>&)
+    //   bool operator> (const optional<LHS>&, bsl::nullopt_t)
+    //   bool operator> (bsl::nullopt_t,         const optional<RHS>&)
+
+    if (verbose)
+        printf("\nTESTING RELATIONAL OPERATORS"
+               "\n============================\n");
+    if (veryVerbose)
+        printf("\tComparison with an 'optional'.\n");
+    {
+        testCase31_imp_a<bsl::optional<int>,
+                                     bsl::optional<MyClass2> >();
+
+        testCase31_imp_a<bsl::optional<MyClass2>,
+                                     bsl::optional<int> >();
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        testCase31_imp_a<std::optional<int>,
+                                     bsl::optional<int> >();
+
+        testCase31_imp_a<bsl::optional<int>,
+                                     std::optional<int> >();
+
+        testCase31_imp_a<std::optional<MyClass2>,
+                                     bsl::optional<MyClass2> >();
+
+        testCase31_imp_a<bsl::optional<MyClass2>,
+                                     std::optional<MyClass2> >();
+
+        testCase31_imp_a<std::optional<int>,
+                                     bsl::optional<MyClass2> >();
+
+        testCase31_imp_a<bsl::optional<MyClass2>,
+                                     std::optional<int> >();
+
+        testCase31_imp_a<std::optional<MyClass2>,
+                                     bsl::optional<int> >();
+
+        testCase31_imp_a<bsl::optional<int>,
+                                     std::optional<MyClass2> >();
+#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+
+    }
+    if (veryVerbose)
+        printf("\tComparison with a non 'optional' .\n");
+    {
+        testCase31_imp_b<bsl::optional<int>,
+                                     MyClass2 >();
+
+        testCase31_imp_b<bsl::optional<MyClass2>,
+                                     int >();
+    }
+    if (veryVerbose)
+        printf("\tComparison with a nullopt_t .\n");
+    {
+        testCase31_imp_c<int>();
+        testCase31_imp_c<MyClass2>();
+    }
+}
+
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase30()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'alloc_optional' FACILITY
+    //
+    //  In this test, we are ensuring that the 'optional' created using
+    //  'alloc_optional' facility is created using the given arguments and
+    //  without unnecessary copies. We are not worried about the allocator
+    //  policy of the allocator aware type, as choosing the allocator policy
+    //  when creating an 'optional' is tested in constructor tests.
+    //
+    //  This test verifies the invocation of 'alloc_optional' where the type
+    //  is deduced.
+    //
+    //
+    // Concerns:
+    //: 1 Invoking 'alloc_optional' creates an 'optional' with the value of the
+    //:   argument.
+    //: 2 In a single non-allocator argument of 'alloc_optional' invocation,
+    //:   the value type of the optional is deduced from the non allocator
+    //:   argument.
+    //: 3 Argument is perfectly forwarded.
+    //: 4 The specified allocator is used as the allocator for the returned
+    //:   'optional' object.
+    //: 5 No unnecessary objects of 'value_type' are created.
+    //
+    //
+    // Plan:
+    //: 1 Call 'alloc_optional' to create an 'optional'.  As an argument to
+    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   resulting 'optional' object has the expected value. [C-1]
+    //: 2 In step 1, when invoking make_value, do not specify the template
+    //:   argument. [C-2]
+    //: 3 Repeat steps 1-2 with an rvalue argument, with a const lvalue
+    //:   reference and with a const rvalue reference. Verify the number of
+    //:   invocations of copy and move value type constructors is the same as
+    //:   when the optional's in_place constructor has been called. [C-3][C-5]
+    //: 4 In steps 1-3, check the resulting optional is using the allocator
+    //:   specified in the 'alloc_optional' call. [C-4]
+    //
+    // Testing:
+    //      alloc_optional(allocator_type const&, T&&);
+
+    if (verbose)
+        printf("\nTESTING 'alloc_optional' FACILITY"
+               "\n==============+==================\n");
+
+    if (veryVerbose)
+        printf("\tDeduced type make_optional.\n");
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+        bslma::TestAllocator         ta("third", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        ValWithAllocator sourceBuf(2, &oa);
+        ValueType&       source      = sourceBuf.object();
+        const ValueType& constSource = sourceBuf.object();
+
+        TEST_ALLOC_OPTIONAL_DEDUCED(source);
+        TEST_ALLOC_OPTIONAL_DEDUCED(constSource);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        // C++03 MovableRef isn't deduction friendly when it comes to deducing
+        // the allocator type
+        TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(source));
+        TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(constSource));
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+    }
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase30b()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'alloc_optional' FACILITY
+    //
+    //  In this test, we are ensuring that the 'optional' created using
+    //  'alloc_optional' facility is created using the given arguments and
+    //  without unnecessary copies. We are not worried about the allocator
+    //  policy of the allocator aware type, as choosing the allocator policy
+    //  when creating an 'optional' is tested in constructor tests.
+    //
+    //  This test verifies the invocation of 'alloc_optional' with var args.
+    //
+    //
+    // Concerns:
+    //: 1 Invoking 'alloc_optional' creates an 'optional' with the value of the
+    //:   arguments converted to the specified value type.
+    //: 2 Arguments are perfectly forwarded.
+    //: 3 No unnecessary objects of 'value_type' are created.
+    //: 4 The specified allocator is used as the allocator for the returned
+    //:   'optional' object.
+    //: 5 If the first argument is a 'braced-init-list', make_optional will
+    //:   deduce an 'std::intializer list'
+    //
+    //
+    // Plan:
+    //: 1 Call 'alloc_optional' to create an 'optional'.  As an argument to
+    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   resulting 'optional' object has the expected value. [C-1]
+    //: 2 Repeat step 1 with different number of arguments and with a
+    //:   combination of lvalue and rvalue for each argument. Check that
+    //:   the resulting object was created with the same combination of
+    //:   lvalue and rvalue arguments. [C-2]
+    //: 3 in steps 1-2, check there were no more copies of value type created
+    //:   than when calling an in_place constructor. [C-3]
+    //: 4 In steps 1-3, check the resulting optional is using the allocator
+    //:   specified in the 'alloc_optional' call. [C-4]
+    //: 5 Repeat steps 1-4 with an additional 'braced-init-list' as the first
+    //:   argument to 'alloc_optional'. [C-5]
+    //
+    // Testing:
+    //      alloc_optional(allocator_type const&, Args&&...);
+    //      alloc_optional(allocator_type const&,
+    //                     initializer_list<U> ,
+    //                     Args&&... );
+
+    if (verbose)
+        printf("\nTESTING 'alloc_optional' FACILITY"
+               "\n=================================\n");
+
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place), (&oa), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, MoveUtil::move(VA1)),
+                           (&oa, MoveUtil::move(VA1)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1), (&oa, VA1), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, MoveUtil::move(VA1), VA2),
+                           (&oa, MoveUtil::move(VA1), VA2), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2)),
+                           (&oa, VA1, MoveUtil::move(VA2)), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+               (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
+               (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2), VA3),
+                           (&oa, VA1, MoveUtil::move(VA2), VA3), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+          (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
+          (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4), &oa);
+        TEST_ALLOC_OPTIONAL(
+          (bsl::in_place, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
+          (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+            (bsl::in_place,
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4),
+             VA5),
+            (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)),
+                           (&oa, VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7),
+                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)),
+                           (&oa, VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9),
+                           (&oa, VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10),
+                           (&oa, MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)),
+                           (&oa, VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)), &oa);
+        /*
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
+                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11),
+                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
+                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
+                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)),
+                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13),
+                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14),
+                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)),
+                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)), &oa);
+    */
+    }
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+    if (veryVerbose)
+        printf("\tUsing 'initializer_list' argument.\n");
+
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}), (&oa, {1, 2, 3}), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1)),
+                           (&oa, {1, 2, 3}, MoveUtil::move(VA1)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}, VA1), (&oa, {1, 2, 3}, VA1), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+                         (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1), VA2),
+                         (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2), &oa);
+        TEST_ALLOC_OPTIONAL(
+                         (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
+                         (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2)), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3)),
+            (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+                    (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3),
+                    (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3), &oa);
+
+        TEST_ALLOC_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3),
+             VA4),
+            (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4), &oa);
+        TEST_ALLOC_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4)),
+            (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5),
+                           (&oa, {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)),
+                           (&oa, {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7),
+                   (&oa, {1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)),
+                           (&oa, {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9),
+                           (&oa, {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10),
+                           (&oa, {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)),
+                           (&oa, {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)), &oa);
+        /*
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13), &oa);
+
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14), &oa);
+        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)), &oa);
+    */
+    }
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase29()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'make_optional' FACILITY
+    //
+    //  In this test, we are ensuring that the 'optional' created using
+    //  'make_optional' facility is created using the given arguments and
+    //  without unnecessary copies. We are not worried about the allocator
+    //  policy of the allocator aware type, as choosing the allocator policy
+    //  when creating an 'optional' is tested in constructor tests.
+    //
+    //  This test verifies the invocation of 'make_optional' where the type
+    //  is deduced.
+    //
+    //
+    // Concerns:
+    //: 1 Invoking 'make_optional' creates an 'optional' with the value of the
+    //:   argument.
+    //: 2 In a single argument 'make_optional' invocation, the value type of
+    //:   the optional is deduced from the argument.
+    //: 3 Argument is perfectly forwarded.
+    //: 4 If the 'value_type' is allocator aware, default allocator is used to
+    //:   construct the 'optional' object.
+    //: 5 No unnecessary objects of 'value_type' are created.
+    //
+    //
+    // Plan:
+    //: 1 Call 'make_optional' to create an 'optional'.  As an argument to
+    //:   'make_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   resulting 'optional' object has the expected value. [C-1]
+    //: 2 In step 1, when invoking make_value, do not specify the template
+    //:   argument. [C-2]
+    //: 3 Repeat steps 1-2 with an rvalue argument, with a const lvalue
+    //:   reference and with a const rvalue reference. Verify the number of
+    //:   invocations of copy and move value type constructors is the same as
+    //:   when the optional's in_place constructor has been called. [C-3][C-5]
+    //: 4 In steps 1-3, if type is allocator aware, check the resulting
+    //:    optional is using the default allocator. [C-4]
+    //
+    // Testing:
+    //      make_optional(T&&);
+
+    if (verbose)
+        printf("\nTESTING 'make_optional' FACILITY"
+               "\n================================\n");
+
+    if (veryVerbose)
+        printf("\tDeduced type make_optional.\n");
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+        bslma::TestAllocator         ta("third", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        ValWithAllocator sourceBuf(2, &oa);
+        ValueType&       source      = sourceBuf.object();
+        const ValueType& constSource = sourceBuf.object();
+
+        TEST_MAKE_OPTIONAL_DEDUCED(source);
+        TEST_MAKE_OPTIONAL_DEDUCED(constSource);
+        TEST_MAKE_OPTIONAL_DEDUCED(MoveUtil::move(source));
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        // C++03 MovableRef isn't const friendly which will make this test fail
+        TEST_MAKE_OPTIONAL_DEDUCED(MoveUtil::move(constSource));
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+    }
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase29b()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'make_optional' FACILITY
+    //
+    //  In this test, we are ensuring that the 'optional' created using
+    //  'make_optional' facility is created using the given arguments and
+    //  without unnecessary copies. We are not worried about the allocator
+    //  policy of the allocator aware type, as choosing the allocator policy
+    //  when creating an 'optional' is tested in constructor tests.
+    //
+    //  This test verifies the invocation of 'make_optional' with var args.
+    //
+    //
+    // Concerns:
+    //: 1 Invoking 'make_optional' creates an 'optional' with the value of the
+    //:   arguments converted to the specified value type.
+    //: 2 Arguments are perfectly forwarded.
+    //: 3 No unnecessary objects of 'value_type' are created.
+    //: 4 If the 'value_type' is allocator aware, default allocator is used to
+    //:   construct the 'optional' object.
+    //: 5 If the first argument is a 'braced-init-list', make_optional will
+    //:   deduce an 'std::intializer list'
+    //
+    //
+    // Plan:
+    //: 1 Call 'make_optional' to create an 'optional'.  As an argument to
+    //:   'make_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   resulting 'optional' object has the expected value. [C-1]
+    //: 2 Repeat step 1 with different number of arguments and with a
+    //:   combination of lvalue and rvalue for each argument. Check that
+    //:   the resulting object was created with the same combination of
+    //:   lvalue and rvalue arguments. [C-2]
+    //: 3 in steps 1-2, check there were no more copies of value type created
+    //:   than when calling an in_place constructor. [C-3]
+    //: 4 In steps 1-3, if type is allocator aware, check the resulting
+    //:    optional is using the default allocator. [C-4]
+    //: 5 Repeat steps 1-4 with an additional 'braced-init-list' as the first
+    //:   argument to 'make_optional'. [C-5]
+    //
+    // Testing:
+    //      make_optional(Args&&... args);
+    //      make_optional(initializer_list<U> il, Args&&... args);
+
+    if (verbose)
+        printf("\nTESTING 'make_optional' FACILITY"
+               "\n================================\n");
+
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        TEST_MAKE_OPTIONAL((bsl::in_place), ());
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, MoveUtil::move(VA1)),
+                           (MoveUtil::move(VA1)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, VA1), (VA1));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, MoveUtil::move(VA1), VA2),
+                           (MoveUtil::move(VA1), VA2));
+        TEST_MAKE_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2)),
+                           (VA1, MoveUtil::move(VA2)));
+
+        TEST_MAKE_OPTIONAL(
+               (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
+               (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2), VA3),
+                           (VA1, MoveUtil::move(VA2), VA3));
+
+        TEST_MAKE_OPTIONAL(
+          (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
+          (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
+        TEST_MAKE_OPTIONAL(
+          (bsl::in_place, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
+          (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)));
+
+        TEST_MAKE_OPTIONAL(
+            (bsl::in_place,
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4),
+             VA5),
+            (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)),
+                           (VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7),
+                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)),
+                           (VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9),
+                           (VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10),
+                           (MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)),
+                           (VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)));
+        /*
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
+                   (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11),
+                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
+                   (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
+                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)),
+                   (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13),
+                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14),
+                   (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)),
+                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)));
+    */
+    }
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+    if (veryVerbose)
+        printf("\tUsing 'initializer_list' argument.\n");
+
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1, 2, 3}), ({1, 2, 3}));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1)),
+                           ({1, 2, 3}, MoveUtil::move(VA1)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1, 2, 3}, VA1), ({1, 2, 3}, VA1));
+
+        TEST_MAKE_OPTIONAL(
+                         (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1), VA2),
+                         ({1, 2, 3}, MoveUtil::move(VA1), VA2));
+        TEST_MAKE_OPTIONAL(
+                         (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
+                         ({1, 2, 3}, VA1, MoveUtil::move(VA2)));
+
+        TEST_MAKE_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3)),
+            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
+
+        TEST_MAKE_OPTIONAL(
+                    (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3),
+                    ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3));
+
+        TEST_MAKE_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3),
+             VA4),
+            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
+        TEST_MAKE_OPTIONAL(
+            (bsl::in_place,
+             {1, 2, 3},
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4)),
+            ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7)));
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9)));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10),
+                           ({1, 2, 3},
+                            MoveUtil::move(VA1),
+                            VA2,
+                            MoveUtil::move(VA3),
+                            VA4,
+                            MoveUtil::move(VA5),
+                            VA6,
+                            MoveUtil::move(VA7),
+                            VA8,
+                            MoveUtil::move(VA9),
+                            VA10));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7,
+                            MoveUtil::move(VA8),
+                            VA9,
+                            MoveUtil::move(VA10)));
+        /*
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)));
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12));
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13)));
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13));
+
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14),
+                   ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                    MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
+                    MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
+                    MoveUtil::move(VA13), VA14));
+        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
+                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)),
+                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                    VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
+                    VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
+                    VA13, MoveUtil::move(VA14)));
+    */
+    }
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase28()
+{
+    // --------------------------------------------------------------------
+    // TESTING TRAITS AND TYPEDEFS
+    //
+    //
+    // Concerns:
+    //: 1 That 'optional<TYPE>::value_type' is 'TYPE'
+    //: 2 That 'optional<const TYPE>::value_type' is 'const TYPE'
+    //: 3 That 'BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>' and
+    //:   'BloombergLP::bslmf::UsesAllocatorArgT<optional<TYPE>>' are 'false'
+    //:   if 'TYPE' is a non allocator aware type.
+    //: 4 That 'BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>' and
+    //:   'BloombergLP::bslmf::UsesAllocatorArgT<optional<TYPE>>' are 'true'
+    //:   if 'TYPE' is an allocator aware type.
+    //: 5 That 'optional<TYPE>' is trivially destructible if 'TYPE' is trivially
+    //:   destructible
+    //
+    // Plan:
+    //: 1 Verify that 'optional<TYPE>::value_type' matches 'TYPE'. [C-1]
+    //: 2 Repeat step 1 using a 'const' 'value_type'. [C-2]
+    //: 3 verify that both 'UsesBslmaAllocator' and
+    //:   'UsesAllocatorArgT' traits for 'optional<TYPE'> are true if 'TYPE'
+    //:   is allocator aware. [C-3]
+    //: 4 verify that both 'UsesBslmaAllocator' and
+    //:   'UsesAllocatorArgT' traits for 'optional<TYPE'> are false if 'TYPE'
+    //:   is not allocator aware. [C-4]
+    //: 5 verify that 'optional<TYPE'> is trivially destructible if 'TYPE' is
+    //:   trivially destructible [C-5]
+    //
+    // Testing:
+    //      optional<TYPE>::value_type;
+    //      BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>
+    //      BloombergLP::bslma::UsesAllocatorArgT<optional<TYPE>>
+    //      std::is_trivially_destructible<optional<TYPE>>
+    if (verbose)
+        printf("\nTESTNG TRAITS AND TYPEDEFS"
+               "\n==========================\n");
+
+    {
+        ASSERT((bsl::is_same<typename Obj::value_type, ValueType>::value));
+        ASSERT((bsl::is_same<typename ObjC::value_type, const ValueType>::value));
+
+        ASSERT(BloombergLP::bslma::UsesBslmaAllocator<Obj>::value ==
+            BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value  );
+        ASSERT(BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value ==
+            BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+        ASSERT(std::is_trivially_destructible<Obj>::value ==
+            std::is_trivially_destructible<ValueType>::value);
+#else
+        ASSERT(bsl::is_trivially_copyable<Obj>::value ==
+            bsl::is_trivially_copyable<ValueType>::value);
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+    }
+}
+
+template <class TEST_TYPE>
+void TestDriver<TEST_TYPE>::testCase27()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=' OVERLOAD RESOLUTION
+    //   This test will verify that the 'operator=' overload
+    //   resolution works as expected in the presence of constructors and
+    //   assignment operators of 'value_type' taking an 'optional'.
+    //   In these tests we do not care about the different allocation argument
+    //   policies because the allocator propagation is tested in the
+    //   functionality tests for 'operator=. Here, we only care that the
+    //   correct overload is selected.
+    //   Similarly, we do not care about the allocator state after assignment,
+    //   nor do we care about the difference in behaviour when the source and
+    //   destination 'optional's are engaged/disengaged. We deliberately always
+    //   use engaged 'optional's as that directly forwards to the underlying
+    //   'value_type' assignment.
+    //
+    // Concerns:
+    //: 1 If 'value_type' 'TYPE' is assignable and constructible from an
+    //:   'optional' type 'OPT_TYPE', the assignment of 'OPT_TYPE' to an
+    //:   'optional<TYPE>' assigns the 'OPT_TYPE' object to the 'value_type'
+    //:   object of 'optional<TYPE>'. The resulting 'optional' is always
+    //:   engaged.
+    //: 2 If 'value_type' 'TYPE' is not assignable and constructible from an
+    //:   'optional' type 'OPT_TYPE', the assignment of an engaged 'OPT_TYPE'
+    //:   to an 'optional<TYPE>' assigns the 'value_type' object of the
+    //:   'OPT_TYPE' object to the 'value_type' object of 'optional<TYPE>'.
+    //: 3 Move assign and copy assign have the same overload resolution.
+    //: 4 assigning '{}' to an 'optional' is interpreted as assigning a default
+    //:   constructed 'optional' of same type. The resulting 'optional' is
+    //:   disengaged.
+    //: 5 Assigning a 'nullopt_t' object to an 'optional' object is always
+    //:   interpreted as assigning a disengaged 'optional' of same type.
+    //: 6 'optional' types of non allocator aware 'value_type' and allocator
+    //:   aware type have the same overload resolution.
+    //:
+    //: Plan:
+    //: 1 create a source object of
+    //:   'OPT_TYPE', where 'OPT_TYPE' is 'optional<TYPE>'. Assign the source
+    //:   object to an object of 'optional<OPT_TYPE>'. Check the
+    //:   resulting object is engaged and that its 'value_type' object matches
+    //:   the source object. [C-1]
+    //: 2 Assign an engaged object of 'optional<OPT_TYPE>' to another object
+    //:   of 'optional<OPT_TYPE>'. Check the 'value_type' of the destination
+    //:    object matches the 'value_type' of the source object. [C-2]
+    //: 3 In steps 1 and 2 use rvalues. [C-3]
+    //: 4 assign '{}' to an object of 'OPT_TYPE' and verify
+    //:   the resulting 'OPT_TYPE' object is disengaged. [C-4]
+    //: 5 assign '{}' to an object of 'optional<OPT_TYPE>' and
+    //:   verify the resulting 'optional<OPT_TYPE>' object is disengaged. [C-4]
+    //: 6 assign 'nullopt_t' object to an object of 'OPT_TYPE'
+    //:   and verify the resulting 'OPT_TYPE' object is disengaged. [C-5]
+    //: 7 assign 'nullopt_t' object to an object of
+    //:   'optional<OPT_TYPE>' and  verify the resulting 'optional<OPT_TYPE>'
+    //:   object is disengaged. [C-5]
+    //: 8 execute the test with an allocator aware TYPE. [C-6]
+    //
+    // Testing:
+    //
+    //   optional& operator= overload set
+    //
+    // --------------------------------------------------------------------
+
+    if (verbose)
+        printf("\nTESTING 'operator=' OVERLOAD RESOLUTION"
+               "\n=======================================\n");
+
+    if (veryVerbose)
+        printf("\tUsing non allocator aware 'value_type'.\n");
+    {
+        typedef bsl::optional<Obj>      OPT_TYPE;
+
+        ValueType val;
+        Obj source;
+        OPT_TYPE  destination;
+        destination = source;
+        ASSERT(destination.has_value());
+        ASSERT(!destination.value().has_value());
+
+        destination.reset();
+        source.emplace(val);
+        destination = source;
+        ASSERT(destination.has_value());
+        ASSERT(destination.value().has_value());
+        ASSERT(destination.value().value() == source.value());
+
+        CObj constSource;
+        destination.reset();
+        destination = constSource;
+        ASSERT(destination.has_value());
+        ASSERT(!destination.value().has_value());
+
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+        source = {};
+        ASSERT(!source.has_value());
+        destination = {};
+        ASSERT(!destination.has_value());
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+
+        source.emplace(val);
+        destination = MoveUtil::move(source);
+        ASSERT(destination.has_value());
+        ASSERT(destination.value().value() == val);
+
+        source = val;
+        ASSERT(source.has_value());
+        ASSERT(source.value() == val);
+
+        destination.reset();
+        destination = val;
+        ASSERT(destination.has_value());
+        ASSERT(destination.value().value() == source.value());
+
+        source = bsl::nullopt;
+        ASSERT(!source.has_value());
+        destination = bsl::nullopt;
+        ASSERT(!destination.has_value());
+
+    }
+}
 
 template <class TEST_TYPE>
 void TestDriver<TEST_TYPE>::testCase26()
@@ -7177,8 +9168,9 @@ void TestDriver<TEST_TYPE>::testCase25()
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 }
 
-template <class TEST_TYPE>
-void TestDriver<TEST_TYPE>::testCase24()
+
+template <class TEST_TYPE, class OPT_TYPE1, class OPT_TYPE2>
+void testCase24_imp()
 {
     // --------------------------------------------------------------------
     // TESTING 'swap' METHOD
@@ -7222,8 +9214,8 @@ void TestDriver<TEST_TYPE>::testCase24()
 
     using bsl::swap;
     {
-        Obj a;
-        Obj b;
+        OPT_TYPE1 a;
+        OPT_TYPE2 b;
 
         TEST_TYPE::swapReset();
         swap(a, b);
@@ -7246,8 +9238,8 @@ void TestDriver<TEST_TYPE>::testCase24()
         const TEST_TYPE Zobj1(obj1);
         const TEST_TYPE Zobj2(obj2);
 
-        Obj a = obj1;
-        Obj b = obj2;
+        OPT_TYPE1 a = obj1;
+        OPT_TYPE2 b = obj2;
         ASSERT(a.value() == Zobj1);
         ASSERT(b.value() == Zobj2);
 
@@ -7268,9 +9260,9 @@ void TestDriver<TEST_TYPE>::testCase24()
         ASSERT(b.value() == Zobj2);
     }
     {
-        Obj nonNullObj(TEST_TYPE(10));
-        Obj nonNullObjCopy(nonNullObj);
-        Obj nullObj;
+        OPT_TYPE1 nonNullObj(TEST_TYPE(10));
+        OPT_TYPE1 nonNullObjCopy(nonNullObj);
+        OPT_TYPE2 nullObj;
 
         TEST_TYPE::swapReset();
         swap(nonNullObj, nullObj);
@@ -7286,6 +9278,14 @@ void TestDriver<TEST_TYPE>::testCase24()
         ASSERT(nonNullObjCopy == nonNullObj);
         ASSERT(!nullObj.has_value());
     }
+}
+
+template <class TEST_TYPE>
+void TestDriver<TEST_TYPE>::testCase24()
+{
+    testCase24_imp<TEST_TYPE,
+                   bsl::optional<TEST_TYPE>,
+                   bsl::optional<TEST_TYPE> > ();
 }
 
 template <class TEST_TYPE>
@@ -8344,7 +10344,7 @@ void TestDriver<TYPE>::testCase14()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase13_imp()
+void testCase13_imp()
 {
     // --------------------------------------------------------------------
     // TESTING 'emplace' METHOD
@@ -8396,6 +10396,10 @@ void TestDriver<TYPE>::testCase13_imp()
     //
     // --------------------------------------------------------------------
 
+    typedef TYPE                                ValueType;
+    typedef bslalg::ConstructorProxy<ValueType> ValWithAllocator;
+    typedef bsl::optional<ValueType>            Obj;
+
     if (verbose)
         printf("\nTESTING 'emplace' METHOD"
                "\n========================\n");
@@ -8410,7 +10414,7 @@ void TestDriver<TYPE>::testCase13_imp()
 
         Obj mX;
 
-        CHECK_INSTANCES_EMPLACE();
+        CHECK_INSTANCES_EMPLACE_EMPTY;
         ASSERT(mX.has_value());
         ASSERT(mX->value() == 0);
         ASSERT(checkAllocator(mX, &da));
@@ -8445,8 +10449,8 @@ void TestDriver<TYPE>::testCase13_imp()
 template <class TYPE>
 void TestDriver<TYPE>::testCase13()
 {
-    TestDriver<TYPE>::testCase13_imp();
-    TestDriver<const TYPE>::testCase13_imp();
+    testCase13_imp<TYPE>();
+    testCase13_imp<const TYPE>();
 }
 template <class TYPE>
 void TestDriver<TYPE>::testCase13b()
@@ -9910,1997 +11914,6 @@ void TestDriver<TYPE>::testCase3()
     ASSERT_IF_BOOL_CONVERSION(Y);
 }
 
-void bslstl_optional_test28()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=' OVERLOAD RESOLUTION
-    //   This test will verify that the 'operator=' overload
-    //   resolution works as expected in the presence of constructors and
-    //   assignment operators of 'value_type' taking an 'optional'.
-    //   In these tests we do not care about the different allocation argument
-    //   policies because the allocator propagation is tested in the
-    //   functionality tests for 'operator=. Here, we only care that the
-    //   correct overload is selected.
-    //   Similarly, we do not care about the allocator state after assignment,
-    //   nor do we care about the difference in behaviour when the source and
-    //   destination 'optional's are engaged/disengaged. We deliberately always
-    //   use engaged 'optional's as that directly forwards to the underlying
-    //   'value_type' assignment.
-    //
-    // Concerns:
-    //: 1 If 'value_type' 'TYPE' is assignable and constructible from an
-    //:   'optional' type 'OPT_TYPE', the assignment of 'OPT_TYPE' to an
-    //:   'optional<TYPE>' assigns the 'OPT_TYPE' object to the 'value_type'
-    //:   object of 'optional<TYPE>'. The resulting 'optional' is always
-    //:   engaged.
-    //: 2 If 'value_type' 'TYPE' is not assignable and constructible from an
-    //:   'optional' type 'OPT_TYPE', the assignment of an engaged 'OPT_TYPE'
-    //:   to an 'optional<TYPE>' assigns the 'value_type' object of the
-    //:   'OPT_TYPE' object to the 'value_type' object of 'optional<TYPE>'.
-    //: 3 Move assign and copy assign have the same overload resolution.
-    //: 4 assigning '{}' to an 'optional' is interpreted as assigning a default
-    //:   constructed 'optional' of same type. The resulting 'optional' is
-    //:   disengaged.
-    //: 5 Assigning a 'nullopt_t' object to an 'optional' object is always
-    //:   interpreted as assigning a disengaged 'optional' of same type.
-    //: 6 'optional' types of non allocator aware 'value_type' and allocator
-    //:   aware type have the same overload resolution.
-    //: Plan:
-    //: 1 Using a non allocator aware TYPE, create a source object of
-    //:   'OPT_TYPE', where 'OPT_TYPE' is 'optional<TYPE>'. Assign the source
-    //:   object to an object of 'optional<OPT_TYPE>'. For concern 1, check the
-    //:   resulting object is engaged and that its 'value_type' object matches
-    //:   the source object.
-    //: 2 Assign an engaged object of 'optional<OPT_TYPE>' to another object
-    //:   of 'optional<OPT_TYPE>'. For concern 2, check the 'value_type' of
-    //:   the destination object matches the 'value_type' of the source object.
-    //: 3 For concern 3, in steps 1 and 2 use rvalues.
-    //: 4 For concern 4, assign '{}' to an object of 'OPT_TYPE' and verify
-    //:   the resulting 'OPT_TYPE' object is disengaged.
-    //: 5 For concern 4, assign '{}' to an object of 'optional<OPT_TYPE>' and
-    //:   verify the resulting 'optional<OPT_TYPE>' object is disengaged.
-    //: 6 For concern 5, assign 'nullopt_t' object to an object of 'OPT_TYPE'
-    //:   and verify the resulting 'OPT_TYPE' object is disengaged.
-    //: 7 For concern 5, assign 'nullopt_t' object to an object of
-    //:   'optional<OPT_TYPE>' and  verify the resulting 'optional<OPT_TYPE>'
-    //:   object is disengaged.
-    //: 8 For concern 6, repeat steps 1-7 with an allocator awar TYPE.
-    //
-    // Testing:
-    //
-    //   optional& operator= overload set
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=' OVERLOAD RESOLUTION"
-               "\n=======================================\n");
-
-    if (veryVerbose)
-        printf("\tUsing non allocator aware 'value_type'.\n");
-    {
-        typedef int                      ValueType;
-        typedef bsl::optional<ValueType> OptV;
-        typedef const OptV               COptV;
-        typedef bsl::optional<OptV>      Obj;
-        typedef bsl::optional<COptV>     ObjC;
-
-        OptV source = 4;
-        Obj  destination;
-        destination = source;
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().has_value());
-        ASSERT(destination.value().value() == 4);
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-        source = {};
-        ASSERT(!source.has_value());
-        destination = {};
-        ASSERT(!destination.has_value());
-#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-
-        source      = 5;
-        destination = MoveUtil::move(source);
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().value() == 5);
-
-        source = 8;
-        ASSERT(source.has_value());
-        ASSERT(source.value() == 8);
-        destination = 9;
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().value() == 9);
-
-        COptV source2;
-        destination = source2;
-        ASSERT(destination.has_value());
-        ASSERT(!destination.value().has_value());
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        // C++03 MovableRef isn't const friendly which will make this test fail
-        destination = 4;
-        destination = MoveUtil::move(source2);
-        ASSERT(destination.has_value());
-        ASSERT(!destination.value().has_value());
-#endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-
-        source = bsl::nullopt;
-        ASSERT(!source.has_value());
-        destination = bsl::nullopt;
-        ASSERT(!destination.has_value());
-
-        Obj source3;
-        destination = source3;
-        ASSERT(!destination.has_value());
-
-        ObjC source4;
-        destination = source4;
-        ASSERT(!destination.has_value());
-    }
-    if (veryVerbose)
-        printf("\tUsing allocator aware 'value_type'.\n");
-    {
-        typedef bsl::string              ValueType;
-        typedef bsl::optional<ValueType> OptV;
-        typedef const OptV               COptV;
-
-        typedef bsl::optional<COptV> ObjC;
-        typedef bsl::optional<OptV>  Obj;
-
-        OptV source("test26");
-        Obj  destination;
-        destination = source;
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().has_value());
-        ASSERT(destination.value().value() == "test26");
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-        source = {};
-        ASSERT(!source.has_value());
-        destination = {};
-        ASSERT(!destination.has_value());
-#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-
-        source      = "another test string";
-        destination = MoveUtil::move(source);
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().value() == "another test string");
-
-        COptV source2("test26");
-        destination = source2;
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().has_value());
-        ASSERT(destination.value().value() == "test26");
-
-        source = "booboo";
-        ASSERT(source.has_value());
-        ASSERT(source.value() == "booboo");
-        destination = "haha";
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().value() == "haha");
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        // C++03 MovableRef isn't const friendly which will make this test fail
-        destination = MoveUtil::move(source2);
-        ASSERT(destination.has_value());
-        ASSERT(destination.value().has_value());
-        ASSERT(destination.value().value() == "test26");
-#endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-
-        source = bsl::nullopt;
-        ASSERT(!source.has_value());
-        destination = bsl::nullopt;
-        ASSERT(!destination.has_value());
-
-        Obj source3;
-        destination = source3;
-        ASSERT(!destination.has_value());
-
-        ObjC source4;
-        destination = source4;
-        ASSERT(!destination.has_value());
-    }
-}
-void bslstl_optional_test30()
-{
-    // --------------------------------------------------------------------
-    // TESTING RELATIONAL OPERATORS
-    //
-    // Concerns:
-    //: 1 Two 'optional' objects can be compared if their 'value_type's are
-    //:   comparable. The result depends on whether the objects are engaged
-    //:   or not.
-    //: 2 We can compare an 'optional' object of 'value_type' V and a non
-    //:   'optional' object of type U if U and V are comparable types. The
-    //:   result depends on whether the 'optional' object is engaged or not.
-    //: 3 We can compare any 'optional' object with nulllopt_t. The result
-    //:   depends on whether the 'optional' object is engaged or not.
-    //
-    // Plan:
-    //: 1 For each relation operator, for concern 1, compare two 'optional'
-    //:   objects of comparable valye types. Execute tests for a combination of
-    //:   engaged and disengaged 'optional' objects.
-    //: 2 For each relation operator, for concern 2, compare an 'optional'
-    //:   object of type 'TYPE', and an object of type comparable to TYPE.
-    //:   Execute tests for an engaged and disengaged 'optional' object.
-    //: 3 For each relation operator, for concern 3, compare an 'optional'
-    //:   object and a 'nullopt_t' object. Execute tests for an engaged and
-    //:   disengaged 'optional' object.
-    //
-    // Testing:
-    //   bool operator==(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator==(const optional<LHS>&, const RHS&)
-    //   bool operator==(const LHS&, const optional<RHS>&)
-    //   bool operator==(const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator==(bsl::nullopt_t,         const optional<RHS>&)
-    //   bool operator!=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator!=(const optional<LHS>&, const RHS&)
-    //   bool operator!=(const LHS&, const optional<RHS>&)
-    //   bool operator!=(const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator!=(bsl::nullopt_t,         const optional<RHS>&)
-    //   bool operator<=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator<=(const optional<LHS>&, const RHS&)
-    //   bool operator<=(const LHS&, const optional<RHS>&)
-    //   bool operator<=(const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator<=(bsl::nullopt_t,         const optional<RHS>&)
-    //   bool operator>=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator>=(const optional<LHS>&, const RHS&)
-    //   bool operator>=(const LHS&, const optional<RHS>&)
-    //   bool operator>=(const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator>=(bsl::nullopt_t,         const optional<RHS>&)
-    //   bool operator< (const optional<LHS>&, const optional<RHS>&)
-    //   bool operator< (const optional<LHS>&, const RHS&)
-    //   bool operator< (const LHS&, const optional<RHS>&)
-    //   bool operator< (const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator< (bsl::nullopt_t,         const optional<RHS>&)
-    //   bool operator> (const optional<LHS>&, const optional<RHS>&)
-    //   bool operator> (const optional<LHS>&, const RHS&)
-    //   bool operator> (const LHS&, const optional<RHS>&)
-    //   bool operator> (const optional<LHS>&, bsl::nullopt_t)
-    //   bool operator> (bsl::nullopt_t,         const optional<RHS>&)
-
-    if (verbose)
-        printf("\nTESTING RELATIONAL OPERATORS"
-               "\n============================\n");
-    if (veryVerbose)
-        printf("\tComparison with an 'optional'.\n");
-    {
-        typedef bsl::optional<int>      OptT;
-        typedef bsl::optional<MyClass2> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    if (veryVerbose)
-        printf("\tComparison with a non 'optional' .\n");
-    {
-        typedef bsl::optional<MyClass2> OptV;
-        OptV                            X;
-        int                             Y = 3;
-
-        //comparison with a disengaged optional on rhs
-        ASSERT(!(X == Y));  // return bool(x) ? *x == v : false;
-        ASSERT((X != Y));   // return bool(x) ? *x != v : true;
-        ASSERT((X < Y));    // return bool(x) ? *x < v : true;
-        ASSERT(!(X > Y));   // return bool(x) ? *x > v : false;
-        ASSERT((X <= Y));   // return bool(x) ? *x <= v : true;
-        ASSERT(!(X >= Y));  // return bool(x) ? *x >= v : false;
-
-        //comparison with a disengaged optional on lhs
-        ASSERT(!(Y == X));  // return bool(x) ? v == *x : false;
-        ASSERT((Y != X));   // return bool(x) ? v != *x : true;
-        ASSERT(!(Y < X));   // return bool(x) ? v < *x : false;
-        ASSERT((Y > X));    // return bool(x) ? v > *x : true;
-        ASSERT(!(Y <= X));  // return bool(x) ? v <= *x : false;
-        ASSERT((Y >= X));   // return bool(x) ? v >= *x : true;
-
-        //comparison with an engaged optional on rhs
-        X.emplace(7);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false;
-        ASSERT(!(X <= Y));  // If !x, true;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //comparison with an engaged optional on lhs
-        ASSERT(!(Y == X));  // If bool(x) != bool(y), false;
-        ASSERT((Y != X));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((Y < X));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(Y > X));   // If !x, false;
-        ASSERT((Y <= X));   // If !x, true;
-        ASSERT(!(Y >= X));  // If !y, true; otherwise, if !x, false;
-    }
-    if (veryVerbose)
-        printf("\tComparison with a nullopt_t .\n");
-    {
-        bsl::optional<MyClass2> X;
-
-        //comparison with a disengaged optional on rhs
-        ASSERT((X == bsl::nullopt));   // !x
-        ASSERT(!(X != bsl::nullopt));  // bool(x)
-        ASSERT(!(X < bsl::nullopt));   // false
-        ASSERT(!(X > bsl::nullopt));   // bool(x)
-        ASSERT((X <= bsl::nullopt));   // !x
-        ASSERT((X >= bsl::nullopt));   // true
-
-        //comparison with a disengaged optional on lhs
-        ASSERT((bsl::nullopt == X));   // !x
-        ASSERT(!(bsl::nullopt != X));  // bool(x)
-        ASSERT(!(bsl::nullopt < X));   // bool(x)
-        ASSERT(!(bsl::nullopt > X));   // false
-        ASSERT((bsl::nullopt <= X));   // true
-        ASSERT((bsl::nullopt >= X));   // !x
-
-        //comparison with an engaged optional on rhs
-        X.emplace(7);
-        ASSERT(!(X == bsl::nullopt));  // !x
-        ASSERT((X != bsl::nullopt));   // bool(x)
-        ASSERT(!(X < bsl::nullopt));   // false
-        ASSERT((X > bsl::nullopt));    // bool(x)
-        ASSERT(!(X <= bsl::nullopt));  // !x
-        ASSERT((X >= bsl::nullopt));   // true
-
-        //comparison with an engaged optional on lhs
-        ASSERT(!(bsl::nullopt == X));  // !x
-        ASSERT((bsl::nullopt != X));   // bool(x)
-        ASSERT((bsl::nullopt < X));    // bool(x)
-        ASSERT(!(bsl::nullopt > X));   // false
-        ASSERT((bsl::nullopt <= X));   // true
-        ASSERT(!(bsl::nullopt >= X));  // !x
-    }
-}
-void bslstl_optional_test31()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'make_optional' FACILITY
-    //
-    //  In this test, we are ensuring that the 'optional' created using
-    //  'make_optional' facility is created using the given arguments and
-    //  without unnecessary copies. We are not worried about the allocator
-    //  policy of the allocator aware type, as choosing the allocator policy
-    //  when creating an 'optional' is tested in constructor tests.
-    //
-    //
-    // Concerns:
-    //: 1 Invoking 'make_optional' creates an 'optional' with the value of the
-    //:   arguments.
-    //: 2 Multiple arguments are correctly forwarded.
-    //: 3 Arguments are perfectly forwarded.
-    //: 4 If the 'value_type' is allocator aware, default allocator is used to
-    //:   construct the 'optional' object.
-    //: 5 No unnecessary objects of 'value_type' are created.
-    //
-    //
-    // Plan:
-    //: 1 Call 'make_optional' to create an 'optional' of non allocator aware
-    //:   'value_type'. As an argument to 'make_optional' use an lvalue of
-    //:   the 'value_type'. For concern 1, check the resulting 'optional'
-    // object
-    //:   has the expected value.
-    //: 2 Repeat step 1 using an rvalue of the 'value_type' as an argument to
-    //:   'make_optional'. For concern 2, check the resulting 'optional' object
-    //:   has been created using a move constructor.
-    //: 3 Using various number of arguments to 'make_optional', and a
-    //:   combination of lvalue an  rvalue for each argument poisiont, for
-    //:   concern 2, check that each argument is correctly forwarded to the
-    //:   'value_type' constructor. For concern 3, check that an lvalue
-    // argument
-    //:   is forwarded as an lvalue to the constructor, and rvalue argument is
-    //:   forwarded as an rvalue.
-    //: 4 Repeat step 3 using an 'initializer_list' as the first argument.
-    //: 5 Repeat steps 1-4 using an 'optional' of allocator aware type. For
-    //:   concern 4, check that the default allocator is used.
-    //: 6 In steps 1-5, for concern 5, verify no additional copies of the value
-    //:   type are created.
-    //
-    // Testing:
-    //      make_optional(T&&);
-    //      make_optional(Args&&... args);
-    //      make_optional(initializer_list<U> il, Args&&... args);
-
-    if (verbose)
-        printf("\nTESTING 'make_optional' FACILITY"
-               "\n================================\n");
-
-    if (veryVerbose)
-        printf("\tDeduced type make_optional.\n");
-    {
-        MyClass1 source(2);
-
-        int CCI = MyClass1::s_copyConstructorInvocations;
-        int MCI = MyClass1::s_moveConstructorInvocations;
-
-        optional<MyClass1> obj = bsl::make_optional(source);
-        ASSERT(2 == obj.value().value());
-        ASSERT(CCI == (MyClass1::s_copyConstructorInvocations - 1));
-        ASSERT(MCI == MyClass1::s_moveConstructorInvocations);
-
-        CCI = MyClass1::s_copyConstructorInvocations;
-        MCI = MyClass1::s_moveConstructorInvocations;
-
-        optional<MyClass1> obj2 = bsl::make_optional(MoveUtil::move(source));
-        ASSERT(2 == obj2.value().value());
-        ASSERT(CCI == (MyClass1::s_copyConstructorInvocations));
-        ASSERT(MCI == (MyClass1::s_moveConstructorInvocations - 1));
-    }
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-        MyClass2                     source(2);
-
-        int CCI = MyClass2::s_copyConstructorInvocations;
-        int MCI = MyClass2::s_moveConstructorInvocations;
-
-        optional<MyClass2> obj = bsl::make_optional(source);
-        ASSERT(2 == obj.value().value());
-        ASSERT(&da == obj.value().d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2::s_copyConstructorInvocations - 1));
-        ASSERT(MCI == MyClass2::s_moveConstructorInvocations);
-
-        CCI = MyClass2::s_copyConstructorInvocations;
-        MCI = MyClass2::s_moveConstructorInvocations;
-
-        optional<MyClass2> obj2 = bsl::make_optional(MoveUtil::move(source));
-        ASSERT(2 == obj2.value().value());
-        ASSERT(&da == obj2.value().d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2::s_copyConstructorInvocations));
-        ASSERT(MCI == (MyClass2::s_moveConstructorInvocations - 1));
-    }
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-        MyClass2a                    source(2);
-
-        int CCI = MyClass2a::s_copyConstructorInvocations;
-        int MCI = MyClass2a::s_moveConstructorInvocations;
-
-        optional<MyClass2a> obj = bsl::make_optional(source);
-        ASSERT(2 == obj.value().value());
-        ASSERT(&da == obj.value().d_data.d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2a::s_copyConstructorInvocations - 1));
-        ASSERT(MCI == MyClass2a::s_moveConstructorInvocations);
-
-        CCI = MyClass2a::s_copyConstructorInvocations;
-        MCI = MyClass2a::s_moveConstructorInvocations;
-
-        optional<MyClass2a> obj2 = bsl::make_optional(MoveUtil::move(source));
-        ASSERT(2 == obj2.value().value());
-        ASSERT(&da == obj2.value().d_data.d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2a::s_copyConstructorInvocations));
-        ASSERT(MCI == (MyClass2a::s_moveConstructorInvocations - 1));
-    }
-    if (veryVerbose)
-        printf("\tvar arg make optional.\n");
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-        TEST_MAKEOP((VA1), &da);
-        TEST_MAKEOP((MoveUtil::move(VA1)), &da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2), &da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2)), &da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2, VA3), &da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2), VA3), &da);
-        TEST_MAKEOP((VA1, VA2, MoveUtil::move(VA3)), &da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4), &da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)), &da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1),
-                     VA2,
-                     MoveUtil::move(VA3),
-                     VA4,
-                     MoveUtil::move(VA5)),
-                    &da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5),
-                    &da);
-        /*
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6)),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7)),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8)),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9)),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9), VA10),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9, MoveUtil::move(VA10)),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9), VA10,
-                     MoveUtil::move(VA11)),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9, MoveUtil::move(VA10),
-                     VA11),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9), VA10,
-                     MoveUtil::move(VA11), VA12),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9, MoveUtil::move(VA10),
-                     VA11, MoveUtil::move(VA12)),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9), VA10,
-                     MoveUtil::move(VA11), VA12,
-                     MoveUtil::move(VA13)),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9, MoveUtil::move(VA10),
-                     VA11, MoveUtil::move(VA12),
-                     VA13),&da);
-
-        TEST_MAKEOP((MoveUtil::move(VA1), VA2,
-                     MoveUtil::move(VA3), VA4,
-                     MoveUtil::move(VA5), VA6,
-                     MoveUtil::move(VA7), VA8,
-                     MoveUtil::move(VA9), VA10,
-                     MoveUtil::move(VA11), VA12,
-                     MoveUtil::move(VA13), VA14),&da);
-        TEST_MAKEOP((VA1, MoveUtil::move(VA2),
-                     VA3, MoveUtil::move(VA4),
-                     VA5, MoveUtil::move(VA6),
-                     VA7, MoveUtil::move(VA8),
-                     VA9, MoveUtil::move(VA10),
-                     VA11, MoveUtil::move(VA12),
-                     VA13, MoveUtil::move(VA14)),&da);
-*/
-    }
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-    if (veryVerbose)
-        printf("\tinitializer_list make optional.\n");
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-        TEST_MAKEOP(({1, 2, 3}), &da);
-
-        TEST_MAKEOP(({1, 2, 3}, VA1), &da);
-        TEST_MAKEOP(({1, 2, 3}, MoveUtil::move(VA1)), &da);
-
-        TEST_MAKEOP(({1, 2, 3}, MoveUtil::move(VA1), VA2), &da);
-        TEST_MAKEOP(({1, 2, 3}, VA1, MoveUtil::move(VA2)), &da);
-
-        TEST_MAKEOP(({1, 2, 3}, MoveUtil::move(VA1), VA2, VA3), &da);
-        TEST_MAKEOP(({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3), &da);
-        TEST_MAKEOP(({1, 2, 3}, VA1, VA2, MoveUtil::move(VA3)), &da);
-
-        TEST_MAKEOP(
-            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
-            &da);
-        TEST_MAKEOP(
-            ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
-            &da);
-
-        TEST_MAKEOP(({1, 2, 3},
-                     MoveUtil::move(VA1),
-                     VA2,
-                     MoveUtil::move(VA3),
-                     VA4,
-                     MoveUtil::move(VA5)),
-                    &da);
-        TEST_MAKEOP(({1, 2, 3},
-                     VA1,
-                     MoveUtil::move(VA2),
-                     VA3,
-                     MoveUtil::move(VA4),
-                     VA5),
-                    &da);
-        /*
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6)),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7)),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8)),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8,
-                    MoveUtil::move(VA9)),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8),
-                    VA9),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8,
-                    MoveUtil::move(VA9), VA10),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8),
-                    VA9, MoveUtil::move(VA10)),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8,
-                    MoveUtil::move(VA9), VA10,
-                    MoveUtil::move(VA11)),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8),
-                    VA9, MoveUtil::move(VA10),
-                    VA11),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8,
-                    MoveUtil::move(VA9), VA10,
-                    MoveUtil::move(VA11), VA12),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8),
-                    VA9, MoveUtil::move(VA10),
-                    VA11, MoveUtil::move(VA12)),&da);
-
-       TEST_MAKEOP(({1,2,3}, MoveUtil::move(VA1), VA2,
-                    MoveUtil::move(VA3), VA4,
-                    MoveUtil::move(VA5), VA6,
-                    MoveUtil::move(VA7), VA8,
-                    MoveUtil::move(VA9), VA10,
-                    MoveUtil::move(VA11), VA12,
-                    MoveUtil::move(VA13)),&da);
-       TEST_MAKEOP(({1,2,3}, VA1, MoveUtil::move(VA2),
-                    VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6),
-                    VA7, MoveUtil::move(VA8),
-                    VA9, MoveUtil::move(VA10),
-                    VA11, MoveUtil::move(VA12),
-                    VA13),&da);
-*/
-    }
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-}
-void bslstl_optional_test32()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'alloc_optional' FACILITY
-    //
-    //  In this test, we are ensuring that the 'optional' created using
-    //  'alloc_optional' facility is created using the given arguments and
-    //  without unnecessary copies. We are not worried about the allocator
-    //  policy of the allocator aware type, as choosing the allocator policy
-    //  when creating an 'optional' is tested in constructor tests.
-    //
-    //
-    // Concerns:
-    //: 1 Invoking 'alloc_optional' creates an 'optional' object whose
-    //:   'value_type' object has been created using the arguments of
-    //:   'alloc_optional'.
-    //: 2 The allocator of the created 'optional' object is the allocator
-    //:   passed in to the 'alloc_optional'.
-    //: 3 Multiple arguments are correctly forwarded.
-    //: 4 Arguments are perfectly forwarded.
-    //: 5 No unecessary objects of'value_type' are created.
-    //
-    //
-    // Plan:
-    //: 1 Call 'make_optional' to create an 'optional' of an allocator aware
-    //:   'value_type'. As an argument to 'make_optional' use an lvalue of
-    //:   the 'value_type'. For concern 1, check the resulting 'optional'
-    // object
-    //:   has the expected value.
-    //: 2 In step 2, for concern 2, check the allocator of the newly created
-    //:   'optional' object is the one passed into the 'alloc_optional'
-    //: 3 Repeat steps 1 and 2 using an rvalue of the 'value_type' as an
-    // argument
-    //:   to 'make_optional'. For concern 3, check the resulting 'optional'
-    //:   object has been created using a move constructor.
-    //: 4 Using various number of arguments to 'make_optional', and a
-    //:   combination of lvalue an  rvalue for each argument poisition, for
-    //:   concern 4, check that each argument is correctly forwarded to the
-    //:   'value_type' constructor. For concern 3, check that an lvalue
-    // argument
-    //:   is forwarded as an lvalue to the constructor, and rvalue argument is
-    //:   forwarded as an rvalue.
-    //: 5 Repeat step 4 using an 'initializer_list' as the first argument.
-    //: 6 In steps 1-5, for concern 5, verify no additional copies of the value
-    //:   type are created.
-    //
-    //
-    // Testing:
-    //      alloc_optional(const bsl::allocator<char>& a, T&&);
-    //      alloc_optional(const bsl::allocator<char>>& a, Args&&... args);
-    //      alloc_optional(const bsl::allocator<char><>& a,
-    //                     initializer_list<U> il,
-    //                     Args&&... args);
-    //
-
-    if (verbose)
-        printf("\nTESTING 'alloc_optional' FACILITY"
-               "\n=================================\n");
-
-    if (veryVerbose)
-        printf("\tDeduced type alloc_optional.\n");
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-        MyClass2                     source(2);
-
-        int CCI = MyClass2::s_copyConstructorInvocations;
-        int MCI = MyClass2::s_moveConstructorInvocations;
-
-        optional<MyClass2> obj = bsl::alloc_optional(&oa, source);
-        ASSERT(2 == obj.value().value());
-        ASSERT(&oa == obj.value().d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2::s_copyConstructorInvocations - 1));
-        ASSERT(MCI == MyClass2::s_moveConstructorInvocations);
-
-        CCI = MyClass2::s_copyConstructorInvocations;
-        MCI = MyClass2::s_moveConstructorInvocations;
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        optional<MyClass2> obj2 =
-            bsl::alloc_optional(&oa, MoveUtil::move(source));
-#else
-        //type deduction does not work when using MovableRef
-        optional<MyClass2> obj2 =
-            bsl::alloc_optional<MyClass2>(&oa, MoveUtil::move(source));
-#endif  //#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        ASSERT(2 == obj2.value().value());
-        ASSERT(&oa == obj2.value().d_def.d_allocator_p);
-        ASSERT(CCI == (MyClass2::s_copyConstructorInvocations));
-        ASSERT(MCI == (MyClass2::s_moveConstructorInvocations - 1));
-    }
-    if (veryVerbose)
-        printf("\tvar arg alloc_optional.\n");
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        TEST_ALLOCOP((&da, VA1), (VA1, &da), &da);
-        TEST_ALLOCOP(
-            (&da, MoveUtil::move(VA1)), (MoveUtil::move(VA1), &da), &da);
-
-        TEST_ALLOCOP((&da, MoveUtil::move(VA1), VA2),
-                     (MoveUtil::move(VA1), VA2, &da),
-                     &da);
-        TEST_ALLOCOP((&da, VA1, MoveUtil::move(VA2)),
-                     (VA1, MoveUtil::move(VA2), &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), &da),
-                     &da);
-        TEST_ALLOCOP((&da, VA1, MoveUtil::move(VA2), VA3),
-                     (VA1, MoveUtil::move(VA2), VA3, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4, &da),
-                     &da);
-        TEST_ALLOCOP((&da, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5)),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      &da),
-                     &da);
-        TEST_ALLOCOP(
-            (&da, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5),
-            (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5, &da),
-            &da);
-        /*
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6),&da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9),&da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11),&da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13)),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13), &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13, &da),
-                     &da);
-
-
-        TEST_ALLOCOP((&da,MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13), VA14),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13), VA14, &da),
-                     &da);
-        TEST_ALLOCOP((&da,VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13, MoveUtil::move(VA14)),
-                     (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13, MoveUtil::move(VA14)),
-                     &da);
-*/
-    }
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-    if (veryVerbose)
-        printf("\tinitializer_list alloc_optional.\n");
-    {
-        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        TEST_ALLOCOP((&da, {1, 2, 3}), ({1, 2, 3}, &da), &da);
-
-        TEST_ALLOCOP((&da, {1, 2, 3}, VA1), ({1, 2, 3}, VA1, &da), &da);
-        TEST_ALLOCOP((&da, {1, 2, 3}, MoveUtil::move(VA1)),
-                     ({1, 2, 3}, MoveUtil::move(VA1), &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1, 2, 3}, MoveUtil::move(VA1), VA2),
-                     ({1, 2, 3}, MoveUtil::move(VA1), VA2, &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
-                     ({1, 2, 3}, VA1, MoveUtil::move(VA2), &da),
-                     &da);
-
-        TEST_ALLOCOP(
-            (&da, {1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
-            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), &da),
-            &da);
-        TEST_ALLOCOP((&da, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3),
-                     ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,
-                      {1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da,
-                      {1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4)),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      &da),
-                     &da);
-
-        TEST_ALLOCOP((&da,
-                      {1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5)),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da,
-                      {1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      &da),
-                     &da);
-        /*
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6)),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6),&da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7)),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7)),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8)),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9)),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9),&da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                       VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10)),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11),&da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      &da),
-                     &da);
-
-        TEST_ALLOCOP((&da, {1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13)),
-                     ({1,2,3},
-                      MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
-                      MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
-                      MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
-                      MoveUtil::move(VA13), &da),
-                     &da);
-        TEST_ALLOCOP((&da, {1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13),
-                     ({1,2,3},
-                      VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                      VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
-                      VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
-                      VA13, &da),
-                     &da);
-*/
-    }
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-}
-
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-void bslstl_optional_test33()
-{
-    // --------------------------------------------------------------------
-    // TESTING relop with std::optional
-    //
-    //  In this test, we check that relationship operators work when used
-    //  with bsl::optional and std::optional;
-    //
-    // Concerns:
-    //: 1 We can compare a bsl::optional object of value type V and an
-    //    std::optional object of type U if U and V are comparable types. The
-    //    result depends on whether the optional objects is engaged or not.
-    //
-    // Plan:
-    //: 1 Execute tests for int( doesn't use allocator) and MyClass2 (uses
-    //    allocator).
-    //  2 For each relation operator, execute a combination of comparing:
-    //      - a bsl::optional and std::optional objects of same
-    //        value types, with bsl::optional on left hand side
-    //      - a bsl::optional and std::optional objects of same
-    //        value types, with bsl::optional on right hand side
-    //      - a bsl::optional and std::optional objects of different
-    //        value types, with bsl::optional on left hand side
-    //      - a bsl::optional and std::optional objects of different
-    //        value types, with bsl::optional on right hand side
-    //
-    //   For each comparison, execute tests for both engaged and disengaged
-    //   optional objects
-    //
-    // Testing:
-    //   bool operator==(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator!=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator<=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator>=(const optional<LHS>&, const optional<RHS>&)
-    //   bool operator< (const optional<LHS>&, const optional<RHS>&)
-    //   bool operator> (const optional<LHS>&, const optional<RHS>&)
-
-    if (verbose)
-        printf("\nTESTING RELATIONAL OPERATORS"
-               "\n============================\n");
-    {
-        typedef std::optional<int> OptT;
-        typedef bsl::optional<int> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef bsl::optional<int> OptT;
-        typedef std::optional<int> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef std::optional<MyClass2> OptT;
-        typedef bsl::optional<MyClass2> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef bsl::optional<MyClass2> OptT;
-        typedef std::optional<MyClass2> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef std::optional<int>      OptT;
-        typedef bsl::optional<MyClass2> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef bsl::optional<int>      OptT;
-        typedef std::optional<MyClass2> OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef std::optional<MyClass2> OptT;
-        typedef bsl::optional<int>      OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-    {
-        typedef bsl::optional<MyClass2> OptT;
-        typedef std::optional<int>      OptV;
-
-        OptT X;
-        OptV Y;
-
-        //comparing two disengaged optionals
-        ASSERT(X == Y);     // If bool(x) != bool(y), false;
-        ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(X >= Y);     // If !y, true;
-
-        //rhs disengaged, lhs engaged
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false;
-        ASSERT(X <= Y);     // If !x, true;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-        //rhs engaged, lhs disengaged
-        X.emplace(5);
-        Y.reset();
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-        ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-        ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-        ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-        //both engaged, compare the values
-        X.emplace(1);
-        Y.emplace(3);
-        ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-        ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                            // otherwise, if bool(x) == false, false;
-        ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-        ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-        ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-        ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-    }
-}
-void bslstl_optional_test34()
-{
-    // --------------------------------------------------------------------
-    // TESTING swap FACILITY between bsl::optional and std::optional for a non
-    // AA type Concerns:
-    //   1. Swap of two disengaged objects is a no-op,
-    //   2. Swap of an engaged and a disengaged optional moves the value
-    //      from the engaged object to another without calling swap for the
-    //      value type.
-    //   3. Swap of two engaged objects calls swap for the value type.
-    //
-    // Plan:
-    //   Conduct the test using 'Swappable' (doesn't use allocator) for 'TYPE'.
-    //
-    //   Swap two disengaged optional objects and verify swap has not been
-    //   called.
-    //
-    //   Swap two engaged optional objects and verify swap has been called.
-    //
-    //   Swap an engaged and disengaged optional object. Check swap has not
-    //   been called. Check the correct values of swapped optional objects.
-    //
-    //   Execute the tests for both swap member function and free
-    //   function. Execute the tests for bsl::optional on lhs and on rhs
-    //
-    // Testing:
-    //   void swap(std::optional<TYPE>& other);
-    //   void swap(std::optional<TYPE>& lhs,Obj& rhs);
-    //   void swap(bsl::optional<TYPE>& lhs,std::optional<TYPE>& rhs);
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING SWAP METHOD"
-               "\n===================\n");
-
-    using bsl::swap;
-    {
-        bsl::optional<Swappable> a;
-        std::optional<Swappable> b;
-
-        Swappable::swapReset();
-        swap(a, b);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-
-        Swappable::swapReset();
-        a.swap(b);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-
-        Swappable::swapReset();
-        swap(b, a);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-
-        Swappable::swapReset();
-        b.swap(a);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-    }
-    {
-        Swappable obj1(1);
-        Swappable obj2(2);
-
-        const Swappable Zobj1(obj1);
-        const Swappable Zobj2(obj2);
-
-        bsl::optional<Swappable> a = obj1;
-        std::optional<Swappable> b = obj2;
-        ASSERT(a.value() == Zobj1);
-        ASSERT(b.value() == Zobj2);
-
-        Swappable::swapReset();
-        ASSERT(!Swappable::swapCalled());
-        swap(a, b);
-        ASSERT(Swappable::swapCalled());
-
-        ASSERT(b.value() == Zobj1);
-        ASSERT(a.value() == Zobj2);
-
-        Swappable::swapReset();
-        ASSERT(!Swappable::swapCalled());
-        a.swap(b);
-        ASSERT(Swappable::swapCalled());
-
-        ASSERT(a.value() == Zobj1);
-        ASSERT(b.value() == Zobj2);
-
-        Swappable::swapReset();
-        ASSERT(!Swappable::swapCalled());
-        swap(b, a);
-        ASSERT(Swappable::swapCalled());
-
-        ASSERT(b.value() == Zobj1);
-        ASSERT(a.value() == Zobj2);
-
-        Swappable::swapReset();
-        ASSERT(!Swappable::swapCalled());
-        b.swap(a);
-        ASSERT(Swappable::swapCalled());
-
-        ASSERT(a.value() == Zobj1);
-        ASSERT(b.value() == Zobj2);
-    }
-    {
-        bsl::optional<Swappable> nonNullObj(Swappable(10));
-        bsl::optional<Swappable> nonNullObjCopy(nonNullObj);
-        std::optional<Swappable> nullObj;
-
-        Swappable::swapReset();
-        swap(nonNullObj, nullObj);
-
-        ASSERT(!SwappableAA::swapCalled());
-        ASSERT(nonNullObjCopy == nullObj);
-        ASSERT(!nonNullObj.has_value());
-
-        Swappable::swapReset();
-        nonNullObj.swap(nullObj);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(nonNullObjCopy == nonNullObj);
-        ASSERT(!nullObj.has_value());
-
-        Swappable::swapReset();
-        swap(nullObj, nonNullObj);
-
-        ASSERT(!SwappableAA::swapCalled());
-        ASSERT(nonNullObjCopy == nullObj);
-        ASSERT(!nonNullObj.has_value());
-
-        Swappable::swapReset();
-        nullObj.swap(nonNullObj);
-
-        ASSERT(!Swappable::swapCalled());
-        ASSERT(nonNullObjCopy == nonNullObj);
-        ASSERT(!nullObj.has_value());
-    }
-}
-#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-
-
-template <class TYPE>
-void bslstl_optional_value_type_deduce(const bsl::optional<TYPE>&)
-{
-}
-
-template <class TYPE>
-void bslstl_optional_optional_type_deduce(const TYPE&)
-{
-}
-void bslstl_optional_test35()
-{
-    // --------------------------------------------------------------------
-    // TESTING type deduction
-    //
-    //  In this test, we check that type deduction with 'bsl::optional'
-    //  works.
-    //
-    // Concerns:
-    //: 1 Invoking a template function which takes 'bsl::optional<TYPE>'
-    //    deduces the TYPE
-    //: 2 Invoking a template function which takes 'TYPE' with 'bsl::optional'
-    //    will be able to deduce 'TYPE' as 'bsl::optional'
-    //
-    // Plan:
-    //: 2 Call a template function which takes bsl::optinal<TYPE> with an
-    //    object of type bsl::optional<TestType>
-    //: 3 Call a template function which takes TYPE with an object of type
-    //    bsl::optional<TestType>
-    //
-    //
-    // Testing:
-    //    Type deduction
-    //
-
-    bslstl_optional_value_type_deduce(bsl::optional<int>());
-    bslstl_optional_value_type_deduce(bsl::optional<bsl::string>());
-    bslstl_optional_optional_type_deduce(bsl::optional<int>());
-    bslstl_optional_optional_type_deduce(bsl::optional<bsl::string>());
-}
-void bslstl_optional_test36()
-{
-    // --------------------------------------------------------------------
-    // TESTING TRAITS AND TYPEDEFS
-    //
-    //
-    // Concerns:
-    //: 1 That 'optional<TYPE>::value_type' is 'TYPE'
-    //: 2 That 'optional<const TYPE>::value_type' is 'const TYPE'
-    //: 3 That 'BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>' and
-    //:   'BloombergLP::bslmf::UsesAllocatorArgT<optional<TYPE>>' are 'false'
-    //:   if 'TYPE' is a non allocator aware type.
-    //: 4 That 'BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>' and
-    //:   'BloombergLP::bslmf::UsesAllocatorArgT<optional<TYPE>>' are 'true'
-    //:   if 'TYPE' is an allocator aware type.
-    //
-    // Plan:
-    //: 1 Using an 'optional' of non allocator aware type, verify that
-    //:   'value_type' matches the chosen 'value_type'.
-    //: 2 For concern 2, repeat step 1 using a 'const' 'value_type'.
-    //: 3 In step 1, for concern 2, verify that both 'UsesBslmaAllocator' and
-    //:   'UsesAllocatorArgT' traits are false for the 'optional' type.
-    //: 4 Repeat step 1 for a 'value_type' that is 'UsesBslmaAllocator', but
-    //:   isn't 'UsesAllocatorArgT'. For concern 3, verify that both
-    //:   'UsesBslmaAllocator' and 'UsesAllocatorArgT' traits are true for an
-    //:   'optional' of that type.
-    //: 4 Repeat steps 1 for a 'value_type' that is both 'UsesBslmaAllocator'
-    //:   and 'UsesAllocatorArgT'. For concern 3, verify that both
-    //:   'UsesBslmaAllocator' and 'UsesAllocatorArgT' traits are true for an
-    //:   'optional' of that type.
-    //
-    // Testing:
-    //      optional<TYPE>::value_type;
-    //      BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>
-    //      BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>
-    if (verbose)
-        printf("\nTTRAITS AND TYPEDEFS"
-               "\n====================\n");
-
-    {
-        typedef MyClass1                      ValueType;
-        typedef const MyClass1                ConstValueType;
-        typedef bsl::optional<ValueType>      Obj;
-        typedef bsl::optional<ConstValueType> ObjC;
-        ASSERT((bsl::is_same<Obj::value_type, ValueType>::value));
-        ASSERT((bsl::is_same<ObjC::value_type, ConstValueType>::value));
-        ASSERT(!(BloombergLP::bslma::UsesBslmaAllocator<Obj>::value));
-        ASSERT(!(BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value));
-    }
-    {
-        typedef MyClass2                 ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        ASSERT((bsl::is_same<Obj::value_type, ValueType>::value));
-        ASSERT((BloombergLP::bslma::UsesBslmaAllocator<Obj>::value));
-        ASSERT((BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value));
-    }
-    {
-        typedef MyClass2a                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        ASSERT((bsl::is_same<Obj::value_type, ValueType>::value));
-        ASSERT((BloombergLP::bslma::UsesBslmaAllocator<Obj>::value));
-        ASSERT((BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value));
-    }
-}
-
 template <class TYPE>
 void testCase2_Imp()
 {
@@ -12020,31 +12033,39 @@ int main(int argc, char **argv)
 
     switch (test) {
       case 0:
-      case 38:
-        bslstl_optional_test36();
-        break;
-      case 37:
-        bslstl_optional_test36();
-        break;
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-      case 36:
-        bslstl_optional_test34();
-        break;
-      case 35:
-        bslstl_optional_test33();
-        break;
-#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-      case 34:
-        bslstl_optional_test32();
-        break;
-      case 33:
-        bslstl_optional_test31();
-        break;
       case 32:
-        bslstl_optional_test30();
+        RUN_EACH_TYPE(TestDriver,
+                      testCase32,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        break;
+      case 31:
+        testCase31();
         break;
       case 30:
-        bslstl_optional_test28();
+        RUN_EACH_TYPE(TestDriver,
+                      testCase30,
+                      MyClass2, MyClass2a);
+        RUN_EACH_TYPE(TestDriver,
+                      testCase30b,
+                      ConstructTestTypeAlloc, ConstructTestTypeAllocArgT);
+        break;
+      case 29:
+        RUN_EACH_TYPE(TestDriver,
+                      testCase29,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+        RUN_EACH_TYPE(TestDriver,
+                      testCase29b,
+                      BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
+        break;
+      case 28:
+        RUN_EACH_TYPE(TestDriver,
+                      testCase28,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        break;
+      case 27:
+        RUN_EACH_TYPE(TestDriver,
+                      testCase27,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
         break;
       case 26:
         RUN_EACH_TYPE(TestDriver,
@@ -12059,6 +12080,15 @@ int main(int argc, char **argv)
         break;
       case 24:
         RUN_EACH_TYPE(TestDriver, testCase24, Swappable, SwappableAA);
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        // swap between bsl::optional and std::optional works only for non-AA
+        // types
+        testCase24_imp<Swappable,
+                   bsl::optional<Swappable>,
+                   std::optional<Swappable> > ();
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+
         break;
       case 23:
         RUN_EACH_TYPE(TestDriver,
