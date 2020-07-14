@@ -6171,7 +6171,7 @@ int main(int argc, char *argv[])
 
             obj1.value() = 2;
             obj1.makeValueInplace(obj1.value());
-            ASSERT(2 == obj1.value());
+            ASSERTV(obj1.value(), 2 == obj1.value());
 
             typedef bdlb::NullableValue<Obj1> Obj2;
 

@@ -5247,7 +5247,7 @@ bool isConstPtr(const T *)
     {                                                                         \
         int       expCopy = ValueType::s_copyConstructorInvocations;          \
         int       expMove = ValueType::s_moveConstructorInvocations;          \
-        ValueType expVal();                                                   \
+        ValueType expVal;                                                     \
         expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
         expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
         int numCopy = ValueType::s_copyConstructorInvocations;                \
