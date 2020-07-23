@@ -5808,7 +5808,7 @@ bool isConstPtr(const T *)
         ASSERT(checkAllocator(obj, alloc));                                   \
         ASSERT(checkAllocator(obj.value(), alloc));                           \
         ASSERT(createdAlike(expObj.value(), obj.value()) == true);            \
-    }
+ }
 
 template <class TYPE,
           bool USES_BSLMA_ALLOC =
@@ -6406,7 +6406,7 @@ void TestDriver<TYPE>::testCase30()
         TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(constSource));
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     }
-}
+s}
 template <class TYPE>
 void TestDriver<TYPE>::testCase30b()
 {
@@ -6744,7 +6744,8 @@ void TestDriver<TYPE>::testCase30b()
                     VA13, MoveUtil::move(VA14)), &oa);
     */
     }
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)   &&     \
+(!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900)) 
     if (veryVerbose)
         printf("\tUsing 'initializer_list' argument.\n");
 
@@ -7481,7 +7482,9 @@ void TestDriver<TYPE>::testCase29b()
                     VA13, MoveUtil::move(VA14)));
     */
     }
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)  && \
+(!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900)) 
+
     if (veryVerbose)
         printf("\tUsing 'initializer_list' argument.\n");
 
@@ -7947,12 +7950,14 @@ void TestDriver<TEST_TYPE>::testCase27()
     {
         typedef bsl::optional<Obj>      OPT_TYPE;
 
-        ValueType val;
+        ValueType val = ValueType();
         Obj source;
         OPT_TYPE  destination;
         destination = source;
         ASSERT(destination.has_value());
         ASSERT(!destination.value().has_value());
+        ASSERT(!source.has_value());
+
 
         destination.reset();
         source.emplace(val);
@@ -7960,6 +7965,7 @@ void TestDriver<TEST_TYPE>::testCase27()
         ASSERT(destination.has_value());
         ASSERT(destination.value().has_value());
         ASSERT(destination.value().value() == source.value());
+    
 
         CObj constSource;
         destination.reset();
@@ -10005,7 +10011,7 @@ void TestDriver<TYPE>::testCase17_imp()
         SourceWithAllocator                        X(&da);
         OPT_TYPE&                                  source  = X.object();
         const OPT_TYPE&                            cSource = X.object();
-
+        
         TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(source);
         TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(source);
         TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(source));
@@ -10062,6 +10068,7 @@ void TestDriver<TYPE>::testCase17()
     testCase17_imp<std::optional<TYPE> >();
     testCase17_imp<std::optional<int> >();
 #endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+
 }
 void testCase16()
 {
@@ -11048,6 +11055,21 @@ void TestDriver<TYPE>::testCase12()
     // TESTING 'operator*' FUNCTIONALITY
     //   This test will verify that the 'operator*' works as expected.
     //
+    //   MSVC2015 has a bug which removes constness from temporaries in certain
+    //   situations. For example :
+    //
+    //       bsl::string = CObj("s").value();
+    //
+    //   invokes non const qualified overload of 'value', despite the fact the
+    //   temporary is of a const qualified 'bsl::optional'. In the following
+    //   example, the constness is preserved:
+    //
+    //       Cobj temp = Cobj("s");
+    //       bsl::string = MoveUtil::move(temp).value();
+    //
+    //    The tests have been written to take this issue into account.
+    //
+    //
     // Concerns:
     //: 1 Calling 'operator* 'on an engaged 'optional' returns a reference to
     //:   the contained value.
@@ -11104,19 +11126,19 @@ void TestDriver<TYPE>::testCase12()
     }
 
     {
-        Obj   mX(ValueType(4));
         CObj  cObjX(ValueType(8));
         ObjC  objcX(ValueType(9));
-        CObjC cObjcX(ValueType(10));
-
+        
         ASSERT((*(Obj(ValueType(4)))).value() == 4);
         ASSERT((*(CObj(ValueType(8)))).value() == 8);
         ASSERT((*(ObjC(ValueType(9)))).value() == 9);
         ASSERT((*(CObjC(ValueType(10)))).value() == 10);
 
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
         ASSERT(!isConstRef(Obj(ValueType(4)). operator*()));
-        ASSERT(isConstRef(CObj(ValueType(8)). operator*()));
-        ASSERT(isConstRef(ObjC(ValueType(9)). operator*()));
+        ASSERT(isConstRef((std::move(cObjX)). operator*()));
+        ASSERT(isConstRef((std::move(objcX)). operator*()));
+#endif
     }
 }
 
@@ -11898,7 +11920,7 @@ void TestDriver<TYPE>::testCase3()
     ASSERT(!X.has_value());
     ASSERT_IF_BOOL_CONVERSION(!X);
 
-    TYPE val;
+    TYPE val = TYPE();
     X.emplace(val);
     ASSERT(checkAllocator(X, &da));
     ASSERT(X.has_value());
@@ -12009,7 +12031,6 @@ void TestDriver<TYPE>::testCase1()
 //=============================================================================
 //                              MAIN PROGRAM
 //-----------------------------------------------------------------------------
-
 int main(int argc, char **argv)
 {
     const int test      = argc > 1 ? atoi(argv[1]) : 0;
@@ -12208,7 +12229,8 @@ int main(int argc, char **argv)
 
         RUN_EACH_TYPE(TestDriver,
                       testCase2,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
       } break;
       case 1: {
         // --------------------------------------------------------------------
