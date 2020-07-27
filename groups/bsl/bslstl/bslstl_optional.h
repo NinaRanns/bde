@@ -97,6 +97,7 @@ BSLS_IDENT("$Id: $")
 #include <bslmf_if.h>
 #include <bslmf_integralconstant.h>
 #include <bslmf_isbitwisemoveable.h>
+#include <bslmf_issame.h>
 #include <bslmf_isconvertible.h>
 #include <bslmf_movableref.h>
 #include <bslmf_nestedtraitdeclaration.h>
@@ -215,42 +216,49 @@ BSLS_KEYWORD_INLINE_CONSTEXPR Optional_OptNoSuchType optNoSuchType =
 #else
 extern const Optional_OptNoSuchType optNoSuchType;
 #endif
-// Value of type 'Optional_OptNoSuchType' used as the default argument in
-// functions that are constrained using a function argument.
+    // Value of type 'Optional_OptNoSuchType' used as the default argument in
+    // functions that are constrained using a function argument.
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
-template<class U, class V, bool D>
-struct Optional_IsConstructible : std::is_constructible<U, V> {};
+template <class U, class V, bool D>
+struct Optional_IsConstructible : std::is_constructible<U, V> {
+};
 
-template<class U, class V, bool D>
-struct Optional_IsAssignable : std::is_assignable<U, V> {};
+template <class U, class V, bool D>
+struct Optional_IsAssignable : std::is_assignable<U, V> {
+};
 
-template<class TYPE>
-struct Optional_IsTriviallyDestructible : std::is_trivially_destructible<TYPE> {};
-
+template <class TYPE>
+struct Optional_IsTriviallyDestructible
+: std::is_trivially_destructible<TYPE> {
+};
 
 #else
 
-template<class U, class V, bool D>
-struct Optional_IsConstructible : bsl::integral_constant<bool, D> {};
-    // The 'bool' template parameter represents the desired value this trait
-    // should have in order not to affect the constraint it appears in.
+// The 'bool' template parameter represents the desired value this trait should
+// have in order not to affect the constraint it appears in.
+template <class U, class V, bool D>
+struct Optional_IsConstructible : bsl::integral_constant<bool, D> {
+};
 
-template<class U, class V, bool D>
-struct Optional_IsAssignable : bsl::integral_constant<bool, D> {};
-    // The 'bool' template parameter represents the desired value this trait
-    // should have in order not to affect the constraint it appears in.
+// The 'bool' template parameter represents the desired value this trait should
+// have in order not to affect the constraint it appears in.
+template <class U, class V, bool D>
+struct Optional_IsAssignable : bsl::integral_constant<bool, D> {
+};
 
-template<class TYPE>
-struct Optional_IsTriviallyDestructible : bsl::is_trivially_copyable<TYPE> {};
-    // C++03 does not provide a trivially destructible trait.  Instead we use
-    // 'bsl::is_trivially_copyable' which implies the type is also trivially
-    // destructible.
+// C++03 does not provide a trivially destructible trait.  Instead we use
+// 'bsl::is_trivially_copyable' which implies the type is also trivially
+// destructible.
+template <class TYPE>
+struct Optional_IsTriviallyDestructible : bsl::is_trivially_copyable<TYPE> {
+};
+
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
 // Type traits to assist in choosing the correct assignment and construction
-// overload.  If the 'value_type' converts  or assigns from an
+// overload.  If the 'value_type' converts or assigns from an
 // 'optional<other_type>', then the overload passing the function parameter to
 // the 'value_type' is preferred.  As in 'std' implementation, if the
 // 'value_type' converts or assigns from any value category, we consider it
@@ -263,21 +271,14 @@ struct Optional_ConvertsFrom
           bsl::is_convertible<OPT_TYPE&, TYPE>::value ||
           bsl::is_convertible<const OPT_TYPE, TYPE>::value ||
           bsl::is_convertible<OPT_TYPE, TYPE>::value ||
-          BloombergLP::bslstl::Optional_IsConstructible<
-              TYPE,
-              const OPT_TYPE&,
-              false>::value ||
           BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, OPT_TYPE&, false>::
-                  value ||
-          BloombergLP::bslstl::Optional_IsConstructible<
-              TYPE,
-              const OPT_TYPE,
-              false>::value ||
+              Optional_IsConstructible<TYPE, const OPT_TYPE&, false>::value ||
           BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, OPT_TYPE, false>::
-                  value>
-{
+              Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
+          BloombergLP::bslstl::
+              Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
+          BloombergLP::bslstl::
+              Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
 };
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 template <class TYPE, class OPT_TYPE>
@@ -286,8 +287,8 @@ struct Optional_AssignsFrom
       bool,
       std::is_assignable<TYPE&, const OPT_TYPE&>::value ||
           std::is_assignable<TYPE&, OPT_TYPE&>::value ||
-          std::is_assignable<TYPE&, const OPT_TYPE >::value ||
-          std::is_assignable<TYPE&, OPT_TYPE >::value> {
+          std::is_assignable<TYPE&, const OPT_TYPE>::value ||
+          std::is_assignable<TYPE&, OPT_TYPE>::value> {
 };
 #else
 
@@ -299,7 +300,6 @@ struct Optional_AssignsFrom : bsl::integral_constant<bool, false> {
     // never affects the trait it appears in.
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
-
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConvertsFromBslOptional
@@ -314,8 +314,6 @@ struct Optional_AssignsFromBslOptional
       bool,
       Optional_AssignsFrom<TYPE, bsl::optional<ANY_TYPE> >::value> {
 };
-
-
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 template <class TYPE, class ANY_TYPE>
@@ -342,13 +340,12 @@ struct Optional_AssignsFromStdOptional : bsl::integral_constant<bool, false> {
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
-
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConvertsFromOptional
 : bsl::integral_constant<
       bool,
       Optional_ConvertsFromBslOptional<TYPE, ANY_TYPE>::value ||
-      Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value> {
+          Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value> {
 };
 
 template <class TYPE, class ANY_TYPE>
@@ -356,13 +353,12 @@ struct Optional_AssignsFromOptional
 : bsl::integral_constant<
       bool,
       Optional_AssignsFromBslOptional<TYPE, ANY_TYPE>::value ||
-      Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value> {
+          Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value> {
 };
 
 // Remove CV qualifiers and references from type 'U'
 template <class TYPE>
-struct Optional_RemoveCVRef
-{
+struct Optional_RemoveCVRef {
     typedef typename bsl::remove_cv<bsl::remove_reference<TYPE> >::type type;
 };
 
@@ -377,44 +373,42 @@ struct Optional_Propagates_Allocator
 {
 };
 
-
 // Macros to define common constraints that enable a constructor or assignment
 // operator.
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_OPTIONAL_LVAL                \
     , typename bsl::enable_if<                                                \
-          !bsl::is_same<ANY_TYPE,             \
-                        TYPE>::value &&                                       \
+          !bsl::is_same<ANY_TYPE, TYPE>::value &&                             \
               !BloombergLP::bslstl::                                          \
-                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value        \
-                      && BloombergLP::bslstl::Optional_IsConstructible<                 \
-                          TYPE, const ANY_TYPE&, true>::value,                             \
+                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&     \
+              BloombergLP::bslstl::Optional_IsConstructible<TYPE,             \
+                                                            const ANY_TYPE&,  \
+                                                            true>::value,     \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_OPTIONAL_RVAL                \
     , typename bsl::enable_if<                                                \
-          !bsl::is_same<ANY_TYPE,             \
-                        TYPE>::value && \
+          !bsl::is_same<ANY_TYPE, TYPE>::value &&                             \
               !BloombergLP::bslstl::                                          \
-                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value        \
-                      && BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::value, \
+                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&     \
+              BloombergLP::bslstl::                                           \
+                  Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,      \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
-
-#define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR             \
+#define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR              \
     , typename bsl::enable_if<                                                \
-          BloombergLP::bslstl::Optional_Propagates_Allocator<TYPE,ANY_TYPE>::value, \
+          BloombergLP::bslstl::                                               \
+              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
-
-#define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR             \
+#define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR      \
     , typename bsl::enable_if<                                                \
-          !BloombergLP::bslstl::Optional_Propagates_Allocator<TYPE,ANY_TYPE>::value, \
+          !BloombergLP::bslstl::                                              \
+              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
-
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_ANYTYPE                      \
     , typename bsl::enable_if<                                                \
@@ -456,10 +450,13 @@ struct Optional_Propagates_Allocator
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL_LVAL                      \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::Optional_ConvertsFromOptional<TYPE,             \
-                                                            ANY_TYPE>::value  \
-                && BloombergLP::bslstl::Optional_IsConstructible<TYPE, const ANY_TYPE&, true>::value \
-                && BloombergLP::bslstl::Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&   \
+        !BloombergLP::bslstl::Optional_ConvertsFromOptional<TYPE, ANY_TYPE>:: \
+                value &&                                                      \
+            BloombergLP::bslstl::Optional_IsConstructible<TYPE,               \
+                                                          const ANY_TYPE&,    \
+                                                          true>::value &&     \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
             !BloombergLP::bslstl::                                            \
                 Optional_AssignsFromOptional<TYPE, ANY_TYPE>::value,          \
         optional>::type
@@ -467,9 +464,12 @@ struct Optional_Propagates_Allocator
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL_RVAL                      \
     typename bsl::enable_if<                                                  \
         !BloombergLP::bslstl::Optional_ConvertsFromOptional<TYPE, ANY_TYPE>:: \
-                value && BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::value  \
-                    && BloombergLP::bslstl::Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value    \
-            && !BloombergLP::bslstl::                                            \
+                value &&                                                      \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
+            !BloombergLP::bslstl::                                            \
                 Optional_AssignsFromOptional<TYPE, ANY_TYPE>::value,          \
         optional>::type
 
@@ -478,9 +478,11 @@ struct Optional_Propagates_Allocator
         !bsl::is_same<ANY_TYPE, optional>::value &&                           \
             !(bsl::is_same<ANY_TYPE,                                          \
                            typename bsl::decay<TYPE>::type>::value &&         \
-              std::is_scalar<TYPE>::value)                                    \
-                && BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::value        \
-                    && BloombergLP::bslstl::Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value,     \
+              std::is_scalar<TYPE>::value) &&                                 \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value,          \
         optional>::type
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
@@ -488,37 +490,43 @@ struct Optional_Propagates_Allocator
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_STD_OPTIONAL_LVAL            \
     , typename bsl::enable_if<                                                \
           !BloombergLP::bslstl::                                              \
-              Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value            \
-                  && BloombergLP::bslstl::Optional_IsConstructible<TYPE,                \
-                                                         const ANY_TYPE&, true>::value,    \
+                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&     \
+              BloombergLP::bslstl::Optional_IsConstructible<TYPE,             \
+                                                            const ANY_TYPE&,  \
+                                                            true>::value,     \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_STD_OPTIONAL_RVAL            \
     , typename bsl::enable_if<                                                \
           !BloombergLP::bslstl::                                              \
-              Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value            \
-                  && BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,     \
+                  Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&     \
+              BloombergLP::bslstl::                                           \
+                  Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,      \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL_LVAL                  \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::Optional_ConvertsFromStdOptional<TYPE,          \
-                                                               ANY_TYPE>::    \
-                value && BloombergLP::bslstl::Optional_IsConstructible<TYPE,            \
-                                             const ANY_TYPE&,true>::value \
-                    && BloombergLP::bslstl::Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&   \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
+            BloombergLP::bslstl::Optional_IsConstructible<TYPE,               \
+                                                          const ANY_TYPE&,    \
+                                                          true>::value &&     \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
             !BloombergLP::bslstl::                                            \
                 Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value,       \
         optional>::type
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL_RVAL                  \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::Optional_ConvertsFromStdOptional<TYPE,          \
-                                                               ANY_TYPE>::    \
-                value && BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::value  \
-                    && BloombergLP::bslstl::Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&   \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
             !BloombergLP::bslstl::                                            \
                 Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value,       \
         optional>::type
@@ -545,7 +553,7 @@ struct Optional_DataImp {
     typedef typename bsl::remove_const<TYPE>::type StoredType;
 
     // DATA
-    bsls::ObjectBuffer<StoredType> d_buffer;
+    BloombergLP::bsls::ObjectBuffer<StoredType> d_buffer;
         // in-place 'TYPE' object
 
     bool                           d_hasValue;
@@ -945,8 +953,8 @@ struct Optional_DataImp {
         //otherwise.
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-    const TYPE&  value() const&;
-    const TYPE&& value() const&&;
+    const TYPE&  value() const &;
+    const TYPE&& value() const &&;
         // Return the 'value_type' object in 'd_buffer' with const qualification
         // adjusted to match that of 'TYPE'.  The behavior is undefined unless
         // 'this->hasValue() == true'.
@@ -963,9 +971,10 @@ struct Optional_DataImp {
                             // class Optional_Data
                             // ===================
 
-template <class TYPE,
-          bool IS_TRIVIALLY_DESTRUCTIBLE =
-              BloombergLP::bslstl::Optional_IsTriviallyDestructible<TYPE>::value>
+template <
+    class TYPE,
+    bool IS_TRIVIALLY_DESTRUCTIBLE =
+        BloombergLP::bslstl::Optional_IsTriviallyDestructible<TYPE>::value>
 struct Optional_Data : public Optional_DataImp<TYPE> {
     // This component-private 'struct' manages a 'value_type' object in
     // 'optional' by inheriting from `Optional_DataImp`.  In addition, this
@@ -993,12 +1002,12 @@ struct Optional_Data<TYPE, true> : public Optional_DataImp<TYPE> {
     BSLMF_NESTED_TRAIT_DECLARATION_IF(Optional_Data,
                                       bsl::is_trivially_copyable,
                                       bsl::is_trivially_copyable<TYPE>::value);
-    // Workaround for C++03 'bsl::is_trivially_copyable' trait.  Note that,
-    // whether 'Optional_Data<TYPE>' satisfies 'bsl::is_trivally_copyable'
-    // doesn't affect 'Optional<TYPE>' 'bsl::is_trivally_copyable' trait.  We
-    // only add this nested trait for the tests to be able to check the C++03
-    // implementation of 'Optional_Data'.  For correct C++03 functionality,
-    // 'bsl::optional' has to add a nested trait as well.
+        // Workaround for C++03 'bsl::is_trivially_copyable' trait.  Note that,
+        // whether 'Optional_Data<TYPE>' satisfies 'bsl::is_trivally_copyable'
+        // doesn't affect 'Optional<TYPE>' 'bsl::is_trivally_copyable' trait.
+        // We only add this nested trait for the tests to be able to check the
+        // C++03 implementation of 'Optional_Data'.  For correct C++03
+        // functionality, 'bsl::optional' has to add a nested trait as well.
 #endif  //BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 };
 }  // close package namespace
@@ -1046,6 +1055,7 @@ class optional {
     // DATA
     BloombergLP::bslstl::Optional_Data<TYPE> d_value;
         // in-place 'TYPE' object
+
     allocator_type                           d_allocator;
         // allocator to be used for all in-place 'TYPE' objects
 
@@ -1225,9 +1235,8 @@ class optional {
         // If specified 'rhs' contains a value, initialize the 'value_type'
         // object by moving from '*rhs'.  Otherwise, create a disengaged
         // 'optional'.  This is a special case constructor where 'ANY_TYPE' is
-        // a non-const version of 'TYPE' and we need to use the allocator
-        // from 'rhs' to supply memory for this and any future 'value_type'
-        // objects.
+        // a non-const version of 'TYPE' and we need to use the allocator from
+        // 'rhs' to supply memory for this and any future 'value_type' objects.
         : d_allocator(rhs.get_allocator())
     {
         // Must be in-place inline because the use of 'enable_if' will
@@ -1244,8 +1253,9 @@ class optional {
         BSLSTL_OPTIONAL_ENABLE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
         // If specified 'rhs' contains a value, initialize the 'value_type'
         // object by moving from '*rhs'.  Otherwise, create a disengaged
-        // 'optional'.  Use the currently installed default allocator to supply
-        // memory for this and any future 'value_type' objects.
+        // 'optional'.  This is a special case constructor where 'ANY_TYPE' is
+        // a non-const version of 'TYPE' and we need to use the allocator from
+        // 'rhs' to supply memory for this and any future 'value_type' objects.
     : d_allocator(rhs.get_allocator())
     {
         // Must be in-place inline because the use of 'enable_if' will
@@ -1263,8 +1273,9 @@ class optional {
         BSLSTL_OPTIONAL_ENABLE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
         // If specified 'rhs' contains a value, initialize the 'value_type'
         // object by moving from '*rhs'.  Otherwise, create a disengaged
-        // 'optional'.  Use the currently installed default allocator to supply
-        // memory for this and any future 'value_type' objects.
+        // 'optional'.  This is a special case constructor where 'ANY_TYPE' is
+        // a non-const version of 'TYPE' and we need to use the allocator from
+        // 'rhs' to supply memory for this and any future 'value_type' objects.
     : d_allocator(MoveUtil::access(rhs).get_allocator())
     {
         // Must be in-place inline because the use of 'enable_if' will
@@ -1282,8 +1293,9 @@ class optional {
         BSLSTL_OPTIONAL_ENABLE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
         // If specified 'rhs' contains a value, initialize the 'value_type'
         // object by moving from '*rhs'.  Otherwise, create a disengaged
-        // 'optional'.  Use the currently installed default allocator to supply
-        // memory for this and any future 'value_type' objects.
+        // 'optional'.  This is a special case constructor where 'ANY_TYPE' is
+        // a non-const version of 'TYPE' and we need to use the allocator from
+        // 'rhs' to supply memory for this and any future 'value_type' objects.
     : d_allocator(MoveUtil::access(rhs).get_allocator())
     {
         // Must be in-place inline because the use of 'enable_if' will
@@ -2774,10 +2786,10 @@ class optional {
 #ifdef BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
     template <class ANY_TYPE>
     TYPE value_or(bsl::allocator_arg_t, allocator_type, ANY_TYPE&&) &&;
-    // If 'this->has_value() == true', return a copy of the contained
-    // 'value_type' object created using the provided allocator.  Otherwise,
-    // return the value of specified 'rhs' converted to 'value_type' and use
-    // the specified 'allocator' for the returned object.
+      // If 'this->has_value() == true', return a copy of the contained
+      // 'value_type' object created using the provided allocator.  Otherwise,
+      // return the value of specified 'rhs' converted to 'value_type' and use
+      // the specified 'allocator' for the returned object.
 #endif  //BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
@@ -2882,6 +2894,7 @@ class optional {
 
     optional& operator=(const TYPE& rhs);
     optional& operator=(BloombergLP::bslmf::MovableRef<TYPE> rhs);
+        // Assign to this object the value of the specified 'rhs' object
 
     template <class ANY_TYPE>
     BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL_RVAL& operator=(
@@ -3009,8 +3022,8 @@ class optional {
         // Return 'true' if this object is disengaged, and 'false' otherwise.
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-    const TYPE&  value() const&;
-    const TYPE&& value() const&&;
+    const TYPE&  value() const &;
+    const TYPE&& value() const &&;
         // Return a reference providing non-modifiable access to the underlying
         // 'TYPE' object.  Throws a 'bsl::bad_optional_access' if the
         // 'optional' object is disengaged.
@@ -3030,8 +3043,8 @@ class optional {
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
-    const TYPE&  operator*() const&;
-    const TYPE&& operator*() const&&;
+    const TYPE&  operator*() const &;
+    const TYPE&& operator*() const &&;
         // Return a reference providing non-modifiable access to the underlying
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.
@@ -3369,7 +3382,6 @@ class optional<TYPE, false> {
                                       bsl::is_trivially_copyable<TYPE>::value);
     // Workaround for C++03 'bsl::is_trivially_copyable' trait.
 #endif  //BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
-
 
     // CREATORS
     optional();
@@ -4443,8 +4455,8 @@ class optional<TYPE, false> {
         // Return 'true' if this object is disengaged, and 'false' otherwise.
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-    const TYPE&  value() const&;
-    const TYPE&& value() const&&;
+    const TYPE&  value() const &;
+    const TYPE&& value() const &&;
     // Return a reference providing non-modifiable access to the underlying
     // 'TYPE' object.  Throws a 'bsl::bad_optional_access' if the 'optional'
     // object is disengaged.
@@ -4462,17 +4474,17 @@ class optional<TYPE, false> {
 
 #else
     template <class ANY_TYPE>
-    TYPE        value_or(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)) const;
+    TYPE value_or(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)) const;
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
-    const TYPE *operator->() const;
+    const TYPE* operator->() const;
         // Return a pointer providing non-modifiable access to the underlying
         // 'TYPE' object.  The behaviour is undefined if this object is
         // disengaged.
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-    const TYPE&  operator*() const&;
-    const TYPE&& operator*() const&&;
+    const TYPE&  operator*() const &;
+    const TYPE&& operator*() const &&;
     // Return a reference providing non-modifiable access to the underlying
     // 'TYPE' object.  The behavior is undefined if this object is disengaged.
 #else
@@ -4808,7 +4820,12 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
     // 'args' as constructor arguments.  Note that this function will fail to
     // compile if TYPE doesn't use allocators.
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+// MSVC2013 has a bug which causes deduction issues in free template functions
+// that have an 'std::initializer_list' argument where the
+// 'std::initializer_list' element type is deduced.
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
                      typename bsl::optional<TYPE>::allocator_type const& alloc,
@@ -4997,7 +5014,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_G >= 10
 
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_G >= 0
 template <class TYPE, class INIT_LIST_TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
@@ -5184,7 +5203,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
                      typename bsl::optional<TYPE>::allocator_type const& alloc,
                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...          args);
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
                      typename bsl::optional<TYPE>::allocator_type const& alloc,
@@ -5211,7 +5232,12 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
     // 'args' as the constructor arguments.  If TYPE uses an allocator, the
     // default allocator will be used for the 'optional' object.
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+// MSVC2013 has a bug which causes deduction issues in free template functions
+// that have an 'std::initializer_list' argument where the
+// 'std::initializer_list' element type is deduced.
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               std::initializer_list<INIT_LIST_TYPE>      il,
@@ -5389,7 +5415,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 10
 
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 0
 template <class TYPE, class INIT_LIST_TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
@@ -5565,7 +5593,9 @@ template <class TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args);
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               std::initializer_list<INIT_LIST_TYPE>      il,
@@ -6333,7 +6363,7 @@ template <class TYPE>
 void Optional_DataImp<TYPE>::reset() BSLS_KEYWORD_NOEXCEPT
 {
     if (d_hasValue) {
-        bslma::DestructionUtil::destroy(&d_buffer.object());
+        bslma::DestructionUtil::destroy(d_buffer.address());
         d_hasValue = false;
     }
 }
@@ -8407,8 +8437,9 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 void optional<TYPE, USES_BSLMA_ALLOC>::swap(optional& other)
 {
     if (this->has_value() && other.has_value()) {
-        BloombergLP::bslalg::SwapUtil::swap(&(this->value()),
-                                            &(other.value()));
+        BloombergLP::bslalg::SwapUtil::swap(
+            BloombergLP::bsls::Util::addressOf(this->value()),
+            BloombergLP::bsls::Util::addressOf(other.value()));
     }
     else if (this->has_value()) {
         other.emplace(MoveUtil::move(this->value()));
@@ -10088,8 +10119,9 @@ template <class TYPE>
 void optional<TYPE, false>::swap(optional& other)
 {
     if (this->has_value() && other.has_value()) {
-        BloombergLP::bslalg::SwapUtil::swap(&(this->value()),
-                                            &(other.value()));
+        BloombergLP::bslalg::SwapUtil::swap(
+            BloombergLP::bsls::Util::addressOf(this->value()),
+            BloombergLP::bsls::Util::addressOf(other.value()));
     }
     else if (this->has_value()) {
         other.emplace(MoveUtil::move(this->value()));
@@ -11033,7 +11065,10 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
 // }}} END GENERATED CODE
 #endif
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
                      typename bsl::optional<TYPE>::allocator_type const& alloc,
@@ -11047,6 +11082,339 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
                                BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
 }
 #endif  // defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
+// {{{ BEGIN GENERATED CODE
+// The following section is automatically generated.  **DO NOT EDIT**
+// Generator command line: sim_cpp11_features.pl bslstl_optional.h
+#ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT
+#define BSLSTL_OPTIONAL_VARIADIC_LIMIT 10
+#endif
+#ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT_P
+#define BSLSTL_OPTIONAL_VARIADIC_LIMIT_P BSLSTL_OPTIONAL_VARIADIC_LIMIT
+#endif
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+template <class TYPE, class INIT_LIST_TYPE>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il);
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05,
+                                            class ARGS_06>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_06) args_06)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05,
+                                            class ARGS_06,
+                                            class ARGS_07>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_06) args_06,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_07) args_07)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05,
+                                            class ARGS_06,
+                                            class ARGS_07,
+                                            class ARGS_08>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_06) args_06,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_07) args_07,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_08) args_08)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05,
+                                            class ARGS_06,
+                                            class ARGS_07,
+                                            class ARGS_08,
+                                            class ARGS_09>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_06) args_06,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_07) args_07,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_08) args_08,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_09) args_09)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
+                                            class ARGS_02,
+                                            class ARGS_03,
+                                            class ARGS_04,
+                                            class ARGS_05,
+                                            class ARGS_06,
+                                            class ARGS_07,
+                                            class ARGS_08,
+                                            class ARGS_09,
+                                            class ARGS_10>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03) args_03,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_04) args_04,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_05) args_05,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_06) args_06,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_07) args_07,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_08) args_08,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_09) args_09,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_10) args_10)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09),
+                              BSLS_COMPILERFEATURES_FORWARD(ARGS_10, args_10));
+}
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+
+#endif
+#else
+// The generated code below is a workaround for the absence of perfect
+// forwarding in some compilers.
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
+template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
+BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> alloc_optional(
+                     typename bsl::optional<TYPE>::allocator_type const& alloc,
+                     std::initializer_list<INIT_LIST_TYPE>               il,
+                     BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...          args)
+{
+    return bsl::optional<TYPE>(bsl::allocator_arg,
+                               alloc,
+                               bsl::in_place,
+                               il,
+                               BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
+}
+#endif
+// }}} END GENERATED CODE
+#endif
 
 template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<typename bsl::decay<TYPE>::type>
@@ -11065,7 +11433,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
 }
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                std::initializer_list<INIT_LIST_TYPE>      il,
@@ -11082,19 +11452,19 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 #ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT
 #define BSLSTL_OPTIONAL_VARIADIC_LIMIT 10
 #endif
-#ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT_P
-#define BSLSTL_OPTIONAL_VARIADIC_LIMIT_P BSLSTL_OPTIONAL_VARIADIC_LIMIT
+#ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q
+#define BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q BSLSTL_OPTIONAL_VARIADIC_LIMIT
 #endif
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 0
 template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                )
 {
     return bsl::optional<TYPE>(bsl::in_place);
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 0
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 1
 template <class TYPE, class ARGS_01>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                             BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01)
@@ -11102,9 +11472,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
     return bsl::optional<TYPE>(bsl::in_place,
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 1
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 2
 template <class TYPE, class ARGS_01,
                       class ARGS_02>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
@@ -11115,9 +11485,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 2
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 3
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03>
@@ -11131,9 +11501,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 3
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 4
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11150,9 +11520,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 4
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 5
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11172,9 +11542,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 5
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 6
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11197,9 +11567,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 6
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 7
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11225,9 +11595,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 7
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 8
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11256,9 +11626,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 8
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 9
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11290,9 +11660,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 9
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 10
 template <class TYPE, class ARGS_01,
                       class ARGS_02,
                       class ARGS_03,
@@ -11327,11 +11697,13 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09),
                               BSLS_COMPILERFEATURES_FORWARD(ARGS_10, args_10));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 10
 
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 0
 template <class TYPE, class INIT_LIST_TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                std::initializer_list<INIT_LIST_TYPE>      il)
@@ -11339,9 +11711,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
     return bsl::optional<TYPE>(
         bsl::in_place, il);
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 0
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 0
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 1
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                std::initializer_list<INIT_LIST_TYPE>      il,
@@ -11350,9 +11722,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
     return bsl::optional<TYPE>(
         bsl::in_place, il, BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 1
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 1
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 2
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
@@ -11364,9 +11736,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
         bsl::in_place, il, BSLS_COMPILERFEATURES_FORWARD(ARGS_01, args_01),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 2
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 2
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 3
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03>
@@ -11381,9 +11753,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_02, args_02),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 3
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 3
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 4
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11401,9 +11773,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_03, args_03),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 4
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 4
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 5
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11424,9 +11796,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_04, args_04),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 5
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 5
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 6
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11450,9 +11822,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_05, args_05),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 6
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 6
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 7
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11479,9 +11851,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_06, args_06),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 7
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 7
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 8
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11511,9 +11883,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_07, args_07),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 8
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 8
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 9
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11546,9 +11918,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_08, args_08),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 9
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 9
 
-#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+#if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 10
 template <class TYPE, class INIT_LIST_TYPE, class ARGS_01,
                                             class ARGS_02,
                                             class ARGS_03,
@@ -11584,7 +11956,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_09, args_09),
                            BSLS_COMPILERFEATURES_FORWARD(ARGS_10, args_10));
 }
-#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_P >= 10
+#endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 10
 
 #endif
 #else
@@ -11598,7 +11970,9 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                BSLS_COMPILERFEATURES_FORWARD(ARGS, args)...);
 }
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
+
 template <class TYPE, class INIT_LIST_TYPE, class... ARGS>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
                                std::initializer_list<INIT_LIST_TYPE>      il,

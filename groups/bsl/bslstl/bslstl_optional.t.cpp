@@ -6406,7 +6406,7 @@ void TestDriver<TYPE>::testCase30()
         TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(constSource));
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     }
-s}
+}
 template <class TYPE>
 void TestDriver<TYPE>::testCase30b()
 {
