@@ -5879,8 +5879,8 @@ bool isConstPtr(const T *)
 
 #define TEST_MAKE_OPTIONAL_DEDUCED(source)                                    \
     {                                                                         \
-        int       expCopy = ValueType::s_copyConstructorInvocations;          \
-        int       expMove = ValueType::s_moveConstructorInvocations;          \
+        int expCopy = ValueType::s_copyConstructorInvocations;                \
+        int expMove = ValueType::s_moveConstructorInvocations;                \
         bsl::optional<ValueType> expObj(bsl::in_place, source);               \
         expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
         expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
@@ -5899,13 +5899,13 @@ bool isConstPtr(const T *)
 
 #define TEST_MAKE_OPTIONAL(expArgs, args)                                     \
     {                                                                         \
-        int              expCopy = ValueType::s_copyConstructorInvocations;   \
-        int              expMove = ValueType::s_moveConstructorInvocations;   \
+        int expCopy = ValueType::s_copyConstructorInvocations;                \
+        int expMove = ValueType::s_moveConstructorInvocations;                \
         bsl::optional<ValueType> expObj expArgs;                              \
-        expCopy = ValueType::s_copyConstructorInvocations - expCopy;          \
-        expMove = ValueType::s_moveConstructorInvocations - expMove;          \
-        int              numCopy = ValueType::s_copyConstructorInvocations;   \
-        int              numMove = ValueType::s_moveConstructorInvocations;   \
+        expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
+        expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
+        int numCopy = ValueType::s_copyConstructorInvocations;                \
+        int numMove = ValueType::s_moveConstructorInvocations;                \
         bsl::optional<ValueType> obj = bsl::make_optional<ValueType> args;    \
         numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
         numMove = ValueType::s_moveConstructorInvocations - numMove;          \
@@ -5917,16 +5917,17 @@ bool isConstPtr(const T *)
         ASSERT(createdAlike(expObj.value(), obj.value()) == true);            \
     }
 
-#define TEST_ALLOC_OPTIONAL_DEDUCED(source)                                   \
+#define TEST_MAKE_OPTIONAL_WITH_ALLOC_DEDUCED(source)                         \
     {                                                                         \
-        int       expCopy = ValueType::s_copyConstructorInvocations;          \
-        int       expMove = ValueType::s_moveConstructorInvocations;          \
+        int expCopy = ValueType::s_copyConstructorInvocations;                \
+        int expMove = ValueType::s_moveConstructorInvocations;                \
         bsl::optional<ValueType> expObj(bsl::in_place, source);               \
         expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
         expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
         int numCopy = ValueType::s_copyConstructorInvocations;                \
         int numMove = ValueType::s_moveConstructorInvocations;                \
-        bsl::optional<ValueType> obj = bsl::alloc_optional(&ta, source);       \
+        bsl::optional<ValueType> obj =                                        \
+            bsl::make_optional(bsl::allocator_arg, &ta, source);              \
         numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
         numMove = ValueType::s_moveConstructorInvocations - numMove;          \
         ASSERTV(expCopy, numCopy, expCopy == numCopy);                        \
@@ -5937,16 +5938,16 @@ bool isConstPtr(const T *)
         ASSERT(checkAllocator(obj.value(), &ta));                             \
     }
 
-#define TEST_ALLOC_OPTIONAL(expArgs, args, alloc)                             \
+#define TEST_MAKE_OPTIONAL_WITH_ALLOC(expArgs, args, alloc)                   \
     {                                                                         \
-        int              expCopy = ValueType::s_copyConstructorInvocations;   \
-        int              expMove = ValueType::s_moveConstructorInvocations;   \
+        int expCopy = ValueType::s_copyConstructorInvocations;                \
+        int expMove = ValueType::s_moveConstructorInvocations;                \
         bsl::optional<ValueType> expObj expArgs;                              \
-        expCopy = ValueType::s_copyConstructorInvocations - expCopy;          \
-        expMove = ValueType::s_moveConstructorInvocations - expMove;          \
-        int              numCopy = ValueType::s_copyConstructorInvocations;   \
-        int              numMove = ValueType::s_moveConstructorInvocations;   \
-        bsl::optional<ValueType> obj = bsl::alloc_optional<ValueType> args;   \
+        expCopy     = ValueType::s_copyConstructorInvocations - expCopy;      \
+        expMove     = ValueType::s_moveConstructorInvocations - expMove;      \
+        int numCopy = ValueType::s_copyConstructorInvocations;                \
+        int numMove = ValueType::s_moveConstructorInvocations;                \
+        bsl::optional<ValueType> obj = bsl::make_optional<ValueType> args;    \
         numCopy = ValueType::s_copyConstructorInvocations - numCopy;          \
         numMove = ValueType::s_moveConstructorInvocations - numMove;          \
         ASSERT(expCopy == numCopy);                                           \
@@ -5955,7 +5956,7 @@ bool isConstPtr(const T *)
         ASSERT(checkAllocator(obj, alloc));                                   \
         ASSERT(checkAllocator(obj.value(), alloc));                           \
         ASSERT(createdAlike(expObj.value(), obj.value()) == true);            \
- }
+    }
 
 template <class TYPE,
           bool USES_BSLMA_ALLOC =
@@ -6064,7 +6065,6 @@ class TestDriver {
         // Array of test values of 'TEST_TYPE'.
 
   public:
-
     static void testCase32();
         // TESTING type deduction
 
@@ -6108,7 +6108,6 @@ class TestDriver {
     static void testCase20_imp();
     static void testCase20();
         // TESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION FROM OPTIONAL
-
 
     template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
     static void testCase19_imp();
@@ -6197,8 +6196,6 @@ class TestDriver {
         // Optional_Data TEST
 };
 
-
-
 template <class TYPE>
 void bslstl_optional_value_type_deduce(const bsl::optional<TYPE>&)
 {
@@ -6240,7 +6237,6 @@ void TestDriver<TYPE>::testCase32()
     bslstl_optional_value_type_deduce(x);
     bslstl_optional_optional_type_deduce(x);
 }
-
 
 template <class OPT_TYPE1, class OPT_TYPE2>
 void testCase31_imp_a()
@@ -6293,8 +6289,8 @@ void testCase31_imp_a()
 template <class OPT_TYPE, class VAL_TYPE>
 void testCase31_imp_b()
 {
-    OPT_TYPE                             X;
-    VAL_TYPE                             Y = 3;
+    OPT_TYPE X;
+    VAL_TYPE Y = 3;
 
     //comparison with a disengaged optional on rhs
     ASSERT(!(X == Y));  // return bool(x) ? *x == v : false;
@@ -6434,47 +6430,34 @@ void testCase31()
     if (veryVerbose)
         printf("\tComparison with an 'optional'.\n");
     {
-        testCase31_imp_a<bsl::optional<int>,
-                                     bsl::optional<MyClass2> >();
+        testCase31_imp_a<bsl::optional<int>, bsl::optional<MyClass2> >();
 
-        testCase31_imp_a<bsl::optional<MyClass2>,
-                                     bsl::optional<int> >();
+        testCase31_imp_a<bsl::optional<MyClass2>, bsl::optional<int> >();
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-        testCase31_imp_a<std::optional<int>,
-                                     bsl::optional<int> >();
+        testCase31_imp_a<std::optional<int>, bsl::optional<int> >();
 
-        testCase31_imp_a<bsl::optional<int>,
-                                     std::optional<int> >();
+        testCase31_imp_a<bsl::optional<int>, std::optional<int> >();
 
-        testCase31_imp_a<std::optional<MyClass2>,
-                                     bsl::optional<MyClass2> >();
+        testCase31_imp_a<std::optional<MyClass2>, bsl::optional<MyClass2> >();
 
-        testCase31_imp_a<bsl::optional<MyClass2>,
-                                     std::optional<MyClass2> >();
+        testCase31_imp_a<bsl::optional<MyClass2>, std::optional<MyClass2> >();
 
-        testCase31_imp_a<std::optional<int>,
-                                     bsl::optional<MyClass2> >();
+        testCase31_imp_a<std::optional<int>, bsl::optional<MyClass2> >();
 
-        testCase31_imp_a<bsl::optional<MyClass2>,
-                                     std::optional<int> >();
+        testCase31_imp_a<bsl::optional<MyClass2>, std::optional<int> >();
 
-        testCase31_imp_a<std::optional<MyClass2>,
-                                     bsl::optional<int> >();
+        testCase31_imp_a<std::optional<MyClass2>, bsl::optional<int> >();
 
-        testCase31_imp_a<bsl::optional<int>,
-                                     std::optional<MyClass2> >();
+        testCase31_imp_a<bsl::optional<int>, std::optional<MyClass2> >();
 #endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-
     }
     if (veryVerbose)
         printf("\tComparison with a non 'optional' .\n");
     {
-        testCase31_imp_b<bsl::optional<int>,
-                                     MyClass2 >();
+        testCase31_imp_b<bsl::optional<int>, MyClass2>();
 
-        testCase31_imp_b<bsl::optional<MyClass2>,
-                                     int >();
+        testCase31_imp_b<bsl::optional<MyClass2>, int>();
     }
     if (veryVerbose)
         printf("\tComparison with a nullopt_t .\n");
@@ -6483,7 +6466,6 @@ void testCase31()
         testCase31_imp_c<MyClass2>();
     }
 }
-
 
 template <class TYPE>
 void TestDriver<TYPE>::testCase30()
@@ -6515,7 +6497,8 @@ void TestDriver<TYPE>::testCase30()
     //
     // Plan:
     //: 1 Call 'alloc_optional' to create an 'optional'.  As an argument to
-    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check
+    // the
     //:   resulting 'optional' object has the expected value. [C-1]
     //: 2 In step 1, when invoking make_value, do not specify the template
     //:   argument. [C-2]
@@ -6545,13 +6528,13 @@ void TestDriver<TYPE>::testCase30()
         ValueType&       source      = sourceBuf.object();
         const ValueType& constSource = sourceBuf.object();
 
-        TEST_ALLOC_OPTIONAL_DEDUCED(source);
-        TEST_ALLOC_OPTIONAL_DEDUCED(constSource);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC_DEDUCED(source);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC_DEDUCED(constSource);
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
         // C++03 MovableRef isn't deduction friendly when it comes to deducing
         // the allocator type
-        TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(source));
-        TEST_ALLOC_OPTIONAL_DEDUCED(MoveUtil::move(constSource));
+        TEST_MAKE_OPTIONAL_WITH_ALLOC_DEDUCED(MoveUtil::move(source));
+        TEST_MAKE_OPTIONAL_WITH_ALLOC_DEDUCED(MoveUtil::move(constSource));
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     }
 }
@@ -6583,7 +6566,8 @@ void TestDriver<TYPE>::testCase30b()
     //
     // Plan:
     //: 1 Call 'alloc_optional' to create an 'optional'.  As an argument to
-    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check the
+    //:   'alloc_optional' use an lvalue of the desired 'value_type'.  Check
+    // the
     //:   resulting 'optional' object has the expected value. [C-1]
     //: 2 Repeat step 1 with different number of arguments and with a
     //:   combination of lvalue and rvalue for each argument. Check that
@@ -6611,289 +6595,371 @@ void TestDriver<TYPE>::testCase30b()
         bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
         bslma::DefaultAllocatorGuard dag(&da);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place), (&oa), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place), (bsl::allocator_arg, &oa), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, MoveUtil::move(VA1)),
-                           (&oa, MoveUtil::move(VA1)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, MoveUtil::move(VA1)),
+            (bsl::allocator_arg, &oa, MoveUtil::move(VA1)),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1), (&oa, VA1), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, VA1), (bsl::allocator_arg, &oa, VA1), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, MoveUtil::move(VA1), VA2),
-                           (&oa, MoveUtil::move(VA1), VA2), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2)),
-                           (&oa, VA1, MoveUtil::move(VA2)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, MoveUtil::move(VA1), VA2),
+            (bsl::allocator_arg, &oa, MoveUtil::move(VA1), VA2),
+            &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, VA1, MoveUtil::move(VA2)),
+            (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2)),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL(
-               (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
-               (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)),
+            (bsl::allocator_arg,
+             &oa,
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3)),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, VA1, MoveUtil::move(VA2), VA3),
-                           (&oa, VA1, MoveUtil::move(VA2), VA3), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, VA1, MoveUtil::move(VA2), VA3),
+            (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2), VA3),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL(
-          (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
-          (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4), &oa);
-        TEST_ALLOC_OPTIONAL(
-          (bsl::in_place, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
-          (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5)),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL(
-            (bsl::in_place,
-             VA1,
-             MoveUtil::move(VA2),
-             VA3,
-             MoveUtil::move(VA4),
-             VA5),
-            (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6)),
-                           (&oa, VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7)),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7),
-                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7)),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8)),
-                           (&oa, VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9)),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9),
-                           (&oa, VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9)),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9),
-                            VA10),
-                           (&oa, MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9),
-                            VA10), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9,
-                            MoveUtil::move(VA10)),
-                           (&oa, VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9,
-                            MoveUtil::move(VA10)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9),
+                                       VA10),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9),
+                                       VA10),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9,
+                                       MoveUtil::move(VA10)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9,
+                                       MoveUtil::move(VA10)),
+                                      &oa);
         /*
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
-                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                   (bsl::allocator_arg, &oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11),
-                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                   (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
-                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                   (bsl::allocator_arg, &oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
-                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                   (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13)),
-                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                   (bsl::allocator_arg, &oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
                     VA13),
-                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                   (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
                     VA13), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13), VA14),
-                   (&oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
+                   (bsl::allocator_arg, &oa, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13), VA14), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
                     VA13, MoveUtil::move(VA14)),
-                   (&oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
+                   (bsl::allocator_arg, &oa, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
                     VA13, MoveUtil::move(VA14)), &oa);
     */
     }
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)   &&     \
-(!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900)) 
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
     if (veryVerbose)
         printf("\tUsing 'initializer_list' argument.\n");
 
@@ -6902,268 +6968,348 @@ void TestDriver<TYPE>::testCase30b()
         bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
         bslma::DefaultAllocatorGuard dag(&da);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}), (&oa, {1, 2, 3}), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1, 2, 3}),
+                                      (bsl::allocator_arg, &oa, {1, 2, 3}),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1)),
-                           (&oa, {1, 2, 3}, MoveUtil::move(VA1)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1)),
+            (bsl::allocator_arg, &oa, {1, 2, 3}, MoveUtil::move(VA1)),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1, 2, 3}, VA1), (&oa, {1, 2, 3}, VA1), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, {1, 2, 3}, VA1),
+            (bsl::allocator_arg, &oa, {1, 2, 3}, VA1),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL(
-                         (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1), VA2),
-                         (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2), &oa);
-        TEST_ALLOC_OPTIONAL(
-                         (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
-                         (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1), VA2),
+            (bsl::allocator_arg, &oa, {1, 2, 3}, MoveUtil::move(VA1), VA2),
+            &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
+            (bsl::allocator_arg, &oa, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL(
-            (bsl::in_place,
-             {1, 2, 3},
-             MoveUtil::move(VA1),
-             VA2,
-             MoveUtil::move(VA3)),
-            (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL(
-                    (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3),
-                    (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3), &oa);
-
-        TEST_ALLOC_OPTIONAL(
-            (bsl::in_place,
-             {1, 2, 3},
-             MoveUtil::move(VA1),
-             VA2,
-             MoveUtil::move(VA3),
-             VA4),
-            (&oa, {1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4), &oa);
-        TEST_ALLOC_OPTIONAL(
-            (bsl::in_place,
+        TEST_MAKE_OPTIONAL_WITH_ALLOC(
+            (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3),
+            (bsl::allocator_arg,
+             &oa,
              {1, 2, 3},
              VA1,
              MoveUtil::move(VA2),
-             VA3,
-             MoveUtil::move(VA4)),
-            (&oa, {1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)), &oa);
+             VA3),
+            &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5)),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5),
-                           (&oa, {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6)),
-                           (&oa, {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7)),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
-                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7),
-                   (&oa, {1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8)),
-                           (&oa, {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7)),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9)),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9),
-                           (&oa, {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8)),
+                                      &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9),
-                            VA10),
-                           (&oa, {1, 2, 3},
-                            MoveUtil::move(VA1),
-                            VA2,
-                            MoveUtil::move(VA3),
-                            VA4,
-                            MoveUtil::move(VA5),
-                            VA6,
-                            MoveUtil::move(VA7),
-                            VA8,
-                            MoveUtil::move(VA9),
-                            VA10), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place,
-                            {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9,
-                            MoveUtil::move(VA10)),
-                           (&oa, {1, 2, 3},
-                            VA1,
-                            MoveUtil::move(VA2),
-                            VA3,
-                            MoveUtil::move(VA4),
-                            VA5,
-                            MoveUtil::move(VA6),
-                            VA7,
-                            MoveUtil::move(VA8),
-                            VA9,
-                            MoveUtil::move(VA10)), &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9)),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9),
+                                      &oa);
+
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9),
+                                       VA10),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       MoveUtil::move(VA1),
+                                       VA2,
+                                       MoveUtil::move(VA3),
+                                       VA4,
+                                       MoveUtil::move(VA5),
+                                       VA6,
+                                       MoveUtil::move(VA7),
+                                       VA8,
+                                       MoveUtil::move(VA9),
+                                       VA10),
+                                      &oa);
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9,
+                                       MoveUtil::move(VA10)),
+                                      (bsl::allocator_arg,
+                                       &oa,
+                                       {1, 2, 3},
+                                       VA1,
+                                       MoveUtil::move(VA2),
+                                       VA3,
+                                       MoveUtil::move(VA4),
+                                       VA5,
+                                       MoveUtil::move(VA6),
+                                       VA7,
+                                       MoveUtil::move(VA8),
+                                       VA9,
+                                       MoveUtil::move(VA10)),
+                                      &oa);
         /*
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)),
                    ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11),
@@ -7171,14 +7317,14 @@ void TestDriver<TYPE>::testCase30b()
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12),
                    ({1,2,3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)),
@@ -7186,7 +7332,7 @@ void TestDriver<TYPE>::testCase30b()
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12)), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
@@ -7195,7 +7341,7 @@ void TestDriver<TYPE>::testCase30b()
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13)), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
@@ -7205,7 +7351,7 @@ void TestDriver<TYPE>::testCase30b()
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
                     VA13), &oa);
 
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4,
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
@@ -7214,7 +7360,7 @@ void TestDriver<TYPE>::testCase30b()
                     MoveUtil::move(VA5), VA6, MoveUtil::move(VA7), VA8,
                     MoveUtil::move(VA9), VA10, MoveUtil::move(VA11), VA12,
                     MoveUtil::move(VA13), VA14), &oa);
-        TEST_ALLOC_OPTIONAL((bsl::in_place, {1,2,3},
+        TEST_MAKE_OPTIONAL_WITH_ALLOC((bsl::in_place, {1,2,3},
                     VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
                     VA5, MoveUtil::move(VA6), VA7, MoveUtil::move(VA8),
                     VA9, MoveUtil::move(VA10), VA11, MoveUtil::move(VA12),
@@ -7439,10 +7585,20 @@ void TestDriver<TYPE>::testCase29b()
                             VA6,
                             MoveUtil::move(VA7)));
         TEST_MAKE_OPTIONAL((bsl::in_place,
-                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7),
-                   (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7));
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7),
+                           (VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7));
 
         TEST_MAKE_OPTIONAL((bsl::in_place,
                             MoveUtil::move(VA1),
@@ -7630,8 +7786,8 @@ void TestDriver<TYPE>::testCase29b()
                     VA13, MoveUtil::move(VA14)));
     */
     }
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)  && \
-(!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900)) 
+#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS) &&        \
+    (!defined(BSLS_PLATFORM_CMP_MSVC) || (BSLS_PLATFORM_CMP_VERSION >= 1900))
 
     if (veryVerbose)
         printf("\tUsing 'initializer_list' argument.\n");
@@ -7759,11 +7915,23 @@ void TestDriver<TYPE>::testCase29b()
                             MoveUtil::move(VA5),
                             VA6,
                             MoveUtil::move(VA7)));
-        TEST_MAKE_OPTIONAL((bsl::in_place, {1,2,3},
-                    VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7),
-                   ({1,2,3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4),
-                    VA5, MoveUtil::move(VA6), VA7));
+        TEST_MAKE_OPTIONAL((bsl::in_place,
+                            {1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7),
+                           ({1, 2, 3},
+                            VA1,
+                            MoveUtil::move(VA2),
+                            VA3,
+                            MoveUtil::move(VA4),
+                            VA5,
+                            MoveUtil::move(VA6),
+                            VA7));
 
         TEST_MAKE_OPTIONAL((bsl::in_place,
                             {1, 2, 3},
@@ -7982,7 +8150,8 @@ void TestDriver<TYPE>::testCase28()
     //: 4 That 'BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>' and
     //:   'BloombergLP::bslmf::UsesAllocatorArgT<optional<TYPE>>' are 'true'
     //:   if 'TYPE' is an allocator aware type.
-    //: 5 That 'optional<TYPE>' is trivially destructible if 'TYPE' is trivially
+    //: 5 That 'optional<TYPE>' is trivially destructible if 'TYPE' is
+    // trivially
     //:   destructible
     //
     // Plan:
@@ -8008,19 +8177,20 @@ void TestDriver<TYPE>::testCase28()
 
     {
         ASSERT((bsl::is_same<typename Obj::value_type, ValueType>::value));
-        ASSERT((bsl::is_same<typename ObjC::value_type, const ValueType>::value));
+        ASSERT(
+            (bsl::is_same<typename ObjC::value_type, const ValueType>::value));
 
         ASSERT(BloombergLP::bslma::UsesBslmaAllocator<Obj>::value ==
-            BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value  );
+               BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
         ASSERT(BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value ==
-            BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
+               BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
         ASSERT(std::is_trivially_destructible<Obj>::value ==
-            std::is_trivially_destructible<ValueType>::value);
+               std::is_trivially_destructible<ValueType>::value);
 #else
         ASSERT(bsl::is_trivially_copyable<Obj>::value ==
-            bsl::is_trivially_copyable<ValueType>::value);
+               bsl::is_trivially_copyable<ValueType>::value);
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
     }
 }
@@ -8096,16 +8266,15 @@ void TestDriver<TEST_TYPE>::testCase27()
     if (veryVerbose)
         printf("\tUsing non allocator aware 'value_type'.\n");
     {
-        typedef bsl::optional<Obj>      OPT_TYPE;
+        typedef bsl::optional<Obj> OPT_TYPE;
 
         ValueType val = ValueType();
-        Obj source;
+        Obj       source;
         OPT_TYPE  destination;
         destination = source;
         ASSERT(destination.has_value());
         ASSERT(!destination.value().has_value());
         ASSERT(!source.has_value());
-
 
         destination.reset();
         source.emplace(val);
@@ -8113,7 +8282,6 @@ void TestDriver<TEST_TYPE>::testCase27()
         ASSERT(destination.has_value());
         ASSERT(destination.value().has_value());
         ASSERT(destination.value().value() == source.value());
-    
 
         CObj constSource;
         destination.reset();
@@ -8146,7 +8314,6 @@ void TestDriver<TEST_TYPE>::testCase27()
         ASSERT(!source.has_value());
         destination = bsl::nullopt;
         ASSERT(!destination.has_value());
-
     }
 }
 
@@ -8212,11 +8379,11 @@ void TestDriver<TEST_TYPE>::testCase26()
 
     bslma::DefaultAllocatorGuard dag(&da);
     if (veryVerbose)
-            printf("\tUsing 'ValueType' argument.\n");
+        printf("\tUsing 'ValueType' argument.\n");
     {
         ValWithAllocator srcBuffer(&da);
-        ValueType&  source = srcBuffer.object();
-        const ValueType&  csource = srcBuffer.object();
+        ValueType&       source  = srcBuffer.object();
+        const ValueType& csource = srcBuffer.object();
 
         TEST_IN_PLACE_CONSTRUCT(
             (bsl::allocator_arg, &oa, bsl::in_place, source),
@@ -8234,21 +8401,20 @@ void TestDriver<TEST_TYPE>::testCase26()
             &oa);
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // C++03 MovableRef isn't const friendly which will make this
-            // test fail
+        // C++03 MovableRef isn't const friendly which will make this test fail
         TEST_IN_PLACE_CONSTRUCT(
             (bsl::allocator_arg, &oa, bsl::in_place, MoveUtil::move(csource)),
             (MoveUtil::move(csource), &ta),
             &oa);
-#endif // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     }
 
     if (veryVerbose)
-            printf("\tUsing variadic arguments.\n");
+        printf("\tUsing variadic arguments.\n");
 
     {
         TEST_IN_PLACE_CONSTRUCT(
-          (bsl::allocator_arg, &oa, bsl::in_place), (&ta), &oa);
+            (bsl::allocator_arg, &oa, bsl::in_place), (&ta), &oa);
 
         TEST_IN_PLACE_CONSTRUCT(
             (bsl::allocator_arg, &oa, bsl::in_place, MoveUtil::move(VA1)),
@@ -8479,10 +8645,10 @@ void TestDriver<TEST_TYPE>::testCase26()
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
     }
     if (veryVerbose)
-            printf("\tUsing 'initializer_list' argument.\n");
+        printf("\tUsing 'initializer_list' argument.\n");
 
     {
-          TEST_IN_PLACE_CONSTRUCT(
+        TEST_IN_PLACE_CONSTRUCT(
             (bsl::allocator_arg, &oa, bsl::in_place, {1, 2, 3}),
             (std::initializer_list<int>{1, 2, 3}, &ta),
             &oa);
@@ -8500,24 +8666,28 @@ void TestDriver<TEST_TYPE>::testCase26()
             (std::initializer_list<int>{1, 2, 3}, VA1, &ta),
             &oa);
 
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::allocator_arg,
-             &oa,
-             bsl::in_place,
-             {1, 2, 3},
-             MoveUtil::move(VA1),
-             VA2),
-            (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), VA2, &ta),
-            &oa);
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::allocator_arg,
-             &oa,
-             bsl::in_place,
-             {1, 2, 3},
-             VA1,
-             MoveUtil::move(VA2)),
-            (std::initializer_list<int>{1, 2, 3}, VA1, MoveUtil::move(VA2), &ta),
-            &oa);
+        TEST_IN_PLACE_CONSTRUCT((bsl::allocator_arg,
+                                 &oa,
+                                 bsl::in_place,
+                                 {1, 2, 3},
+                                 MoveUtil::move(VA1),
+                                 VA2),
+                                (std::initializer_list<int>{1, 2, 3},
+                                 MoveUtil::move(VA1),
+                                 VA2,
+                                 &ta),
+                                &oa);
+        TEST_IN_PLACE_CONSTRUCT((bsl::allocator_arg,
+                                 &oa,
+                                 bsl::in_place,
+                                 {1, 2, 3},
+                                 VA1,
+                                 MoveUtil::move(VA2)),
+                                (std::initializer_list<int>{1, 2, 3},
+                                 VA1,
+                                 MoveUtil::move(VA2),
+                                 &ta),
+                                &oa);
 
         TEST_IN_PLACE_CONSTRUCT((bsl::allocator_arg,
                                  &oa,
@@ -8756,7 +8926,7 @@ void TestDriver<TEST_TYPE>::testCase26()
                     VA13,
                    &ta), &oa);
     */
-    #endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+#endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
     }
 }
 
@@ -8820,46 +8990,37 @@ void TestDriver<TEST_TYPE>::testCase25()
     bslma::DefaultAllocatorGuard dag(&da);
 
     if (veryVerbose)
-            printf("\tUsing 'ValueType' argument.\n");
+        printf("\tUsing 'ValueType' argument.\n");
     {
         ValWithAllocator srcBuffer(&oa);
-        ValueType&  source = srcBuffer.object();
-        const ValueType&  csource = srcBuffer.object();
+        ValueType&       source  = srcBuffer.object();
+        const ValueType& csource = srcBuffer.object();
 
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, source),
-            (source, &oa),
-            &da);
+        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, source), (source, &oa), &da);
 
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, csource),
-            (csource, &oa),
-            &da);
+        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, csource), (csource, &oa), &da);
 
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, MoveUtil::move(source)),
-            (MoveUtil::move(source), &oa),
-            &da);
+        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, MoveUtil::move(source)),
+                                (MoveUtil::move(source), &oa),
+                                &da);
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // C++03 MovableRef isn't const friendly which will make this
-            // test fail
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, MoveUtil::move(csource)),
-            (MoveUtil::move(csource), &oa),
-            &da);
-#endif // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        // C++03 MovableRef isn't const friendly which will make this test fail
+        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, MoveUtil::move(csource)),
+                                (MoveUtil::move(csource), &oa),
+                                &da);
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     }
 
     if (veryVerbose)
-            printf("\tUsing variadic arguments.\n");
+        printf("\tUsing variadic arguments.\n");
 
     {
-
         TEST_IN_PLACE_CONSTRUCT((bsl::in_place), (&oa), &da);
 
-        TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, MoveUtil::move(VA1)), (MoveUtil::move(VA1), &oa), &da);
+        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, MoveUtil::move(VA1)),
+                                (MoveUtil::move(VA1), &oa),
+                                &da);
 
         TEST_IN_PLACE_CONSTRUCT((bsl::in_place, VA1), (VA1, &oa), &da);
 
@@ -8880,11 +9041,19 @@ void TestDriver<TEST_TYPE>::testCase25()
                                 &da);
 
         TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4),
+            (bsl::in_place,
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3),
+             VA4),
             (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4, &oa),
             &da);
         TEST_IN_PLACE_CONSTRUCT(
-            (bsl::in_place, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)),
+            (bsl::in_place,
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4)),
             (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), &oa),
             &da);
 
@@ -9064,7 +9233,7 @@ void TestDriver<TEST_TYPE>::testCase25()
     }
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
     if (veryVerbose)
-            printf("\tUsing 'initializer_list' argument.\n");
+        printf("\tUsing 'initializer_list' argument.\n");
 
     {
         TEST_IN_PLACE_CONSTRUCT((bsl::in_place, {1, 2, 3}),
@@ -9076,17 +9245,24 @@ void TestDriver<TEST_TYPE>::testCase25()
             (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), &oa),
             &da);
 
-        TEST_IN_PLACE_CONSTRUCT((bsl::in_place, {1, 2, 3}, VA1),
-                                (std::initializer_list<int>{1, 2, 3}, VA1, &oa),
-                                &da);
+        TEST_IN_PLACE_CONSTRUCT(
+            (bsl::in_place, {1, 2, 3}, VA1),
+            (std::initializer_list<int>{1, 2, 3}, VA1, &oa),
+            &da);
 
         TEST_IN_PLACE_CONSTRUCT(
             (bsl::in_place, {1, 2, 3}, MoveUtil::move(VA1), VA2),
-            (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), VA2, &oa),
+            (std::initializer_list<int>{1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             &oa),
             &da);
         TEST_IN_PLACE_CONSTRUCT(
             (bsl::in_place, {1, 2, 3}, VA1, MoveUtil::move(VA2)),
-            (std::initializer_list<int>{1, 2, 3}, VA1, MoveUtil::move(VA2), &oa),
+            (std::initializer_list<int>{1, 2, 3},
+             VA1,
+             MoveUtil::move(VA2),
+             &oa),
             &da);
 
         TEST_IN_PLACE_CONSTRUCT((bsl::in_place,
@@ -9322,7 +9498,6 @@ void TestDriver<TEST_TYPE>::testCase25()
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 }
 
-
 template <class TEST_TYPE, class OPT_TYPE1, class OPT_TYPE2>
 void testCase24_imp()
 {
@@ -9439,7 +9614,7 @@ void TestDriver<TEST_TYPE>::testCase24()
 {
     testCase24_imp<TEST_TYPE,
                    bsl::optional<TEST_TYPE>,
-                   bsl::optional<TEST_TYPE> > ();
+                   bsl::optional<TEST_TYPE> >();
 }
 
 template <class TEST_TYPE>
@@ -9881,8 +10056,8 @@ void TestDriver<TYPE>::testCase19_imp()
             source.emplace(3);
             TEST_COPY_FROM_ENGAGED_OPT(source);
             TEST_COPY_FROM_ENGAGED_OPT(csource);
-            // extracted to testCase19_imp_libgccbug
-            // TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
+                // extracted to testCase19_imp_libgccbug
+                // TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
             // we call copy macro here because a move from a 'const optional'
             // should trigger a copy constructor
@@ -9906,8 +10081,8 @@ void TestDriver<TYPE>::testCase19_imp()
             source.emplace(3);
             TEST_COPY_FROM_ENGAGED_OPT(source);
             TEST_COPY_FROM_ENGAGED_OPT(csource);
-            // extracted to testCase19_imp_libgccbug
-            //TEST_MOVE_FROM_ENGAGED_OPT(source, false);
+                // extracted to testCase19_imp_libgccbug
+                //TEST_MOVE_FROM_ENGAGED_OPT(source, false);
             source.emplace(3);
             // we call copy macro here because a move from a 'const optional'
             // should trigger a copy constructor
@@ -9930,7 +10105,7 @@ void TestDriver<TYPE>::testCase19_imp_libgccbug()
             typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
             typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
             SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
+            SRC_OPT_TYPE& source = sourceBuffer.object();
 
             source.emplace(3);
             TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
@@ -9940,8 +10115,7 @@ void TestDriver<TYPE>::testCase19_imp_libgccbug()
             typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
             typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
             SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
-
+            SRC_OPT_TYPE& source = sourceBuffer.object();
 
             source.emplace(3);
             TEST_MOVE_FROM_ENGAGED_OPT(source, false);
@@ -9950,10 +10124,10 @@ void TestDriver<TYPE>::testCase19_imp_libgccbug()
     }
 }
 
-#if (BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY &&  \
-     BSLS_LIBRARYFEATURES_STDCPP_GNU && \
-     (!defined(_GLIBCXX_RELEASE) || (defined(_GLIBCXX_RELEASE) &&\
-                                     _GLIBCXX_RELEASE<8)))
+#if (BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY &&                       \
+     BSLS_LIBRARYFEATURES_STDCPP_GNU &&                                       \
+     (!defined(_GLIBCXX_RELEASE) ||                                           \
+      (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 8)))
 #define STD_OPTIONAL_LIBCPP_BUG 1
 #endif
 
@@ -10159,7 +10333,7 @@ void TestDriver<TYPE>::testCase17_imp()
         SourceWithAllocator                        X(&da);
         OPT_TYPE&                                  source  = X.object();
         const OPT_TYPE&                            cSource = X.object();
-        
+
         TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(source);
         TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(source);
         TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(source));
@@ -10216,7 +10390,6 @@ void TestDriver<TYPE>::testCase17()
     testCase17_imp<std::optional<TYPE> >();
     testCase17_imp<std::optional<int> >();
 #endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-
 }
 void testCase16()
 {
@@ -11274,9 +11447,9 @@ void TestDriver<TYPE>::testCase12()
     }
 
     {
-        CObj  cObjX(ValueType(8));
-        ObjC  objcX(ValueType(9));
-        
+        CObj cObjX(ValueType(8));
+        ObjC objcX(ValueType(9));
+
         ASSERT((*(Obj(ValueType(4)))).value() == 4);
         ASSERT((*(CObj(ValueType(8)))).value() == 8);
         ASSERT((*(ObjC(ValueType(9)))).value() == 9);
