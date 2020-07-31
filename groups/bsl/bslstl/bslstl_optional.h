@@ -3124,12 +3124,12 @@ class optional<TYPE, false> : public std::optional<TYPE> {
   public:
     using optionalBase::optionalBase;
 
-    optional(const optional& original);  // IMPLICIT
+    optional(const optional& original) = default ;  // IMPLICIT
         // If 'original' contains a value, initialize the 'value_type' object using
         // '*original'. Otherwise, create a disengaged 'optional'.  Needed because
         // we declare a move assignment operator.
 
-    optional(optional&& original);  // IMPLICIT
+    optional(optional&& original) = default;  // IMPLICIT
         // If 'original' contains a value, initialize the 'value_type' object by
         // move construction from '*original'. Otherwise, create a disengaged
         // 'optional'. 'original' is left in a valid, but unspecified state.
@@ -8900,19 +8900,6 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator bool() const BSLS_KEYWORD_NOEXCEPT
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
-template <class TYPE>
-inline
-optional<TYPE, false>::optional(const optional& original)
-: optionalBase(static_cast<const optionalBase&>(original))
-{
-}
-
-template <class TYPE>
-inline
-optional<TYPE, false>::optional(optional&& original)
-: optionalBase(static_cast<optionalBase&&>(original))
-{
-}
 
 template <class TYPE>
 inline
