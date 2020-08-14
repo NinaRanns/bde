@@ -1578,13 +1578,13 @@ class optional {
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_B >= 0
     template <class INIT_LIST_TYPE>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>);
+                      std::initializer_list<INIT_LIST_TYPE>      il);
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_B >= 0
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_B >= 1
     template <class INIT_LIST_TYPE, class ARGS_01>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_B >= 1
 
@@ -1592,7 +1592,7 @@ class optional {
     template <class INIT_LIST_TYPE, class ARGS_01,
                                     class ARGS_02>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_B >= 2
@@ -1602,7 +1602,7 @@ class optional {
                                     class ARGS_02,
                                     class ARGS_03>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03));
@@ -1614,7 +1614,7 @@ class optional {
                                     class ARGS_03,
                                     class ARGS_04>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1628,7 +1628,7 @@ class optional {
                                     class ARGS_04,
                                     class ARGS_05>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1644,7 +1644,7 @@ class optional {
                                     class ARGS_05,
                                     class ARGS_06>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1662,7 +1662,7 @@ class optional {
                                     class ARGS_06,
                                     class ARGS_07>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1682,7 +1682,7 @@ class optional {
                                     class ARGS_07,
                                     class ARGS_08>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1704,7 +1704,7 @@ class optional {
                                     class ARGS_08,
                                     class ARGS_09>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1728,7 +1728,7 @@ class optional {
                                     class ARGS_09,
                                     class ARGS_10>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -1751,7 +1751,7 @@ class optional {
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
 #endif
 // }}} END GENERATED CODE
@@ -2485,19 +2485,19 @@ class optional {
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 0
     template <class INIT_LIST_TYPE>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>);
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il);
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 0
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 1
     template <class INIT_LIST_TYPE, class ARGS_01>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 1
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 2
     template <class INIT_LIST_TYPE, class ARGS_01,
                                     class ARGS_02>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_D >= 2
@@ -2506,7 +2506,7 @@ class optional {
     template <class INIT_LIST_TYPE, class ARGS_01,
                                     class ARGS_02,
                                     class ARGS_03>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03));
@@ -2517,7 +2517,7 @@ class optional {
                                     class ARGS_02,
                                     class ARGS_03,
                                     class ARGS_04>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2530,7 +2530,7 @@ class optional {
                                     class ARGS_03,
                                     class ARGS_04,
                                     class ARGS_05>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2545,7 +2545,7 @@ class optional {
                                     class ARGS_04,
                                     class ARGS_05,
                                     class ARGS_06>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2562,7 +2562,7 @@ class optional {
                                     class ARGS_05,
                                     class ARGS_06,
                                     class ARGS_07>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2581,7 +2581,7 @@ class optional {
                                     class ARGS_06,
                                     class ARGS_07,
                                     class ARGS_08>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2602,7 +2602,7 @@ class optional {
                                     class ARGS_07,
                                     class ARGS_08,
                                     class ARGS_09>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2625,7 +2625,7 @@ class optional {
                                     class ARGS_08,
                                     class ARGS_09,
                                     class ARGS_10>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -2648,7 +2648,7 @@ class optional {
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
 
 #endif
@@ -3791,19 +3791,19 @@ class optional<TYPE, false> {
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 0
     template <class INIT_LIST_TYPE>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>);
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il);
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 0
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 1
     template <class INIT_LIST_TYPE, class ARGS_01>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 1
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 2
     template <class INIT_LIST_TYPE, class ARGS_01,
                                     class ARGS_02>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_F >= 2
@@ -3812,7 +3812,7 @@ class optional<TYPE, false> {
     template <class INIT_LIST_TYPE, class ARGS_01,
                                     class ARGS_02,
                                     class ARGS_03>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03));
@@ -3823,7 +3823,7 @@ class optional<TYPE, false> {
                                     class ARGS_02,
                                     class ARGS_03,
                                     class ARGS_04>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3836,7 +3836,7 @@ class optional<TYPE, false> {
                                     class ARGS_03,
                                     class ARGS_04,
                                     class ARGS_05>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3851,7 +3851,7 @@ class optional<TYPE, false> {
                                     class ARGS_04,
                                     class ARGS_05,
                                     class ARGS_06>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3868,7 +3868,7 @@ class optional<TYPE, false> {
                                     class ARGS_05,
                                     class ARGS_06,
                                     class ARGS_07>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3887,7 +3887,7 @@ class optional<TYPE, false> {
                                     class ARGS_06,
                                     class ARGS_07,
                                     class ARGS_08>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3908,7 +3908,7 @@ class optional<TYPE, false> {
                                     class ARGS_07,
                                     class ARGS_08,
                                     class ARGS_09>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3931,7 +3931,7 @@ class optional<TYPE, false> {
                                     class ARGS_08,
                                     class ARGS_09,
                                     class ARGS_10>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_03),
@@ -3954,7 +3954,7 @@ class optional<TYPE, false> {
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
 
 #endif
@@ -4194,15 +4194,16 @@ swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
     // Efficiently exchange the values of the specified 'lhs' and 'rhs'
     // objects.  This method provides the no-throw exception-safety guarantee
     // if the template parameter 'TYPE' provides that guarantee and the result
-    // of the 'hasValue' method for 'lhs' and 'rhs' is the same.  The behavior
-    // is undefined unless both objects were created with the same allocator,
-    // if any.
+    // of the 'hasValue' method for 'lhs' and 'rhs' is the same.
 
 template <class TYPE>
 typename
 bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
 swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
-
+    // Efficiently exchange the values of the specified 'lhs' and 'rhs'
+    // objects.  This method provides the no-throw exception-safety guarantee
+    // if the template parameter 'TYPE' provides that guarantee and the result
+    // of the 'hasValue' method for 'lhs' and 'rhs' is the same.
 
 
 // HASH SPECIALIZATIONS
@@ -4419,15 +4420,28 @@ bool operator>=(const LHS_TYPE& lhs, const bsl::optional<RHS_TYPE>& rhs);
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 template <class TYPE>
-void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
+typename bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
 template <class TYPE>
-void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+typename bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+template <class TYPE>
+typename bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
+template <class TYPE>
+typename bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
     // Efficiently exchange the values of the specified 'lhs' and 'rhs'
     // objects.  This method provides the no-throw exception-safety guarantee
     // if the template parameter 'TYPE' provides that guarantee and the result
-    // of the 'hasValue' method for 'lhs' and 'rhs' is the same.  The behavior
-    // is undefined unless both objects were created with the same allocator,
-    // if any.
+    // of the 'hasValue' method for 'lhs' and 'rhs' is the same.
+
+
+
 
 // comparison with optional
 template <class LHS_TYPE, class RHS_TYPE>
@@ -10976,32 +10990,33 @@ void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input)
 
 template <class TYPE>
 inline
-typename
-bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
-swap(bsl::optional<TYPE>& lhs, optional<TYPE>& rhs)
+typename bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs)
 {
-    if (lhs.d_allocator_p == rhs.d_allocator_p) {
+    if (lhs.get_allocator() == rhs.get_allocator()) {
         lhs.swap(rhs);
 
         return;                                                       // RETURN
     }
 
-    bsl::optional<TYPE> futureA(rhs, lhs.d_allocator_p);
-    bsl::optional<TYPE> futureB(lhs, rhs.d_allocator_p);
+    bsl::optional<TYPE> futureLhs(
+        bsl::allocator_arg, lhs.get_allocator(), rhs);
+    bsl::optional<TYPE> futureRhs(
+        bsl::allocator_arg, rhs.get_allocator(), lhs);
 
-    futureA.swap(lhs);
-    futureB.swap(rhs);
+    futureLhs.swap(lhs);
+    futureRhs.swap(rhs);
 }
 
 template <class TYPE>
 inline
-typename
-bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
-swap(bsl::optional<TYPE>& lhs, optional<TYPE>& rhs)
+typename bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs)
 {
     lhs.swap(rhs);
 }
-
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline
@@ -12559,19 +12574,62 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 #endif
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-
-// in presence of std::optional, we need to provide better match relation
-// operators, or some comparisons may be ambiguous.
 template <class TYPE>
 inline
-void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs)
+typename bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs)
+{
+    if (lhs.get_allocator() == rhs.get_allocator()) {
+        lhs.swap(rhs);
+
+        return;                                                       // RETURN
+    }
+
+    bsl::optional<TYPE> futureLhs(
+        bsl::allocator_arg, lhs.get_allocator(), rhs);
+    bsl::optional<TYPE> futureRhs(
+        bsl::allocator_arg, rhs.get_allocator(), lhs);
+
+    futureLhs.swap(lhs);
+    futureRhs.swap(rhs);
+}
+
+template <class TYPE>
+inline
+typename bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs)
+{
+    if (lhs.get_allocator() == rhs.get_allocator()) {
+        lhs.swap(rhs);
+
+        return;                                                       // RETURN
+    }
+
+    bsl::optional<TYPE> futureLhs(
+        bsl::allocator_arg, lhs.get_allocator(), rhs);
+    bsl::optional<TYPE> futureRhs(
+        bsl::allocator_arg, rhs.get_allocator(), lhs);
+
+    futureLhs.swap(lhs);
+    futureRhs.swap(rhs);
+}
+
+template <class TYPE>
+inline
+typename bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs)
 {
     lhs.swap(rhs);
 }
 
 template <class TYPE>
 inline
-void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs)
+typename bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value,
+                        void>::type
+swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs)
 {
     lhs.swap(rhs);
 }

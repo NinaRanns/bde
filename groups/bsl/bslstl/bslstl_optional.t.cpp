@@ -12430,7 +12430,7 @@ void testCase2_Imp()
     ASSERT(X.hasValue());
     ASSERT(X.value() == val);
     ASSERT(checkAllocator(X, &da));
-    ASSERT(isConstPtr(&val) == isConstPtr(&X.value()));
+    ASSERT(isConstPtr(BSLS_UTIL_ADDRESSOF(val)) == isConstPtr(BSLS_UTIL_ADDRESSOF(X.value())));
 
     X.reset();
     ASSERT(!X.hasValue());
