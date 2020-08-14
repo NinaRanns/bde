@@ -1,5 +1,7 @@
-// bslstl_badoptionalaccess.t.cpp                                            -*-C++-*-
+// bslstl_badoptionalaccess.t.cpp                                     -*-C++-*-
 #include <bslstl_badoptionalaccess.h>
+
+#include <bslmf_issame.h>
 
 #include <bsls_asserttest.h>
 #include <bsls_bsltestutil.h>
@@ -15,13 +17,26 @@ using namespace BloombergLP;
 // ----------------------------------------------------------------------------
 //                             Overview
 //                             --------
+// The type under test is 'bsl::bad_optional_access', an exception type whose
+// interface and contract is dictated by the C++ standard.  If
+// 'std::bad_optional_access' exception is available, we need to check that
+// 'bsl::bad_optional_access' is a typedef to the standard's exception type.
+// If 'std::bad_optional_access' exception isn't available, we need to check
+// that 'bsl::bad_optional_access' satisfies the interface and contract of
+// 'std::bad_optional_access'.
 //
 // ----------------------------------------------------------------------------
-// [  ] ...
+// creators:
+// [ 3] bad_optional_access();
+//
+// accessors:
+// [ 3] const char *what() const;
+//
+// typedef:
+// [ 4] typedef bsl::bad_optional_access
 // ----------------------------------------------------------------------------
 // [ 1] BREATHING TEST
-// [  ] USAGE EXAMPLE
-// [ 2] CONCERN: Methods qualifed 'noexcept' in standard are so.
+// [ 2] CONCERN: Methods qualified 'noexcept' in standard are so.
 
 // ============================================================================
 //                     STANDARD BSL ASSERT TEST FUNCTION
@@ -30,7 +45,7 @@ using namespace BloombergLP;
 namespace {
 
 int testStatus = 0;
-#ifndef __cpp_lib_optional
+
 void aSsErT(bool condition, const char *message, int line)
 {
     if (condition) {
@@ -41,7 +56,7 @@ void aSsErT(bool condition, const char *message, int line)
         }
     }
 }
-#endif
+
 }  // close unnamed namespace
 
 // ============================================================================
@@ -103,44 +118,109 @@ int main(int argc, char *argv[])
     printf("TEST " __FILE__ " CASE %d\n", test);
 
     switch (test) { case 0:
-     case 2: {
+#ifdef BDE_BUILD_TARGET_EXC
+      case 4: {
+        // --------------------------------------------------------------------
+        // 'bsl::bad_optional_access' TYPEDEF
+        //
+        // Concerns:
+        //: 1 The 'bsl::bad_optional_access' is a typedef for
+        //:   'std::bad_optional_access' if 'std::bad_optional_access' is
+        //:    available.
+        //
+        // Plan:
+        //: 1 For concern 1, if we're using CPP17 library, check that
+        //:   'bsl::bad_optional_access' is the same type as
+        //:   'std::bad_optional_access' using 'bsl::is_same'.
+        //
+        // Testing:
+        //   typedef bsl::bad_optional_access
+        // --------------------------------------------------------------------
+        if (verbose) printf("\n'bsl::bad_optional_access' TYPEDEF"
+                            "\n==================================\n");
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        ASSERT((bsl::is_same<bsl::bad_optional_access,
+                             std::bad_optional_access>::value));
+
+#endif //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+      } break;
+      case 3: {
+        // --------------------------------------------------------------------
+        // DEFAULT CONSTRUCTION AND 'what' METHOD
+        //
+        // Concerns:
+        //: 1 A 'bad_optional_access' object can be default constructed.
+        //: 2 Invoking a 'what' method on a 'bad_optional_access' object
+        //:   returns a "bad_optional_access" string.
+        //: 3 'what' method can be invoked on a const 'bad_optional_access'
+        //:   object.
+        //
+        // Plan:
+        //: 1 For concern 1, default construct a 'bad_optional_access' object.
+        //: 2 For concern 2, invoke the 'what' method on a
+        //:   'bad_optional_access' object and check that the returned string
+        //:   is "bad_optional_access".
+        //: 3 For concern 3, in step 2, use a const qualified
+        //:   'bad_optional_access' object.
+        //
+        // Testing:
+        //   bad_optional_access();
+        //   const char *what() const;
+        // --------------------------------------------------------------------
+        if (verbose) printf("\nDEFAULT CONSTRUCTION AND 'what' METHOD"
+                            "\n======================================\n");
+#ifndef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        // string returned by 'what()' method is implementation specific so we
+        // can only check our own implementation
+        const bsl::bad_optional_access b;
+        ASSERT(0 == strcmp("bad_optional_access", b.what()));
+#endif // #ifndef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+
+      } break;
+      case 2: {
         // --------------------------------------------------------------------
         // 'noexcept' SPECIFICATION
         //
         // Concerns:
-        //: 1 The 'noexcept' specification has been applied to all class
-        //:   interfaces required by the standard.
-        //
+        //: 1 The 'noexcept' specification has been applied to
+        //:   'bad_optional_access' constructor as required by the standard.
+        //: 2 The 'noexcept' specification has been applied to
+        //:   'bad_optional_access' 'what' method as required by the standard.
         // Plan:
-        //: 1 Apply the uniary 'noexcept' operator to expressions that mimic
-        //:   those appearing in the standard and confirm that calculated
-        //:   boolean value matches the expected value.
-        //:
-        //: 2 Since the 'noexcept' specification does not vary with the 'TYPE'
-        //:   of the container, we need test for just one general type and any
-        //:   'TYPE' specializations.
+        //: 1 Apply the unary 'noexcept' operator to a 'bad_optional_access'
+        //:   constructor and, for concern 1, confirm that calculated boolean
+        //:   value matches the expected value.
+        //: 2 Apply the unary 'noexcept' operator to 'bad_optional_access'
+        //:   'what' method and, for concern 2, confirm that calculated boolean
+        //:   value matches the expected value.
         //
         // Testing:
-        //   CONCERN: Methods qualifed 'noexcept' in standard are so.
+        //   CONCERN: Methods qualified 'noexcept' in standard are so.
         // --------------------------------------------------------------------
 
-        if (verbose) printf("\n" "'noexcept' SPECIFICATION" "\n"
-                                 "========================" "\n");
+        if (verbose) printf("\n'noexcept' SPECIFICATION"
+                            "\n========================\n");
 
-        // N4594: 20.10.2.1 Class 'bad_optional_access'
-
-        // page 590
+        // N4835: 20.6.5 Class 'bad_optional_access' [optional.bad.access]
         //..
         //     namespace std {
         //       class bad_optional_access: public std::exception {
         //       public:
-        //         bad_optional_access() noexcept;
+        //         const char* what() const noexcept override;
         //       };
         //     } // namespace std
         //..
-#ifndef __cpp_lib_optional
+#ifndef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        // While noexcept specification is a standard requirement, at least one
+        // library implementation does not apply the noexcept specification
+        // correctly.
         ASSERT(BSLS_KEYWORD_NOEXCEPT_AVAILABLE
-            == BSLS_KEYWORD_NOEXCEPT_OPERATOR(bslstl::BadOptionalAccess()));
+            == BSLS_KEYWORD_NOEXCEPT_OPERATOR(bsl::bad_optional_access()));
+
+        bsl::bad_optional_access b;
+        ASSERT(BSLS_KEYWORD_NOEXCEPT_AVAILABLE
+            == BSLS_KEYWORD_NOEXCEPT_OPERATOR(b.what()));
 #endif
       } break;
       case 1: {
@@ -161,24 +241,16 @@ int main(int argc, char *argv[])
 
         if (verbose) printf("\nBREATHING TEST"
                             "\n==============\n");
-#ifndef __cpp_lib_optional
-        bslstl::BadOptionalAccess b;
-        const native_std::exception *ptr = &b;
+        bsl::bad_optional_access  b;
+        const std::exception     *ptr = &b;
 
-        ASSERT(0 == strcmp("bad_optional_access", b.what()));
-        ASSERT(0 == strcmp("bad_optional_access", ptr->what()));
-
-        const bsl::bad_optional_access b2;
-        const native_std::exception *ptr2 = &b2;
-
-        ASSERT(0 == strcmp("bad_optional_access", b2.what()));
-        ASSERT(0 == strcmp("bad_optional_access", ptr2->what()));
-#endif
-
-      }break;
+        ASSERT(0 != b.what());
+        ASSERT(0 != ptr->what());
+      } break;
+#endif //BDE_BUILD_TARGET_EXC
       default: {
-        fprintf(stderr, "WARNING: CASE `%d' NOT FOUND.\n", test);
-        testStatus = -1;
+            fprintf(stderr, "WARNING: CASE `%d' NOT FOUND.\n", test);
+            testStatus = -1;
       }
     }
 
@@ -189,7 +261,7 @@ int main(int argc, char *argv[])
 }
 
 // ----------------------------------------------------------------------------
-// Copyright 2013 Bloomberg Finance L.P.
+// Copyright 2020 Bloomberg Finance L.P.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

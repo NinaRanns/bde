@@ -49,7 +49,7 @@ BSLS_IDENT("$Id: $")
 ///-----
 // The following snippets of code illustrate use of this component:
 //
-// First, create a nullable 'int' object:
+// First, create a 'optional' 'int' object:
 //..
 //  bsl::optional<int> optionalInt;
 //  assert(!optionalInt.has_value());
@@ -364,7 +364,7 @@ struct Optional_RemoveCVRef {
 };
 
 template <class TYPE, class ANY_TYPE>
-struct Optional_Propagates_Allocator
+struct Optional_PropagatesAllocator
 : bsl::integral_constant<
       bool,
       BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value &&
@@ -398,14 +398,14 @@ struct Optional_Propagates_Allocator
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR              \
     , typename bsl::enable_if<                                                \
           BloombergLP::bslstl::                                               \
-              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
+              Optional_PropagatesAllocator<TYPE, ANY_TYPE>::value,            \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR      \
     , typename bsl::enable_if<                                                \
           !BloombergLP::bslstl::                                              \
-              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
+              Optional_PropagatesAllocator<TYPE, ANY_TYPE>::value,            \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type =                \
           BloombergLP::bslstl::optNoSuchType
 
@@ -469,13 +469,13 @@ struct Optional_Propagates_Allocator
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR_DEF          \
     , typename bsl::enable_if<                                                \
           BloombergLP::bslstl::                                               \
-              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
+              Optional_PropagatesAllocator<TYPE, ANY_TYPE>::value,            \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR_DEF  \
     , typename bsl::enable_if<                                                \
           !BloombergLP::bslstl::                                              \
-              Optional_Propagates_Allocator<TYPE, ANY_TYPE>::value,           \
+              Optional_PropagatesAllocator<TYPE, ANY_TYPE>::value,            \
           BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_ANYTYPE_DEF                  \
@@ -627,14 +627,15 @@ struct Optional_Propagates_Allocator
 
 template <class TYPE>
 struct Optional_DataImp {
-    // This component-private 'struct' manages a 'value_type' object in
-    // 'optional'.  This class provides an abstraction for 'const' value type.
-    // An 'optional' may contain a 'const' type object.  An assignment to such
-    // an 'optional' should not succeed.  However, unless the 'optional' itself
-    // is 'const', it should be possible to change the value of the 'optional'
-    // using 'emplace'.  In order to allow for that, this class manages a
-    // non-const object of 'value_type', but all the accessors return a 'const'
-    // adjusted reference to the managed object.
+    // This component-private 'struct' manages a 'value_type' object in an
+    // 'optional' object.  This class provides an abstraction for 'const' value
+    // type.  An 'optional' object may contain an object of 'const' type.  An
+    // assignment to such an 'optional' object should not succeed.  However,
+    // unless the 'optional' object itself is 'const', it should be possible to
+    // change the value of the 'optional' object using 'emplace'.  In order to
+    // allow for that, this class manages a non-const object of 'value_type',
+    // but all the accessors return a 'const' adjusted reference to the managed
+    // object.
 
   private:
     // PRIVATE TYPES
@@ -1131,9 +1132,9 @@ class optional {
     // UNSPECIFIED BOOL
 
     // This type is needed only in C++03 mode, where 'explicit' conversion
-    // operators are not supported.  An 'optional' is implicitly converted to
-    // 'UnspecifiedBool' when used in 'if' statements, but is not implicitly
-    // convertible to 'bool'.
+    // operators are not supported.  An 'optional' object is implicitly
+    // converted to 'UnspecifiedBool' when used in 'if' statements, but is not
+    // implicitly convertible to 'bool'.
     typedef BloombergLP::bsls::UnspecifiedBool<optional> UnspecifiedBoolUtil;
     typedef typename UnspecifiedBoolUtil::BoolType       UnspecifiedBool;
 
@@ -1402,7 +1403,7 @@ class optional {
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
+                      std::initializer_list<INIT_LIST_TYPE>      il,
                       BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
         // Create an 'optional' object having the value of the (template
         // parameter) 'TYPE' created in place using the specified 'il' and
@@ -1769,13 +1770,13 @@ class optional {
              const optional&      original);
         // If specified 'original' contains a value, initialize the contained
         // 'value_type' object with '*original'.  Otherwise, create a
-        // disengaged 'optional'.  Use the specified 'allocator' to supply
-        // memory.
+        // disengaged 'optional' object.  Use the specified 'allocator' to
+        // supply memory.
 
     optional(bsl::allocator_arg_t,
              allocator_type                           allocator,
              BloombergLP::bslmf::MovableRef<optional> original);
-        // Create a nullable object having the same value as the specified
+        // Create a 'optional' object having the same value as the specified
         // 'original' object by moving the contents of 'original' to the
         // newly-created object.  Use the specified 'allocator' to supply
         // memory.
@@ -1849,8 +1850,8 @@ class optional {
                       const std::optional<ANY_TYPE>& original
         BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_STD_OPTIONAL_LVAL);
         // If specified 'original' contains a value, initialize the 'value_type'
-        // object with '*original'.  Otherwise, create a disengaged 'optional'.
-        // Use the specified 'allocator' to supply memory.
+        // object with '*original'.  Otherwise, create a disengaged 'optional'
+        // object.  Use the specified 'allocator' to supply memory.
 
     template <class ANY_TYPE = TYPE>
     explicit optional(bsl::allocator_arg_t,
@@ -1859,8 +1860,8 @@ class optional {
         BSLSTL_OPTIONAL_ENABLE_IF_CONSTRUCT_FROM_STD_OPTIONAL_RVAL);
         // If specified 'original' contains a value, initialize the 'value_type'
         // object by move construction from '*original'.  Otherwise, create a
-        // disengaged 'optional'.  Use the specified 'allocator' to supply
-        // memory.
+        // disengaged 'optional' object.  Use the specified 'allocator' to
+        // supply memory.
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -2302,7 +2303,7 @@ class optional {
         // Assign to this 'optional' object the value of the (template
         // parameter) 'TYPE' created in place using the specified 'args'.  If
         // this 'optional' object already contains an object
-        // ('false == isNull()'), that object is  destroyed before the new
+        // ('true == hasValue()'), that object is destroyed before the new
         // object is created.  The allocator specified at the construction of
         // this 'optional' object is used to supply memory to the value object.
         // Attempts to explicitly specify via 'args' another allocator to
@@ -2312,12 +2313,12 @@ class optional {
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
         // Assign to this 'optional' object the value of the (template
         // parameter) 'TYPE' created in place using the specified 'il' and
         // specified 'args'.  If this 'optional' object already contains an
-        // object ('false == isNull()'), that object is  destroyed before the
+        // object ('true == hasValue()'), that object is destroyed before the
         // new object is created.  The allocator specified at the construction
         // of this 'optional' object is used to supply memory to the value
         // object. Attempts to explicitly specify via 'args' another allocator
@@ -2708,7 +2709,7 @@ class optional {
         // Assign to this object the value of the specified 'rhs' object, and
         // return a non-'const' reference to this object.  The allocators of
         // this object and 'rhs' both remain unchanged.  The contents of 'rhs'
-        // are either move-inserted into or move-assigned to this object.
+        // are either move-constructed into or move-assigned to this object.
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
@@ -2718,7 +2719,7 @@ class optional {
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
         // converted to 'TYPE' otherwise.  Return a reference providing
         // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE and 'ANY_TYPE' are
+        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
         // compatible.
     {
         // Must be in-place inline because the use of 'enable_if' will
@@ -2745,9 +2746,9 @@ class optional {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible. Using rvalue reference instead of
-        // 'movableRef' ensures this overload is considered a better match over
+        // 'MovableRef' ensures this overload is considered a better match over
         // 'ANY_TYPE' overloads for optional types.
 
     template <class ANY_TYPE = TYPE>
@@ -2783,7 +2784,7 @@ class optional {
     optional& operator=(BloombergLP::bslmf::MovableRef<TYPE> rhs);
         // Assign to this object the value of the specified 'rhs', and return a
         // reference providing modifiable access to this object.  The contents
-        // of 'rhs' are either move-inserted into or move-assigned to this
+        // of 'rhs' are either move-constructed into or move-assigned to this
         // object.  'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
@@ -2793,7 +2794,7 @@ class optional {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE>
@@ -2808,10 +2809,10 @@ class optional {
     optional& operator=(BloombergLP::bslmf::MovableRef<ANY_TYPE> rhs);
         // Assign to this object the value of the specified 'rhs' object (of
         // 'ANY_TYPE') converted to 'TYPE', and return a reference providing
-        // modifiable access to this object.  The contents  of 'rhs' are either
-        // move-inserted into or move-assigned to this object.  'rhs' is left
-        // in a valid but unspecified state.  This overload needs to exist in
-        // C++03 because the perfect forwarding 'operator=' can not to be
+        // modifiable access to this object.  The contents of 'rhs' are either
+        // move-constructed into or move-assigned to this object.  'rhs' is
+        // left in a valid but unspecified state.  This overload needs to exist
+        // in C++03 because the perfect forwarding 'operator=' can not to be
         // specified in terms of 'MovableRef'.
 
 #endif
@@ -2824,7 +2825,7 @@ class optional {
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
         // converted to 'TYPE' otherwise.  Return a reference providing
         // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE and 'ANY_TYPE' are
+        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
         // compatible.
 
     template <class ANY_TYPE = TYPE>
@@ -2834,7 +2835,7 @@ class optional {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible.
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
@@ -3026,7 +3027,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // Assign to this object the value of the specified 'rhs' object, and
         // return a non-'const' reference to this object.  The allocators of
         // this object and 'rhs' both remain unchanged.  The contents of 'rhs'
-        // are either move-inserted into or move-assigned to this object.
+        // are either move-constructed into or move-assigned to this object.
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
@@ -3036,7 +3037,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
         // converted to 'TYPE' otherwise.  Return a reference providing
         // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE and 'ANY_TYPE' are
+        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
         // compatible.
 
     template <class ANY_TYPE>
@@ -3046,7 +3047,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE = TYPE>
@@ -3056,7 +3057,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
         // converted to 'TYPE' otherwise.  Return a reference providing
         // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE and 'ANY_TYPE' are
+        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
         // compatible.
 
     template <class ANY_TYPE = TYPE>
@@ -3066,7 +3067,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE = TYPE>
@@ -3614,20 +3615,20 @@ class optional<TYPE, false> {
     template <class... ARGS>
     void emplace(BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
         // Assign to this 'optional' object the value of the (template
-        // parameter) 'TYPE' created in place using the specified 'il' and
-        // specified 'args'.  If this 'optional' object already contains an
-        // object ('false == isNull()'), that object is  destroyed before the
-        // new object is created.  Note that if the constructor of 'TYPE'
-        // throws an exception this object is left in a disengaged state.
+        // parameter) 'TYPE' created in place using the specified 'args'.  If
+        // this 'optional' object already contains an object
+        // ('true == hasValue()'), that object is destroyed before the new
+        // object is created.  Note that if the constructor of 'TYPE' throws an
+        // exception this object is left in a disengaged state.
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
-    void emplace(std::initializer_list<INIT_LIST_TYPE>,
+    void emplace(std::initializer_list<INIT_LIST_TYPE>      il,
                  BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
         // Assign to this 'optional' object the value of the (template
         // parameter) 'TYPE' created in place using the specified 'il' and
         // specified 'args'.  If this 'optional' object already contains an
-        // object ('false == isNull()'), that object is  destroyed before the
+        // object ('true == hasValue()'), that object is destroyed before the
         // new object is created.  Note that if the constructor of 'TYPE'
         // throws an exception this object is left in a disengaged state.
 
@@ -3996,7 +3997,7 @@ class optional<TYPE, false> {
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
     optional& operator=(bsl::nullopt_t) BSLS_KEYWORD_NOEXCEPT;
-        // reset the 'optional' to a disengaged state.
+        // reset the 'optional' object to a disengaged state.
 
     optional& operator=(const optional& rhs);
         // Assign to this object the value of the specified 'rhs' object, and
@@ -4006,7 +4007,7 @@ class optional<TYPE, false> {
         // Assign to this object the value of the specified 'rhs' object, and
         // return a non-'const' reference to this object.  The allocators of
         // this object and 'rhs' both remain unchanged.  The contents of 'rhs'
-        // are either move-inserted into or move-assigned to this object.
+        // are either move-constructed into or move-assigned to this object.
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
@@ -4016,7 +4017,7 @@ class optional<TYPE, false> {
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
         // converted to 'TYPE' otherwise.  Return a reference providing
         // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE and 'ANY_TYPE' are
+        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
         // compatible.
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES)
@@ -4027,9 +4028,9 @@ class optional<TYPE, false> {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible. Using rvalue reference instead of
-        // 'movableRef' ensures this overload is considered a better match over
+        // 'MovableRef' ensures this overload is considered a better match over
         // 'ANY_TYPE' overloads for optional types.
 
     template <class ANY_TYPE = TYPE>
@@ -4064,7 +4065,7 @@ class optional<TYPE, false> {
     optional& operator=(BloombergLP::bslmf::MovableRef<TYPE> rhs);
         // Assign to this object the value of the specified 'rhs', and return a
         // reference providing modifiable access to this object.  The contents
-        // of 'rhs' are either move-inserted into or move-assigned to this
+        // of 'rhs' are either move-constructed into or move-assigned to this
         // object.  'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
@@ -4074,7 +4075,7 @@ class optional<TYPE, false> {
         // and move assign to this object the value of 'rhs.value()' (of
         // 'ANY_TYPE') converted to 'TYPE' otherwise.  Return a reference
         // providing modifiable access to this object.  Note that this method
-        // does not  participate in overload resolution unless 'TYPE and
+        // does not participate in overload resolution unless 'TYPE' and
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE>
@@ -4089,10 +4090,10 @@ class optional<TYPE, false> {
     optional& operator=(BloombergLP::bslmf::MovableRef<ANY_TYPE> rhs);
         // Assign to this object the value of the specified 'rhs' object (of
         // 'ANY_TYPE') converted to 'TYPE', and return a reference providing
-        // modifiable access to this object.  The contents  of 'rhs' are either
-        // move-inserted into or move-assigned to this object.  'rhs' is left
-        // in a valid but unspecified state.  This overload needs to exist in
-        // C++03 because the perfect forwarding 'operator=' can not to be
+        // modifiable access to this object.  The contents of 'rhs' are either
+        // move-constructed into or move-assigned to this object.  'rhs' is
+        // left in a valid but unspecified state.  This overload needs to exist
+        // in C++03 because the perfect forwarding 'operator=' can not to be
         // specified in terms of 'MovableRef'.
 
 #endif
@@ -4187,13 +4188,22 @@ class optional<TYPE, false> {
 
 // FREE FUNCTIONS
 template <class TYPE>
-void swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+typename
+bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
+swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
     // Efficiently exchange the values of the specified 'lhs' and 'rhs'
     // objects.  This method provides the no-throw exception-safety guarantee
     // if the template parameter 'TYPE' provides that guarantee and the result
     // of the 'hasValue' method for 'lhs' and 'rhs' is the same.  The behavior
     // is undefined unless both objects were created with the same allocator,
     // if any.
+
+template <class TYPE>
+typename
+bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
+swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+
+
 
 // HASH SPECIALIZATIONS
 template <class HASHALG, class TYPE>
@@ -10966,10 +10976,32 @@ void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input)
 
 template <class TYPE>
 inline
-void swap(bsl::optional<TYPE>& lhs, optional<TYPE>& rhs)
+typename
+bsl::enable_if<BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
+swap(bsl::optional<TYPE>& lhs, optional<TYPE>& rhs)
+{
+    if (lhs.d_allocator_p == rhs.d_allocator_p) {
+        lhs.swap(rhs);
+
+        return;                                                       // RETURN
+    }
+
+    bsl::optional<TYPE> futureA(rhs, lhs.d_allocator_p);
+    bsl::optional<TYPE> futureB(lhs, rhs.d_allocator_p);
+
+    futureA.swap(lhs);
+    futureB.swap(rhs);
+}
+
+template <class TYPE>
+inline
+typename
+bsl::enable_if<!BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value, void>::type
+swap(bsl::optional<TYPE>& lhs, optional<TYPE>& rhs)
 {
     lhs.swap(rhs);
 }
+
 
 template <class LHS_TYPE, class RHS_TYPE>
 inline

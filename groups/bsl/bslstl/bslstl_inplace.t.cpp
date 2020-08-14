@@ -2,6 +2,8 @@
 
 #include <bslstl_inplace.h>
 
+#include <bslmf_issame.h>
+
 #include <bsls_bsltestutil.h>
 #include <bsls_platform.h>
 
