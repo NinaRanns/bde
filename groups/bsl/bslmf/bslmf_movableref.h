@@ -575,9 +575,9 @@ struct MovableRefUtil {
         // Return an lvalue reference to the object referenced by the specified
         // 'ref' object.  This function is used to provide a uniform interface
         // to members of an object reference by 'ref', regardless of whether
-        // 'ref' is an 'MovableRef' or lvalue reference and whether the compiler
-        // supports C++11 rvalue references.  This function is unnecessary
-        // (but allowed) when simply converting 'ref' to 'TYPE&'.
+        // 'ref' is an 'MovableRef' or lvalue reference and whether the
+        // compiler supports C++11 rvalue references.  This function is
+        // unnecessary (but allowed) when simply converting 'ref' to 'TYPE&'.
         //
         // Please see the component-level documentation for more information on
         // this function.

@@ -479,8 +479,9 @@ class TestMoving {
 
 template <class TYPE>
 bool testForwardRefArgument(BSLS_COMPILERFEATURES_FORWARD_REF(TYPE) arg)
-    // Tests forwarding of 'MovableRef' arguments.  This function works only
-    // with 'const TestMoving&' and 'MovableRef<TestMoving>'.
+    // Move from specified 'arg', which must be of type
+    // 'MovableRef<TestMoving>'. This function tests that 'MovableRef'
+    // arguments can be passed and used through forwarding references.
 {
     TestMoving moveTo(bslmf::MovableRefUtil::move(arg));
     // Return true if 'arg' was moved from
@@ -1367,7 +1368,7 @@ int main(int argc, char *argv[])
         {
             int  value(19);
             int *address(MovableAddress<int>::get(
-                                           bslmf::MovableRefUtil::move(value)));
+                                          bslmf::MovableRefUtil::move(value)));
 
 #if !defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES)
             const
@@ -1378,7 +1379,7 @@ int main(int argc, char *argv[])
             ASSERT(&value == &bslmf::MovableRefUtil::access(value));
             ASSERT(&value == &bslmf::MovableRefUtil::access(ref));
             ASSERT(&value == &bslmf::MovableRefUtil::access(
-                                           bslmf::MovableRefUtil::move(value)));
+                                          bslmf::MovableRefUtil::move(value)));
             ASSERT(&value == &bslmf::MovableRefUtil::access(ref));
         }
         {
@@ -1391,12 +1392,12 @@ int main(int argc, char *argv[])
         {
             const int value(19);
             const int *address(MovableAddress<const int>::get(
-                                           bslmf::MovableRefUtil::move(value)));
+                                          bslmf::MovableRefUtil::move(value)));
 
             ASSERT(&value == address);
             ASSERT(&value == &bslmf::MovableRefUtil::access(value));
             ASSERT(&value == &bslmf::MovableRefUtil::access(
-                                           bslmf::MovableRefUtil::move(value)));
+                                          bslmf::MovableRefUtil::move(value)));
         }
       } break;
       case 4: {
@@ -1448,7 +1449,7 @@ int main(int argc, char *argv[])
         {
             const int                    value(17);
             bslmf::MovableRef<const int> rvalue(
-                                            bslmf::MovableRefUtil::move(value));
+                                           bslmf::MovableRefUtil::move(value));
             const int&                   lvalue(rvalue);
             ASSERT(&value == &lvalue);
         }
@@ -1589,7 +1590,7 @@ int main(int argc, char *argv[])
         int&                   lvalue0(bslmf::MovableRefUtil::access(rvalue));
         int&                   lvalue1(bslmf::MovableRefUtil::access(value));
         int&                   lvalue2(bslmf::MovableRefUtil::access(
-                                           bslmf::MovableRefUtil::move(value)));
+                                          bslmf::MovableRefUtil::move(value)));
 
         ASSERT(&reference == &value);
         ASSERT(&reference == &lvalue0);
