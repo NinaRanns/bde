@@ -1574,11 +1574,11 @@ int main(int argc, char *argv[])
 
 #define TEST(T, REMREF, ADDLVR, ADDMR) do {                                   \
         ASSERTV(#T, (bsl::is_same<REMREF,                                     \
-                                  Util::RemoveReference<T>::type>::value));   \
+                                  Util::RemoveReference<T >::type>::value));  \
         ASSERTV(#T, (bsl::is_same<ADDLVR,                                     \
-                                Util::AddLvalueReference<T>::type>::value));  \
+                                Util::AddLvalueReference<T >::type>::value)); \
         ASSERTV(#T, (bsl::is_same<ADDMR,                                      \
-                                Util::AddMovableReference<T>::type>::value)); \
+                               Util::AddMovableReference<T >::type>::value)); \
     } while (false)
 
         //   TYPE                  RemRef      AddLvRef     AddMovRef
@@ -1638,12 +1638,12 @@ int main(int argc, char *argv[])
 
         typedef bslmf::MovableRefUtil Util;
 
-#define TEST(T, IS_LVREF, IS_MREF, IS_REF) do {                         \
-        ASSERTV(#T, ! (IS_LVREF && IS_MREF));                           \
-        ASSERTV(#T, IS_REF == (IS_LVREF || IS_MREF));                   \
-        ASSERTV(#T, IS_LVREF == (Util::IsLvalueReference<T>::value));   \
-        ASSERTV(#T, IS_MREF == (Util::IsMovableReference<T>::value));   \
-        ASSERTV(#T, IS_REF == (Util::IsReference<T>::value));           \
+#define TEST(T, IS_LVREF, IS_MREF, IS_REF) do {                          \
+        ASSERTV(#T, ! (IS_LVREF && IS_MREF));                            \
+        ASSERTV(#T, IS_REF == (IS_LVREF || IS_MREF));                    \
+        ASSERTV(#T, IS_LVREF == (Util::IsLvalueReference<T >::value));   \
+        ASSERTV(#T, IS_MREF == (Util::IsMovableReference<T >::value));   \
+        ASSERTV(#T, IS_REF == (Util::IsReference<T >::value));           \
     } while (false)
 
         //   TYPE                                  IsLv   IsMov  IsRef
