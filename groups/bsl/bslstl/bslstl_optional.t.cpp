@@ -11875,7 +11875,7 @@ void TestDriver<TYPE>::testCase9()
         const ValueType& dest = obj.value_or(MoveUtil::move(val));
         ValWithAllocator valCopyBuffer(5, &oa);
         ValueType&       valCopy  = valCopyBuffer.object();
-        ValueType        expected = MoveUtil::move(valCopy);
+        ValueType        expected(MoveUtil::move(valCopy));
         ASSERT(val.value() == MOVED_FROM_VAL);
         ASSERT(dest == expected);
         ASSERT(hasSameAllocator(dest, expected));
@@ -11904,7 +11904,7 @@ void TestDriver<TYPE>::testCase9()
             MoveUtil::move(obj).value_or(MoveUtil::move(val));
         ValWithAllocator valCopyBuffer(5, &oa);
         ValueType&       valCopy  = valCopyBuffer.object();
-        ValueType        expected = MoveUtil::move(valCopy);
+        ValueType        expected(MoveUtil::move(valCopy));
         ASSERT(dest == expected);
         ASSERT(val.value() == MOVED_FROM_VAL);
         ASSERT(hasSameAllocator(dest, expected));
@@ -11916,7 +11916,7 @@ void TestDriver<TYPE>::testCase9()
         Obj&             obj  = objBuf.object();
         const ValueType& dest = MoveUtil::move(obj).value_or(77);
         obj.emplace(4);
-        ValueType expected = MoveUtil::move(obj.value());
+        ValueType expected = (MoveUtil::move(obj.value()));
         ASSERT(dest == expected);
         ASSERT(obj.value().value() == MOVED_FROM_VAL);
         ASSERT(hasSameAllocator(dest, expected));
@@ -12430,7 +12430,8 @@ void testCase2_Imp()
     ASSERT(X.hasValue());
     ASSERT(X.value() == val);
     ASSERT(checkAllocator(X, &da));
-    ASSERT(isConstPtr(BSLS_UTIL_ADDRESSOF(val)) == isConstPtr(BSLS_UTIL_ADDRESSOF(X.value())));
+    ASSERT(isConstPtr(BSLS_UTIL_ADDRESSOF(val)) ==
+           isConstPtr(BSLS_UTIL_ADDRESSOF(X.value())));
 
     X.reset();
     ASSERT(!X.hasValue());
