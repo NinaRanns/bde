@@ -1855,10 +1855,10 @@ class optional {
         std::optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                 ANY_TYPE));
-    // If specified 'original' contains a value, initialize the 'value_type'
-    // object by move construction from '*original'.  Otherwise, create a
-    // disengaged 'optional' object.  Use the specified 'allocator' to supply
-    // memory.
+        // If specified 'original' contains a value, initialize the
+        // 'value_type' object by move construction from '*original'.
+        // Otherwise, create a disengaged 'optional' object.  Use the specified
+        // 'allocator' to supply memory.
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -4056,24 +4056,24 @@ class optional<TYPE, false> {
     template <class ANY_TYPE = TYPE>
     BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE) &
     operator=(ANY_TYPE&& rhs);
-    // Assign to this object the value of the specified 'rhs' object converted
-    // to 'TYPE', and return a reference providing modifiable access to this
-    // object.  Note that this method may invoke assignment from 'rhs', or
-    // construction from 'rhs', depending on whether this object is engaged.
-    // BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE contains a check that
-    // disables this overload if 'ANY_TYPE' is 'optional<TYPE>'.  This is
-    // needed to prevent this assignment operator being a better match for non
-    // const 'optional<TYPE>' lvalues than 'operator=(const optional& rhs)'.
-    // This function needs to be a worse match than 'operator=(optional)' so
-    // cases like :
-    //..
-    //      bsl::optional<int> oi;
-    //      oi = {};
-    //..
-    // represent assignment from a default constructed 'optional', as opposed
-    // to assignment from default constructed 'value_type'.  Note that in
-    // C++03, where there is no concept of perfect forwarding, this is not a
-    // concern.
+        // Assign to this object the value of the specified 'rhs' object
+        // converted to 'TYPE', and return a reference providing modifiable
+        // access to this object.  Note that this method may invoke assignment
+        // from 'rhs', or construction from 'rhs', depending on whether this
+        // object is engaged.  BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE
+        // contains a check that disables this overload if 'ANY_TYPE' is
+        // 'optional<TYPE>'.  This is needed to prevent this assignment
+        // operator being a better match for non const 'optional<TYPE>' lvalues
+        // than 'operator=(const optional& rhs)'.  This function needs to be a
+        // worse match than 'operator=(optional)' so cases like :
+        //..
+        //      bsl::optional<int> oi;
+        //      oi = {};
+        //..
+        // represent assignment from a default constructed 'optional', as
+        // opposed to assignment from default constructed 'value_type'.  Note
+        // that in C++03, where there is no concept of perfect forwarding, this
+        // is not a concern.
 
 #else
     // MovableRef and rvalue give different semantics in template functions.
