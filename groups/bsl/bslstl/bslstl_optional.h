@@ -396,21 +396,23 @@ struct Optional_PropagatesAllocator
         BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
         BloombergLP::bslstl::optNoSuchType
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR             \
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,       \
+                                                                  ANY_TYPE)   \
     typename bsl::enable_if<                                                  \
         BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,               \
                                                           ANY_TYPE>::value,   \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
         BloombergLP::bslstl::optNoSuchType
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR     \
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(    \
+    TYPE, ANY_TYPE)                                                           \
     typename bsl::enable_if<                                                  \
         !BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,              \
                                                            ANY_TYPE>::value,  \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
         BloombergLP::bslstl::optNoSuchType
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE                    \
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE)             \
     typename bsl::enable_if<                                                  \
         !bsl::is_same<ANY_TYPE, TYPE>::value &&                               \
             !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef< \
@@ -457,19 +459,21 @@ struct Optional_PropagatesAllocator
                 Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,        \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR              \
+#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,        \
+                                                                 ANY_TYPE)    \
     typename bsl::enable_if<                                                  \
         BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,               \
                                                           ANY_TYPE>::value,   \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR      \
+#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(     \
+    TYPE, ANY_TYPE)                                                           \
     typename bsl::enable_if<                                                  \
         !BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,              \
                                                            ANY_TYPE>::value,  \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE                     \
+#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE)              \
     typename bsl::enable_if<                                                  \
         !bsl::is_same<ANY_TYPE, TYPE>::value &&                               \
             !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef< \
@@ -515,7 +519,7 @@ struct Optional_PropagatesAllocator
                 Optional_AssignsFromOptional<TYPE, ANY_TYPE>::value,          \
         optional<TYPE> >::type
 
-#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE                            \
+#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)                    \
     typename bsl::enable_if<                                                  \
         !bsl::is_same<ANY_TYPE, optional<TYPE> >::value &&                    \
             !(bsl::is_same<ANY_TYPE,                                          \
@@ -562,7 +566,7 @@ struct Optional_PropagatesAllocator
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
-#define BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR                           \
+#define BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)                      \
     typename bsl::enable_if<                                                  \
         !bsl::is_same<                                                        \
             typename BloombergLP::bslstl::Optional_RemoveCVRef<ARG>::type,    \
@@ -1152,7 +1156,7 @@ class optional {
 
     template <class ANY_TYPE>
     optional(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE) value,
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create an 'optional' object having the specified 'value' (of
         // 'ANY_TYPE') converted to 'TYPE'.  Use the currently installed
@@ -1160,7 +1164,7 @@ class optional {
 
     template <class ANY_TYPE>
     explicit optional(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE) value,
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create an 'optional' object having the specified 'value' (of
         // 'ANY_TYPE') converted to 'TYPE'.  Use the currently installed
@@ -1214,7 +1218,9 @@ class optional {
     optional(optional<ANY_TYPE>&& original,
              BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
                                                                  ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
+                 TYPE,
+                 ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -1227,7 +1233,9 @@ class optional {
     explicit optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
+            TYPE,
+            ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -1236,12 +1244,12 @@ class optional {
         // 'original' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    optional(optional<ANY_TYPE>&& original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
-             BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
-                                                               ANY_TYPE));
+    optional(
+        optional<ANY_TYPE>&& original,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
+                                                                  ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' otherwise.  This is a special case constructor
@@ -1253,7 +1261,8 @@ class optional {
     explicit optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
+                                                                  ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -1264,12 +1273,12 @@ class optional {
 
 #else
     template <class ANY_TYPE>
-    optional(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
-             BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
-                                                               ANY_TYPE));
+    optional(
+        BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
+                                                                  ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' otherwise.  This is a special case constructor
@@ -1281,7 +1290,8 @@ class optional {
     explicit optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
+                                                                  ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -1294,7 +1304,9 @@ class optional {
     optional(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
              BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
                                                                  ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
+                 TYPE,
+                 ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -1307,7 +1319,9 @@ class optional {
     explicit optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
+            TYPE,
+            ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -1769,7 +1783,7 @@ class optional {
                    bsl::allocator_arg_t,
                    allocator_type                                    allocator,
                    BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)       value,
-                   BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE);
+                   BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE));
         // Create an 'optional' object having the specified 'value' (of
         // 'ANY_TYPE') converted to 'TYPE'.   Use the specified 'allocator' to
         // supply memory.  'value' is left in a valid but unspecified state.
@@ -2735,25 +2749,26 @@ class optional {
         // 'ANY_TYPE' overloads for optional types.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE& operator=(ANY_TYPE&& rhs);
-        // Assign to this object the value of the specified 'rhs' object
-        // converted to 'TYPE', and return a reference providing modifiable
-        // access to this object.  Note that this method may invoke assignment
-        // from 'rhs', or construction from 'rhs', depending on whether this
-        // object is engaged.  BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE
-        // contains a check that disables this overload if 'ANY_TYPE' is
-        // 'optional<TYPE>'.  This is needed to prevent this assignment
-        // operator being a better match for non const 'optional<TYPE>' lvalues
-        // than 'operator=(const optional& rhs)'.  This function needs to be a
-        // worse match than 'operator=(optional)' so cases like :
-        //..
-        //      bsl::optional<int> oi;
-        //      oi = {};
-        //..
-        // represent assignment from a default constructed 'optional', as
-        // opposed to assignment from default constructed 'value_type'.  Note
-        // that in C++03, where there is no concept of perfect forwarding, this
-        // is not a concern.
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE) &
+    operator=(ANY_TYPE&& rhs);
+    // Assign to this object the value of the specified 'rhs' object converted
+    // to 'TYPE', and return a reference providing modifiable access to this
+    // object.  Note that this method may invoke assignment from 'rhs', or
+    // construction from 'rhs', depending on whether this object is engaged.
+    // BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE) contains a check that
+    // disables this overload if 'ANY_TYPE' is 'optional<TYPE>'.  This is
+    // needed to prevent this assignment operator being a better match for non
+    // const 'optional<TYPE>' lvalues than 'operator=(const optional& rhs)'.
+    // This function needs to be a worse match than 'operator=(optional)' so
+    // cases like :
+    //..
+    //      bsl::optional<int> oi;
+    //      oi = {};
+    //..
+    // represent assignment from a default constructed 'optional', as opposed
+    // to assignment from default constructed 'value_type'.  Note that in
+    // C++03, where there is no concept of perfect forwarding, this is not a
+    // concern.
 
 #else
     // The existence of MovableRef in C++11 affects the above functions, and
@@ -3064,25 +3079,26 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE& operator=(ANY_TYPE&& rhs);
-        // Assign to this object the value of the specified 'rhs' object
-        // converted to 'TYPE', and return a reference providing modifiable
-        // access to this object.  Note that this method may invoke assignment
-        // from 'rhs', or construction from 'rhs3141', depending on whether
-        // this object is engaged.  BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE
-        // contains a check that disables this overload if 'ANY_TYPE' is
-        // 'optional<TYPE>'.  This is needed to prevent this assignment
-        // operator being a better match for non const 'optional<TYPE>' lvalues
-        // than 'operator=(const optional& rhs)'.  This function needs to be a
-        // worse match than 'operator=(optional)' so cases like :
-        //..
-        //      bsl::optional<int> oi;
-        //      oi = {};
-        //..
-        // represent assignment from a default constructed 'optional', as
-        // opposed to assignment from default constructed 'value_type'.  Note
-        // that in C++03, where there is no concept of perfect forwarding, this
-        // is not a concern.
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE) &
+    operator=(ANY_TYPE&& rhs);
+      // Assign to this object the value of the specified 'rhs' object
+      // converted to 'TYPE', and return a reference providing modifiable
+      // access to this object.  Note that this method may invoke assignment
+      // from 'rhs', or construction from 'rhs3141', depending on whether this
+      // object is engaged.  BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)
+      // contains a check that disables this overload if 'ANY_TYPE' is
+      // 'optional<TYPE>'. This is needed to prevent this assignment operator
+      // being a better match for non const 'optional<TYPE>' lvalues than
+      // 'operator=(const optional& rhs)'.  This function needs to be a worse
+      // match than 'operator=(optional)' so cases like :
+      //..
+      //      bsl::optional<int> oi;
+      //      oi = {};
+      //..
+      // represent assignment from a default constructed 'optional', as opposed
+      // to assignment from default constructed 'value_type'.  Note that in
+      // C++03, where there is no concept of perfect forwarding, this is not a
+      // concern.
 };
 #else
 
@@ -3170,7 +3186,7 @@ class optional<TYPE, false> {
     template <class ANY_TYPE>
     optional(
        BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)                       value,
-       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE,
+       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
        BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create an 'optional' object having the same value as the specified
         // 'value' object by forwarding the contents of 'value' to the
@@ -3179,7 +3195,7 @@ class optional<TYPE, false> {
     template <class ANY_TYPE>
     explicit optional(
            BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)                   value,
-           BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE,
+           BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
            BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create an 'optional' object having the same value as the specified
         // 'value' object by forwarding the contents of 'value' to the
@@ -4016,14 +4032,13 @@ class optional<TYPE, false> {
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&)& operator=(
-                                                const optional<ANY_TYPE>& rhs);
-        // Disengage this object if the specified 'rhs' object is disengaged,
-        // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
-        // converted to 'TYPE' otherwise.  Return a reference providing
-        // modifiable access to this object.  Note that this method does not
-        // participate in overload resolution unless 'TYPE' and 'ANY_TYPE' are
-        // compatible.
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    operator=(const optional<ANY_TYPE>& rhs);
+    // Disengage this object if the specified 'rhs' object is disengaged, and
+    // assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
+    // converted to 'TYPE' otherwise.  Return a reference providing modifiable
+    // access to this object.  Note that this method does not participate in
+    // overload resolution unless 'TYPE' and 'ANY_TYPE' are compatible.
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES)
     template <class ANY_TYPE>
@@ -4039,25 +4054,26 @@ class optional<TYPE, false> {
         // 'ANY_TYPE' overloads for optional types.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE& operator=(ANY_TYPE&& rhs);
-        // Assign to this object the value of the specified 'rhs' object
-        // converted to 'TYPE', and return a reference providing modifiable
-        // access to this object.  Note that this method may invoke assignment
-        // from 'rhs', or construction from 'rhs', depending on whether this
-        // object is engaged.  BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE
-        // contains a check that disables this overload if 'ANY_TYPE' is
-        // 'optional<TYPE>'.  This is needed to prevent this assignment
-        // operator being a better match for non const 'optional<TYPE>' lvalues
-        // than 'operator=(const optional& rhs)'.  This function needs to be a
-        // worse match than 'operator=(optional)' so cases like :
-        //..
-        //      bsl::optional<int> oi;
-        //      oi = {};
-        //..
-        // represent assignment from a default constructed 'optional', as
-        // opposed to assignment from default constructed 'value_type'.  Note
-        // that in C++03, where there is no concept of perfect forwarding, this
-        // is not a concern.
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE) &
+    operator=(ANY_TYPE&& rhs);
+    // Assign to this object the value of the specified 'rhs' object converted
+    // to 'TYPE', and return a reference providing modifiable access to this
+    // object.  Note that this method may invoke assignment from 'rhs', or
+    // construction from 'rhs', depending on whether this object is engaged.
+    // BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE contains a check that
+    // disables this overload if 'ANY_TYPE' is 'optional<TYPE>'.  This is
+    // needed to prevent this assignment operator being a better match for non
+    // const 'optional<TYPE>' lvalues than 'operator=(const optional& rhs)'.
+    // This function needs to be a worse match than 'operator=(optional)' so
+    // cases like :
+    //..
+    //      bsl::optional<int> oi;
+    //      oi = {};
+    //..
+    // represent assignment from a default constructed 'optional', as opposed
+    // to assignment from default constructed 'value_type'.  Note that in
+    // C++03, where there is no concept of perfect forwarding, this is not a
+    // concern.
 
 #else
     // MovableRef and rvalue give different semantics in template functions.
@@ -4971,7 +4987,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional();
 
 #if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
 template <class TYPE, class ARG, class... ARGS>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
     // Return an 'optional' object containing a 'TYPE' object created by
@@ -5007,13 +5023,13 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 #endif
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 0
 template <class TYPE, class ARG>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 0
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 1
 template <class TYPE, class ARG, class ARGS_01>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01));
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 1
@@ -5021,7 +5037,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_H >= 2
 template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02));
@@ -5031,7 +5047,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
 template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02,
                                  class ARGS_03>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5043,7 +5059,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02,
                                  class ARGS_03,
                                  class ARGS_04>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5057,7 +5073,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_03,
                                  class ARGS_04,
                                  class ARGS_05>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5073,7 +5089,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_04,
                                  class ARGS_05,
                                  class ARGS_06>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5091,7 +5107,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_05,
                                  class ARGS_06,
                                  class ARGS_07>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5111,7 +5127,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_06,
                                  class ARGS_07,
                                  class ARGS_08>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5133,7 +5149,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_07,
                                  class ARGS_08,
                                  class ARGS_09>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5157,7 +5173,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_08,
                                  class ARGS_09,
                                  class ARGS_10>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02),
@@ -5347,7 +5363,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 // The generated code below is a workaround for the absence of perfect
 // forwarding in some compilers.
 template <class TYPE, class ARG, class... ARGS>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG),
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
 
@@ -6272,7 +6288,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
         BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)                      value,
-        BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE,
+        BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
         BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     emplace(BSLS_COMPILERFEATURES_FORWARD(ANY_TYPE, value));
@@ -6283,7 +6299,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
             BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)                  value,
-            BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE,
+            BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
             BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     emplace(BSLS_COMPILERFEATURES_FORWARD(ANY_TYPE, value));
@@ -6294,10 +6310,26 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
-   optional<ANY_TYPE>&&                                               original,
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
-   BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
+                                                                     ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+{
+    if (original.has_value()) {
+        emplace(std::move(original.value()));
+    }
+}
+
+template <class TYPE, bool USES_BSLMA_ALLOC>
+template <class ANY_TYPE>
+inline
+optional<TYPE, USES_BSLMA_ALLOC>::optional(
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
+                                                                     ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     if (original.has_value()) {
         emplace(std::move(original.value()));
@@ -6310,21 +6342,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    optional<ANY_TYPE>&&                                               original,
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
-   BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
-{
-    if (original.has_value()) {
-        emplace(std::move(original.value()));
-    }
-}
-
-template <class TYPE, bool USES_BSLMA_ALLOC>
-template <class ANY_TYPE>
-inline
-optional<TYPE, USES_BSLMA_ALLOC>::optional(
-   optional<ANY_TYPE>&&                                               original,
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(original.get_allocator())
 {
@@ -6339,7 +6357,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    optional<ANY_TYPE>&&                                               original,
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(original.get_allocator())
 {
@@ -6355,7 +6373,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(MoveUtil::access(original).get_allocator())
 {
@@ -6371,7 +6389,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR,
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(MoveUtil::access(original).get_allocator())
 {
@@ -6385,10 +6403,11 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
-   BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
-   BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
+                                                                     ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     optional<ANY_TYPE>& lvalue = original;
     if (lvalue.has_value()) {
@@ -6400,10 +6419,11 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
-   BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR,
-   BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
+                                                                     ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     optional<ANY_TYPE>& lvalue = original;
     if (lvalue.has_value()) {
@@ -7139,7 +7159,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
                     bsl::allocator_arg_t,
                     allocator_type                                   allocator,
                     BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)      value,
-                    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE)
+                    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE))
 : d_allocator(allocator)
 {
     this->emplace(BSLS_COMPILERFEATURES_FORWARD(ANY_TYPE, value));
@@ -8754,7 +8774,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)&
 optional<TYPE, USES_BSLMA_ALLOC>::operator=(ANY_TYPE&& rhs)
 {
     if (this->has_value()) {
@@ -9212,7 +9232,7 @@ optional<TYPE, false>::operator=(std::optional<ANY_TYPE>&& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(ANY_TYPE&& rhs)
 {
     if (this->has_value()) {
@@ -9286,7 +9306,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE) value,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     this->emplace(BSLS_COMPILERFEATURES_FORWARD(ANY_TYPE, value));
@@ -9297,7 +9317,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE) value,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     this->emplace(BSLS_COMPILERFEATURES_FORWARD(ANY_TYPE, value));
@@ -10727,7 +10747,7 @@ optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(ANY_TYPE&& rhs)
 {
     if (this->has_value()) {
@@ -12013,7 +12033,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional()
 
 #if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
 template <class TYPE, class ARG, class... ARGS>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
 {
@@ -12046,7 +12066,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 #endif
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 0
 template <class TYPE, class ARG>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg)
 {
     return bsl::optional<TYPE>(bsl::in_place,
@@ -12056,7 +12076,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg)
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 1
 template <class TYPE, class ARG, class ARGS_01>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01)
 {
@@ -12069,7 +12089,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_Q >= 2
 template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02)
@@ -12085,7 +12105,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
 template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02,
                                  class ARGS_03>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12104,7 +12124,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_02,
                                  class ARGS_03,
                                  class ARGS_04>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12126,7 +12146,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_03,
                                  class ARGS_04,
                                  class ARGS_05>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12151,7 +12171,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_04,
                                  class ARGS_05,
                                  class ARGS_06>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12179,7 +12199,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_05,
                                  class ARGS_06,
                                  class ARGS_07>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12210,7 +12230,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_06,
                                  class ARGS_07,
                                  class ARGS_08>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12244,7 +12264,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_07,
                                  class ARGS_08,
                                  class ARGS_09>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12281,7 +12301,7 @@ template <class TYPE, class ARG, class ARGS_01,
                                  class ARGS_08,
                                  class ARGS_09,
                                  class ARGS_10>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_01) args_01,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS_02) args_02,
@@ -12573,7 +12593,7 @@ BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional(
 // The generated code below is a workaround for the absence of perfect
 // forwarding in some compilers.
 template <class TYPE, class ARG, class... ARGS>
-BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+BSLS_KEYWORD_CONSTEXPR BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)
 make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(ARG)     arg,
               BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
 {
@@ -12782,25 +12802,25 @@ bool operator>=(const std::optional<LHS_TYPE>& lhs,
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR
-#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_ANYTYPE
+#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM
 #undef BSLSTL_OPTIONAL_DECLARE_IF_SAME
 #undef BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR
-#undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_ANYTYPE
+#undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM
 #undef BSLSTL_OPTIONAL_DEFINE_IF_SAME
 #undef BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL
-#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_ANYTYPE
+#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-#undef BSLSTL_OPTIONAL_ENABLE_IF_ARG_NOT_ALLOCATOR
+#undef BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG
 
 #endif  // INCLUDED_BSLSTL_OPTIONAL
 // ----------------------------------------------------------------------------
