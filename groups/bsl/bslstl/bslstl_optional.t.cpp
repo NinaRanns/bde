@@ -10504,7 +10504,7 @@ void TestDriver<TYPE>::testCase19_imp_libgccbug()
 #if (BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY &&                       \
      BSLS_LIBRARYFEATURES_STDCPP_GNU &&                                       \
      (!defined(_GLIBCXX_RELEASE) ||                                           \
-      (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 8)))
+      (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE <= 8)))
 #define STD_OPTIONAL_LIBCPP_BUG 1
 #endif
 
