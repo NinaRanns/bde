@@ -18,6 +18,7 @@ bslalg_hashtableimputil
 bslalg_hashutil
 bslalg_hasstliterators
 bslalg_hastrait
+bslalg_nothrowmovablewrapper
 bslalg_rangecompare
 bslalg_rbtreeanchor
 bslalg_rbtreenode
