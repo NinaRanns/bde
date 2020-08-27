@@ -64,10 +64,11 @@ using namespace bsl;
 //
 // TYPEDEFS
 // [28] typedef TYPE ValueType;
-// [  ] typename bsl::allocator<char> allocator_type;
+// [28] typename bsl::allocator<char> allocator_type;
 //
 // TRAITS
 // [28] bsl::is_trivially_copyable
+// [28] bsl::is_trivially_destructible
 // [28] BloombergLP::bslma::UsesBslmaAllocator
 // [28] BloombergLP::bslmf::UsesAllocatorArgT
 //
@@ -6040,6 +6041,10 @@ class TestDriver {
         // Array of test values of 'TEST_TYPE'.
 
   public:
+
+    static void testCase33();
+        // TESTING ALLOCATOR EXTENDED 'make_optional' USE CASES
+
     static void testCase32();
         // TESTING type deduction
 
@@ -6052,6 +6057,7 @@ class TestDriver {
         // TESTING 'make_optional' FACILITY
 
     static void testCase28();
+    static void testCase28b();
         // TESTING TRAITS AND TYPEDEFS
 
     static void testCase27();
@@ -6179,6 +6185,48 @@ void bslstl_optional_value_type_deduce(const bsl::optional<TYPE>&)
 template <class TYPE>
 void bslstl_optional_optional_type_deduce(const TYPE&)
 {
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase33()
+{
+    // --------------------------------------------------------------------
+    // TESTING ALLOCATOR EXTENDED 'make_optional' USE CASES
+    //
+    //  In this test, we check that there are no additional copies of the
+    //  newly created 'optional' object when using the allocator extended
+    //  'make_optional' even before RVO was mandatory.
+    //
+    //
+    // Concerns:
+    //
+    // Plan:
+    //
+    //
+    // Testing:
+    //
+    if (verbose)
+        printf("\nTESTING ALLOCATOR EXTENDED 'make_optional' USE CASES"
+               "\n====================================================\n");
+
+    if (veryVerbose)
+        printf("\tinitializing member variable of a class.\n");
+    {
+        bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+        bslma::TestAllocator         ta("third", veryVeryVeryVerbose);
+        bslma::DefaultAllocatorGuard dag(&da);
+        struct LocalClass
+        {
+            LocalClass(const typename Obj::allocator_type &alloc)
+            : member(bsl::make_optional<TYPE>(bsl::allocator_arg, alloc))
+            {}
+            Obj member;
+        };
+
+        LocalClass x(&oa);
+        ASSERT(x.member.get_allocator() == &oa);
+    }
 }
 
 template <class TYPE>
@@ -8167,18 +8215,18 @@ void TestDriver<TYPE>::testCase28()
     // Plan:
     //: 1 Verify that 'optional<TYPE>::value_type' matches 'TYPE'. [C-1]
     //: 2 Repeat step 1 using a 'const' 'value_type'. [C-2]
-    //: 3 verify that both 'UsesBslmaAllocator' and
+    //: 4 verify that both 'UsesBslmaAllocator' and
     //:   'UsesAllocatorArgT' traits for 'optional<TYPE'> are true if 'TYPE'
     //:   is allocator-aware. [C-3]
-    //: 4 verify that both 'UsesBslmaAllocator' and
+    //: 5 verify that both 'UsesBslmaAllocator' and
     //:   'UsesAllocatorArgT' traits for 'optional<TYPE'> are false if 'TYPE'
     //:   is not allocator-aware. [C-4]
-    //: 5 verify that 'optional<TYPE'> is trivially destructible if 'TYPE' is
+    //: 6 verify that 'optional<TYPE'> is trivially destructible if 'TYPE' is
     //:   trivially destructible. [C-5]
     //
     // Testing:
     //
-    //      optional<TYPE>::value_type;
+    //      optional<TYPE>::value_type
     //      BloombergLP::bslma::UsesBslmaAllocator<optional<TYPE>>
     //      BloombergLP::bslma::UsesAllocatorArgT<optional<TYPE>>
     //      std::is_trivially_destructible<optional<TYPE>>
@@ -8186,8 +8234,8 @@ void TestDriver<TYPE>::testCase28()
     // --------------------------------------------------------------------
 
     if (verbose)
-        printf("\nTESTNG TRAITS AND TYPEDEFS"
-               "\n==========================\n");
+        printf("\nTESTING TRAITS AND TYPEDEFS"
+               "\n===========================\n");
 
     {
         ASSERT((bsl::is_same<typename Obj::value_type, ValueType>::value));
@@ -8206,6 +8254,36 @@ void TestDriver<TYPE>::testCase28()
         ASSERT(bsl::is_trivially_copyable<Obj>::value ==
                bsl::is_trivially_copyable<ValueType>::value);
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+    }
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase28b()
+{
+    // --------------------------------------------------------------------
+    // TESTING TRAITS AND TYPEDEFS
+    //
+    //
+    // Concerns:
+    //: 1 That 'optional<TYPE>::allocator_type' is 'bsl::allocator<char>' if
+    //:   'TYPE' is allocator aware.
+    //
+    // Plan:
+    //: 1 Verify that 'optional<TYPE>::allocator_type' is
+    //:   'bsl::allocator<char>'. [C-1]
+    //
+    // Testing:
+    //
+    //      optional<TYPE>::allocator_type
+    //
+    // --------------------------------------------------------------------
+
+    if (verbose)
+        printf("\nTESTING TRAITS AND TYPEDEFS"
+               "\n===========================\n");
+
+    {
+        ASSERT((bsl::is_same<typename ObjC::allocator_type,
+                             bsl::allocator<char> >::value));
     }
 }
 
@@ -12495,16 +12573,13 @@ int main(int argc, char **argv)
     // CONCERN: 'BSLS_REVIEW' failures should lead to test failures.
     bsls::ReviewFailureHandlerGuard reviewGuard(&bsls::Review::failByAbort);
 
-    bslma::TestAllocator defaultAllocator("default", veryVeryVeryVerbose);
-    ASSERT(0 == bslma::Default::setDefaultAllocator(&defaultAllocator));
-
-    // CONCERN: In no case does memory come from the global allocator.
-
-    bslma::TestAllocator globalAllocator("global", veryVeryVeryVerbose);
-    bslma::Default::setGlobalAllocator(&globalAllocator);
-
     switch (test) {
       case 0:
+      case 33:
+        RUN_EACH_TYPE(TestDriver,
+                      testCase33,
+                      MyClass2, MyClass2a);
+        break;
       case 32:
         RUN_EACH_TYPE(TestDriver,
                       testCase32,
@@ -12532,6 +12607,7 @@ int main(int argc, char **argv)
         RUN_EACH_TYPE(TestDriver,
                       testCase28,
                       BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        RUN_EACH_TYPE(TestDriver, testCase28b, MyClass2, MyClass2a);
         break;
       case 27:
         RUN_EACH_TYPE(TestDriver,
