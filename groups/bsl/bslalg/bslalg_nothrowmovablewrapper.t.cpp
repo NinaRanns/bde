@@ -1,22 +1,73 @@
 // bslalg_nothrowmovablewrapper.t.cpp                                 -*-C++-*-
 
-#include "bslalg_nothrowmovablewrapper.h"
+#include <bslalg_nothrowmovablewrapper.h>
+#include <bslalg_constructorproxy.h>
+
+#include <bslma_usesbslmaallocator.h>
 
 #include <bsls_asserttest.h>
 #include <bsls_bsltestutil.h>
+
+#include <bsltf_testvaluesarray.h>
+#include <bsltf_templatetestfacility.h>
 
 #include <stdio.h>   // 'printf'
 #include <stdlib.h>  // 'atoi'
 
 using namespace BloombergLP;
 
-//=============================================================================
-//                             TEST PLAN
-//-----------------------------------------------------------------------------
+// ============================================================================
+//                                  TEST PLAN
+// ----------------------------------------------------------------------------
+//                                  Overview
+//                                  --------
 //
+//  Internal implementation types:
+// [  ] 'NothrowMovableWrapper_Traits' class
+// [  ] 'NothrowMovableWrapperUtil' class
 //
-
-//-----------------------------------------------------------------------------
+// TRAITS
+// [ 3] bsl::is_nothrow_move_constructible
+// [ 3] bslma::UsesBslmaAllocator
+// [ 3] bslma::UsesAllocatorArgT
+// [ 3] bslma::IsBitwiseMoveable
+//
+// TYPEDEFS
+// [  ] allocator_type
+// [ 3] ValueType
+//
+// CREATORS
+// [  ] NothrowMovableWrapper();
+// [  ] NothrowMovableWrapper(bsl::allocator_arg_t, const allocator_type& allocator);
+// [  ] NothrowMovableWrapper(const TYPE& val);  
+// [  ] NothrowMovableWrapper(bsl::allocator_arg_t,
+//                            const allocator_type& allocator,
+//                            const TYPE&           val);
+// [  ] NothrowMovableWrapper(bslmf::MovableRef<TYPE> val) BSLS_KEYWORD_NOEXCEPT;
+// [  ] NothrowMovableWrapper(bsl::allocator_arg_t    ,
+//                            const allocator_type&   allocator,
+//                            bslmf::MovableRef<TYPE> val);
+// [  ] NothrowMovableWrapper(const NothrowMovableWrapper& original);
+// [  ] NothrowMovableWrapper(bsl::allocator_arg_t      ,
+//                            const allocator_type&     alloc,
+//                            const NothrowMovableWrapper& original);
+// [  ] NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original);
+// [  ] NothrowMovableWrapper(bsl::allocator_arg_t                  ,
+//                            const allocator_type&                 alloc,
+//                            bslmf::MovableRef<NothrowMovableWrapper> original);
+// [  ] ~NothrowMovableWrapper();
+//
+// MANIPULATORS
+// [  ] ValueType& unwrap();
+// [  ] operator ValueType&();
+//
+// ACCESSORS
+// [  ] ValueType const& unwrap() const;
+// [  ] operator const ValueType&() const;
+// [  ] allocator_type get_allocator() const;
+//
+// ----------------------------------------------------------------------------
+// [ 3] BREATHING TEST
 
 //=============================================================================
 //                       STANDARD BDE ASSERT TEST MACRO
@@ -50,6 +101,8 @@ void aSsErT(bool b, const char *s, int i)
 #define P_  BSLS_BSLTESTUTIL_P_  // P(X) without '\n'.
 #define T_  BSLS_BSLTESTUTIL_T_  // Print a tab (w/o newline).
 #define L_  BSLS_BSLTESTUTIL_L_  // current Line number
+
+#define RUN_EACH_TYPE BSLTF_TEMPLATETESTFACILITY_RUN_EACH_TYPE
 
 //=============================================================================
 //                  SEMI-STANDARD NEGATIVE-TESTING MACROS
@@ -610,6 +663,110 @@ namespace {
     }
 
 } // end unnamed namespace
+// ============================================================================
+//                          TEST DRIVER TEMPLATE
+// ----------------------------------------------------------------------------
+
+template <class TEST_TYPE>
+class TestDriver {
+    // This class template provides a namespace for testing the 'bslalg::NothrowMovableWrapper'
+    // type.
+
+  private:
+    // PRIVATE TYPES
+    typedef TEST_TYPE ValueType;
+        // ValueType under test.
+
+    typedef bslalg::NothrowMovableWrapper<ValueType> Obj;
+        // Type under test.
+
+    typedef bslalg::ConstructorProxy<ValueType> ValWithAllocator;
+        // Wrapper for 'ValueType' whose constructor takes an allocator.
+
+    typedef bsltf::TestValuesArray<TEST_TYPE> TestValues;
+        // Array of test values of 'TEST_TYPE'.
+
+  public:
+    static void testCase4();
+    
+    static void testCase3();
+};
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4()
+{
+    // --------------------------------------------------------------------
+    //
+    // Concerns:
+    //
+    // Plan:
+    //
+    // Testing:
+    //  bsl::is_nothrow_move_constructible
+    //  bslma::UsesBslmaAllocator
+    //  bslmf::UsesAllocatorArgT
+    //  bslmf::IsBitwiseMoveable
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING TRAITS AND TYPEDEFS"
+                "\n===========================\n");
+
+    {
+        ASSERT((bsl::is_nothrow_move_constructible<Obj>::value));
+        
+        ASSERT(BloombergLP::bslma::UsesBslmaAllocator<Obj>::value ==
+                BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
+        ASSERT(BloombergLP::bslmf::UsesAllocatorArgT<Obj>::value ==
+                BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value);
+        ASSERT(BloombergLP::bslmf::IsBitwiseMoveable<Obj>::value ==
+                BloombergLP::bslmf::IsBitwiseMoveable<ValueType>::value);
+
+        ASSERT((bsl::is_same<typename Obj::ValueType, ValueType>::value));
+        ASSERT((BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value &&
+                 bsl::is_same<typename Obj::allocator_type, bsl::allocator<char>>::value)
+                || !(BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value));
+
+    }
+
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase3()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'NothrowMovableWrapper_Traits' CLASS
+    //
+    // Concerns:
+    //
+    // Plan:
+    //
+    // Testing:
+    //  NothrowMovableWrapper_Traits::IsWrapped
+    //  NothrowMovableWrapper_Traits::UnwrappedType
+    //  NothrowMovableWrapper_Traits::WrappedType
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING 'NothrowMovableWrapper_Traits' CLASS"
+                "\n===========================================\n");
+
+    {
+        ASSERT(!(bslalg:NothrowMovableWrapper_Traits<TYPE>::IsWrapped::value));
+        ASSERT((bsl::is_same(
+            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnWrappedType,
+            typename bslalg::TYPE));
+    
+    
+        ASSERT((bslalg:NothrowMovableWrapper_Traits<Obj>::IsWrapped::value));
+        ASSERT((bsl::is_same(
+            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnWrappedType,
+            ValueType));
+        ASSERT((bsl::is_same(
+            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnWrappedType,
+            Obj));
+    
+    
+    }
+
+}
 
 //=============================================================================
 //                              MAIN PROGRAM
@@ -626,6 +783,12 @@ int main(int argc, char *argv[])
     printf("TEST " __FILE__ " CASE %d\n", test);
 
     switch (test) { case 0:  // Zero is always the leading case.
+      case 3: {
+        RUN_EACH_TYPE(TestDriver,
+                      testCase3,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+
+      } break;
       case 2: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
