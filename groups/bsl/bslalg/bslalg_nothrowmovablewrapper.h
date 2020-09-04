@@ -415,8 +415,7 @@ class NothrowMovableWrapper
         // 'allocator' (e.g., the address of a 'bslma::Allocator' object) to
         // supply memory; otherwise, the default allocator is used.
 
-    NothrowMovableWrapper(bslmf::MovableRef<TYPE> val) BSLS_KEYWORD_NOEXCEPT;
-                                                                    // IMPLICIT
+    NothrowMovableWrapper(bslmf::MovableRef<TYPE> val);             // IMPLICIT
         // Wrap the specified 'val', using 'TYPE''s move constructor.  Note
         // that this move constructor is unconditionally 'noexcept', as that
         // is the entire purpose of this wrapper.
@@ -443,7 +442,8 @@ class NothrowMovableWrapper
         // that this constructor will not be selected by overload resolution
         // unless 'TYPE' is allocator aware.
 
-    NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original);
+    NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original)
+                                                         BSLS_KEYWORD_NOEXCEPT;
         // Move construct from the specified 'original' wrapper using 'TYPE''s
         // move constructor.
 
@@ -617,7 +617,7 @@ template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
 NothrowMovableWrapper(bsl::allocator_arg_t  ,
-                   const allocator_type& allocator)
+                      const allocator_type& allocator)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(),
                                        allocator.mechanism());
@@ -634,8 +634,8 @@ template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
 NothrowMovableWrapper(bsl::allocator_arg_t  ,
-                   const allocator_type& allocator,
-                   const TYPE&           val)
+                      const allocator_type& allocator,
+                      const TYPE&           val)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(),
                                        allocator.mechanism(),
@@ -645,7 +645,7 @@ NothrowMovableWrapper(bsl::allocator_arg_t  ,
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
-NothrowMovableWrapper(bslmf::MovableRef<TYPE> val) BSLS_KEYWORD_NOEXCEPT
+NothrowMovableWrapper(bslmf::MovableRef<TYPE> val)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(), (void*) 0,
                                        bslmf::MovableRefUtil::move(val));
@@ -655,8 +655,8 @@ template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
 NothrowMovableWrapper(bsl::allocator_arg_t    ,
-                   const allocator_type&   allocator,
-                   bslmf::MovableRef<TYPE> val)
+                      const allocator_type&   allocator,
+                      bslmf::MovableRef<TYPE> val)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(),
                                        allocator.mechanism(),
@@ -676,9 +676,9 @@ NothrowMovableWrapper(const NothrowMovableWrapper& original)
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
-NothrowMovableWrapper(bsl::allocator_arg_t      ,
-                   const allocator_type&     allocator,
-                   const NothrowMovableWrapper& original)
+NothrowMovableWrapper(bsl::allocator_arg_t         ,
+                      const allocator_type&        allocator,
+                      const NothrowMovableWrapper& original)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(),
                                        allocator.mechanism(),
@@ -689,6 +689,7 @@ template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
 NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original)
+                                                          BSLS_KEYWORD_NOEXCEPT
 {
     bslma::ConstructionUtil::construct(d_buffer.address(), (void*) 0,
                         bslmf::MovableRefUtil::move(
@@ -698,9 +699,9 @@ NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original)
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::
-NothrowMovableWrapper(bsl::allocator_arg_t                  ,
-                   const allocator_type&                 allocator,
-                   bslmf::MovableRef<NothrowMovableWrapper> original)
+NothrowMovableWrapper(bsl::allocator_arg_t                     ,
+                      const allocator_type&                    allocator,
+                      bslmf::MovableRef<NothrowMovableWrapper> original)
 {
     bslma::ConstructionUtil::construct(
         d_buffer.address(),
