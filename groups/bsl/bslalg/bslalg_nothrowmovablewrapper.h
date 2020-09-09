@@ -461,13 +461,15 @@ class NothrowMovableWrapper
 
     // MANIPULATORS
     ValueType& unwrap();
-    operator ValueType&();
-        // Return a modifiable reference the wrapped object.
+    operator ValueType&() { return unwrap(); }
+        // Return a modifiable reference the wrapped object.  Note that the
+        // conversion operator is inplace inline to work around MSVC 2013 bug.
 
     // ACCESSORS
     ValueType const& unwrap() const;
-    operator const ValueType&() const;
-        // Return a const reference the wrapped object.
+    operator ValueType const&() const { return unwrap(); }
+        // Return a const reference the wrapped object.  Note that the
+        // conversion operator is inplace inline to work around MSVC 2013 bug.
 
     allocator_type get_allocator() const;
         // Return the allocator used to construct this object.  Note that this
@@ -726,13 +728,6 @@ bslalg::NothrowMovableWrapper<TYPE>::unwrap()
     return d_buffer.object();
 }
 
-template <class TYPE>
-inline
-bslalg::NothrowMovableWrapper<TYPE>::operator ValueType&()
-{
-    return unwrap();
-}
-
 // ACCESSORS
 template <class TYPE>
 inline
@@ -740,13 +735,6 @@ typename bslalg::NothrowMovableWrapper<TYPE>::ValueType const&
 bslalg::NothrowMovableWrapper<TYPE>::unwrap() const
 {
     return d_buffer.object();
-}
-
-template <class TYPE>
-inline
-bslalg::NothrowMovableWrapper<TYPE>::operator const ValueType&() const
-{
-    return unwrap();
 }
 
 template <class TYPE>
