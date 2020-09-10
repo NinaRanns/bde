@@ -24,11 +24,6 @@ using namespace BloombergLP;
 //                                  Overview
 //                                  --------
 //
-//  Internal implementation types:
-// [ 3] 'NothrowMovableWrapper_Traits' class
-//
-// NothrowMovableWrapper class
-// ---------------------------
 //
 // TRAITS
 // [ 4] bsl::is_nothrow_move_constructible
@@ -70,25 +65,6 @@ using namespace BloombergLP;
 // [ 8] ValueType const& unwrap() const;
 // [ 8] operator const ValueType&() const;
 // [ 8] allocator_type get_allocator() const;
-//
-//
-//  'NothrowMovableWrapperUtil' class
-//  ---------------------------------
-//
-// TRAITS
-// [  ] IsWrapped
-// [  ] WrappedType
-// [  ] UnwrappedType
-//
-// STATIC METHODS
-// [  ] WrappedType<TYPE>::type wrap(TYPE&);
-// [  ] WrappedType<TYPE>::type wrap(TYPE const&);
-// [  ] WrappedType<:RemoveReference<TYPE>::type>::type
-//        wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
-// [  ] UnwrappedType<TYPE>::type unwrap(TYPE&);
-// [  ] UnwrappedType<TYPE>::type unwrap(TYPE const&);
-// [  ] WrappedType<RemoveReference<TYPE>::type>::type
-//          unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
 //
 // ----------------------------------------------------------------------------
 // [ 3] BREATHING TEST
@@ -434,9 +410,6 @@ bool operator!=(const TrackableValueWithAlloc& a,
     return a.value() != b.value();
 }
 
-typedef void (*BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE)();
-typedef void (BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE)();
-
 
 //=============================================================================
 //                             USAGE EXAMPLES
@@ -600,101 +573,6 @@ namespace {
         ASSERT(-1 == obj3.value().unwrap().value());  // moved from
         ASSERT(3 == obj4.value().unwrap().value());
     }
-//..
-//
-///Example 2
-///- - - - -
-// Note that, in the last two lines of Example 1, we must call 'unwrap' in
-// order to access the 'SomeType' object inside of the
-// 'NothrowMovableWrapper'.  This is one situation where it would be
-// attractive to have an overloadable "operator dot" so that both
-// 'CoundedThing' and 'NothrowMovableWrapper' could be transparent proxy
-// types.  C++ does not have overloadable operator dot, but we can create a
-// 'CountedType' that is more intelligent about the existance of
-// 'NothrowMovableWrapper' and automatically unwraps values for the user's
-// convenience.
-//
-// Rather than starting from scratch, we'll build our new counted type,
-// 'CountedType2' on 'CountedType'.  We start be defining a single data
-// member of type 'CountedType':
-//..
-    template <class TYPE>
-    class CountedType2 {
-        CountedType<TYPE> d_data;
-//..
-// Next, for convenience, we add a public data type, 'ValueType' for the value
-// stored within 'CountedType2'.  However, rather than defining 'ValueType'
-// as simply 'TYPE', we unwrap it, in case 'TYPE' is an instantiation of
-// 'NothrowMovableWrapper':
-//..
-    public:
-        // TYPES
-        typedef typename
-        bslalg::NothrowMovableWrapperUtil::UnwrappedType<TYPE>::type ValueType;
-//..
-// Note that the 'UnwrappedType' metafunction has no affect of 'TYPE' is not
-// wrapped.
-//
-// Next, we declare (and define) the class functions, constructors, and
-// destructor, simply forwarding to the corresponding 'CountedType' function,
-// constructor, or destructor:
-//..
-        // CLASS FUNCTIONS
-        static int count() { return CountedType<TYPE>::count(); }
-
-        // CREATORS
-        CountedType2(const TYPE& val) : d_data(val) { }
-        CountedType2(const CountedType2& original)
-            : d_data(original.d_data) { }
-        CountedType2(bslmf::MovableRef<CountedType2> original)
-            : d_data(bslmf::MovableRefUtil::move(
-                         bslmf::MovableRefUtil::access(original).d_data)) { }
-//..
-// Finally, we implement the 'value()' members such that the returned values
-// do not need to be unwrapped.  As in the case of the 'UnwrappedType'
-// metafunction, the 'unwrap()' function in 'NothrowMovableWrapperUtil'
-// handles both wrapped and unwrapped arguments, unwrapping the latter and
-// returning an unmodified reference to the former:
-//..
-        // MANIPULATORS
-        ValueType& value()
-        {
-            return bslalg::NothrowMovableWrapperUtil::unwrap(d_data.value());
-            // Alternatively: 'return d_data.value();'
-        }
-
-        // ACCESSORS
-        const ValueType& value() const
-        {
-            return bslalg::NothrowMovableWrapperUtil::unwrap(d_data.value());
-            // Alternatively: 'return d_data.value();'
-        }
-    };
-//..
-// Note the alternative code for these members: A 'NothrowMovableWrapper<TP>'
-// object is implicitly convertible to 'TP&', so if 'TYPE' is a
-// 'NothrowMovableWrapper', the simple return statement will implicitly unwrap
-// it.
-//
-// Using a similar example for 'CountedType2' as we used for 'CountedType', we
-// see that the usage of 'CountedType2' with and without
-// 'NothrowMovableWrapper' is the same:
-//..
-    void usageExample2()
-    {
-        CountedType2<SomeType> obj1(1);
-        CountedType2<SomeType> obj2(bslmf::MovableRefUtil::move(obj1));
-        ASSERT(1 == obj1.value().value());  // Copied, not moved from
-        ASSERT(1 == obj2.value().value());
-
-        CountedType2<bslalg::NothrowMovableWrapper<SomeType> >
-            obj3(SomeType(3));
-        CountedType2<bslalg::NothrowMovableWrapper<SomeType> >
-            obj4(bslmf::MovableRefUtil::move(obj3));
-        ASSERT(-1 == obj3.value().value());  // moved from
-        ASSERT(3 == obj4.value().value());   // No need to call 'unwrap'
-    }
-
 } // end unnamed namespace
 
 template <class TYPE,
@@ -1226,55 +1104,6 @@ void TestDriver<TYPE>::testCase4()
                 || !(BloombergLP::bslma::UsesBslmaAllocator<ValueType>::value));
     }
 }
-template <class TYPE>
-void TestDriver<TYPE>::testCase3()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'NothrowMovableWrapper_Traits' CLASS
-    //
-    // Concerns:
-    //
-    // Plan:
-    //
-    // Testing:
-    //  NothrowMovableWrapper_Traits::IsWrapped
-    //  NothrowMovableWrapper_Traits::UnwrappedType
-    //  NothrowMovableWrapper_Traits::WrappedType
-    // --------------------------------------------------------------------
-    if (verbose)
-        printf("\nTESTING 'NothrowMovableWrapper_Traits' CLASS"
-                "\n===========================================\n");
-
-    {
-        ASSERT(!(bslalg::NothrowMovableWrapper_Traits<TYPE>::IsWrapped::value));
-        ASSERT(!(bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnwrappedType,
-            TYPE>::value) || 
-            (bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnwrappedType,
-            TYPE *>::value));
-        ASSERT(!(bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::WrappedType,
-            typename bslalg::NothrowMovableWrapper<typename bsl::remove_cv<TYPE>::type> >::value)
-            ||
-            (bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::WrappedType,
-            typename bslalg::NothrowMovableWrapper<TYPE*> >::value));
-
-        ASSERT((bslalg::NothrowMovableWrapper_Traits<Obj>::IsWrapped::value));
-        ASSERT((bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::UnwrappedType,
-            ValueType>::value));
-        ASSERT((bsl::is_same<
-            typename bslalg::NothrowMovableWrapper_Traits<Obj>::WrappedType,
-            Obj>::value));   
-    }
-
-}
 
 //=============================================================================
 //                              MAIN PROGRAM
@@ -1291,112 +1120,6 @@ int main(int argc, char *argv[])
     printf("TEST " __FILE__ " CASE %d\n", test);
 
     switch (test) { case 0:  // Zero is always the leading case.
-        case 10: {
-            // --------------------------------------------------------------------
-            // TESTING 'NothrowMovableWrapperUtil' TRAITS
-            //
-            //  This test checks the correct behaviour of 'NothrowMovableWrapperUtil' 
-            //  traits when `TYPE` is not a specialization of NothrowMovableWrapper`
-            //
-            // Concerns:
-            //: 1 `IsWrapped` trait is satisfied if and only if 'TYPE' is a
-            //:  specialization of 'NothrowMovableWrapper`.
-            //: 2 `WrappedType::type` is `NothrowMovableWrapper<TYPE>' if `TYPE` is 
-            //:   not a specialization of `NothrowMovableWrapper`, and `TYPE' 
-            //:   otherwise.
-            //: 2 `WrappedType::type` is `TYPE` if `TYPE` is not a specialization of
-            //:   `NothrowMovableWrapper`, and `TYPE::ValueType` otherwise.
-            //
-            // Plan:
-            //: 1 Using a `TYPE` which is not a specialization of 
-            //:   'NothrowMovableWrapper` check that `IsWrapped` trait is not 
-            //:   satisfied.  [C-1]
-            //: 2 In step 1, check that `WrappedType::type` is 
-            //:   `NothrowMovableWrapper<TYPE>'.  [C-2] 
-            //: 3 In step 1, check that `UnwrappedType::type` is 
-            //:   `TYPE`.  [C-2] 
-            //: 4 Using a `NothrowMovableWrapper<TYPE> as test type, check that 
-            //:   `IsWrapped` trait is satisfied.  [C-1]
-            //: 5 In step 5, check that `WrappedType::type` is `TYPE'.  [C-2] 
-            //: 6 In step 6, check that `UnwrappedType::type` is 
-            //:   `TYPE::ValueType`.  [C-2] 
-            //  
-            // Testing:
-            //  NothrowMovableWrapperUtil::IsWrapped
-            //  NothrowMovableWrapperUtil::UnwrappedType
-            //  NothrowMovableWrapperUtil::WrappedType
-            // --------------------------------------------------------------------
-            if (verbose)
-                printf("\nTESTING 'NothrowMovableWrapperUtil' TRAITS"
-                        "\n=========================================\n");
-
-            {
-                ASSERT(!(bslalg::NothrowMovableWrapperUtil::IsWrapped<int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<int>::type,
-                    int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<int>::type,
-                    bslalg::NothrowMovableWrapper<int> >::value));
-
-                ASSERT(!(bslalg::NothrowMovableWrapperUtil::IsWrapped<const int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<const int>::type,
-                    const int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<const int>::type,
-                    bslalg::NothrowMovableWrapper<int> >::value));
-                    
-                ASSERT(!(bslalg::NothrowMovableWrapperUtil::IsWrapped<BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE>::type,
-                    BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE>::type,
-                    bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE> >::value));
-
-                ASSERT(!(bslalg::NothrowMovableWrapperUtil::IsWrapped<BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE>::type,
-                    BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE *>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE>::type,
-                    bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE *> >::value));
-            }
-            {
-
-                typedef bslalg::NothrowMovableWrapper<int> NTMB_INT;
-                typedef bslalg::NothrowMovableWrapper<const int> NTMB_CONST_INT;
-                typedef bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLE_FUNCTION_PTR_TYPE>
-                             NTMB_FUNCTION_PTR_TYPE;
-                
-
-                
-                ASSERT((bslalg::NothrowMovableWrapperUtil::IsWrapped<NTMB_INT>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<NTMB_INT>::type,
-                    int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<NTMB_INT>::type,
-                    NTMB_INT>::value));
-
-                ASSERT((bslalg::NothrowMovableWrapperUtil::IsWrapped<NTMB_CONST_INT>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<NTMB_CONST_INT>::type,
-                    const int>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<NTMB_CONST_INT>::type,
-                    NTMB_CONST_INT >::value));
-                    
-                ASSERT((bslalg::NothrowMovableWrapperUtil::IsWrapped<NTMB_FUNCTION_PTR_TYPE>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::UnwrappedType<NTMB_FUNCTION_PTR_TYPE>::type,
-                    BSLALG_NOTHROWMOVABLE_FUNCTION_TYPE *>::value));
-                ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableWrapperUtil::WrappedType<NTMB_FUNCTION_PTR_TYPE>::type,
-                    NTMB_FUNCTION_PTR_TYPE >::value));
-            }
-        } break;    
         case 9: {
         // --------------------------------------------------------------------
         // 'noexcept' SPECIFICATION
@@ -1448,11 +1171,6 @@ int main(int argc, char *argv[])
                       testCase4,
                       BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
       } break;
-      case 3: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase3,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-      } break;
       case 2: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
@@ -1462,7 +1180,6 @@ int main(int argc, char *argv[])
                             "\n==============\n");
 
         usageExample1();
-        usageExample2();
       } break;
       case 1: {
         // --------------------------------------------------------------------
@@ -1509,13 +1226,6 @@ int main(int argc, char *argv[])
         bslalg::NothrowMovableWrapper<int (*)(int)> funcWrap1(&simpleFunction);
         int (*&pfunc1)(int) = funcWrap1.unwrap();
         ASSERT(pfunc1 == &simpleFunction);
-
-        bslalg::NothrowMovableWrapperUtil::WrappedType<int(int)>::type
-            funcWrap2 = bslalg::NothrowMovableWrapperUtil::wrap(
-                simpleFunction);
-        int (*&pfunc2)(int) = funcWrap2.unwrap();
-        ASSERT(pfunc2 == &simpleFunction);
-
       } break;
 
       default: {
