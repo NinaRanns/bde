@@ -228,7 +228,7 @@ BSLS_IDENT("$Id: $")
 //      typedef typename
 //      bslalg::NothrowMovableWrapperUtil::UnwrappedType<TYPE>::type ValueType;
 //..
-// Note that the 'UnwrappedType' metafunction has no affect of 'TYPE' is not
+// Note that the 'UnwrappedType' metafunction has no affect if 'TYPE' is not
 // wrapped.
 //
 // Next, we declare (and define) the class functions, constructors, and
