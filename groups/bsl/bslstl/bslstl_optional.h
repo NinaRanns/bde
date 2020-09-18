@@ -278,14 +278,14 @@ struct Optional_ConvertsFrom
           bsl::is_convertible<OPT_TYPE&, TYPE>::value ||
           bsl::is_convertible<const OPT_TYPE, TYPE>::value ||
           bsl::is_convertible<OPT_TYPE, TYPE>::value ||
-          BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, const OPT_TYPE&, false>::value ||
-          BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
-          BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
-          BloombergLP::bslstl::
-              Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
+
+          Optional_IsConstructible<TYPE, const OPT_TYPE&, false>::value ||
+
+          Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
+
+          Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
+
+          Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
 };
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 template <class TYPE, class OPT_TYPE>
@@ -384,7 +384,6 @@ struct Optional_PropagatesAllocator
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
 };
 
-
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConstructsFromOptional
 : bsl::integral_constant<
@@ -399,45 +398,29 @@ struct Optional_ConstructsFromType
 : bsl::integral_constant<
       bool,
       !bsl::is_same<ANY_TYPE, TYPE>::value &&
-          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
-                            ANY_TYPE>::type,
+          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::optional<TYPE> >::value &&
-          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
-                            ANY_TYPE>::type,
+          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::nullopt_t>::value &&
-          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
-                            ANY_TYPE>::type,
+          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::in_place_t>::value &&
-          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
-                            ANY_TYPE>::type,
+          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::allocator_arg_t>::value &&
-          BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::
-              value> {
+          Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
 };
 
 // Macros to define common constraints that enable a constructor or assignment
 // operator.
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE)   \
-    typename bsl::enable_if<                                                  \
-        BloombergLP::bslstl::                                                 \
-            Optional_ConstructsFromOptional<TYPE, ANY_TYPE>::value,           \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
-
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE)    \
     typename bsl::enable_if<                                                  \
         BloombergLP::bslstl::                                                 \
             Optional_ConstructsFromOptional<TYPE, ANY_TYPE>::value,           \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,       \
-                                                                  ANY_TYPE)   \
-    typename bsl::enable_if<                                                  \
-        BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,               \
-                                                          ANY_TYPE>::value,   \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
-
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE)   \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(                       \
+                               TYPE,                                          \
+                               ANY_TYPE) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,        \
                                                                  ANY_TYPE)    \
@@ -446,13 +429,11 @@ struct Optional_ConstructsFromType
                                                           ANY_TYPE>::value,   \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(    \
-    TYPE, ANY_TYPE)                                                           \
-    typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::Optional_PropagatesAllocator<TYPE,              \
-                                                           ANY_TYPE>::value,  \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,       \
+                                                                  ANY_TYPE)   \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(                 \
+                               TYPE,                                          \
+                               ANY_TYPE) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(     \
     TYPE, ANY_TYPE)                                                           \
@@ -461,12 +442,11 @@ struct Optional_ConstructsFromType
                                                            ANY_TYPE>::value,  \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE)             \
-    typename bsl::enable_if<                                                  \
-        BloombergLP::bslstl::Optional_ConstructsFromType<TYPE,                \
-                                                         ANY_TYPE>::value,    \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(    \
+    TYPE, ANY_TYPE)                                                           \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(         \
+                               TYPE,                                          \
+                               ANY_TYPE) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE)              \
     typename bsl::enable_if<                                                  \
@@ -474,40 +454,38 @@ struct Optional_ConstructsFromType
                                                          ANY_TYPE>::value,    \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_SAME(U, V)                                 \
-    typename bsl::enable_if<                                                  \
-        bsl::is_same<U, V>::value,                                            \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM(TYPE, ANYTYPE)             \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM(                                \
+                                TYPE,                                         \
+                                ANYTYPE) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_SAME(U, V)                                  \
     typename bsl::enable_if<                                                  \
         bsl::is_same<U, V>::value,                                            \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-
-#define BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(U, V)                   \
-    typename bsl::enable_if<                                                  \
-        !bsl::is_convertible<V, U>::value,                                    \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
+#define BSLSTL_OPTIONAL_DECLARE_IF_SAME(U, V)                                 \
+    BSLSTL_OPTIONAL_DEFINE_IF_SAME(U, V) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(U, V)                    \
     typename bsl::enable_if<                                                  \
         !bsl::is_convertible<V, U>::value,                                    \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(U, V)               \
-    typename bsl::enable_if<                                                  \
-        bsl::is_convertible<V, U>::value,                                     \
-        BloombergLP::bslstl::Optional_OptNoSuchType>::type =                  \
-        BloombergLP::bslstl::optNoSuchType
+#define BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(U, V)                   \
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(                             \
+                                      U,                                      \
+                                      V) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(U, V)                \
     typename bsl::enable_if<                                                  \
         bsl::is_convertible<V, U>::value,                                     \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
+#define BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(U, V)               \
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(                         \
+                                      U,                                      \
+                                      V) = BloombergLP::bslstl::optNoSuchType
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)           \
     typename bsl::enable_if<                                                  \
@@ -539,10 +517,8 @@ template <class TYPE, class ANY_TYPE>
 struct Optional_ConstructsFromStdOptional
 : bsl::integral_constant<
       bool,
-      !BloombergLP::bslstl::Optional_ConvertsFromOptional<TYPE,
-                                                          ANY_TYPE>::value &&
-          BloombergLP::bslstl::Optional_IsConstructible<TYPE, ANY_TYPE, true>::
-              value> {
+      !Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&
+          Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
 };
 
 #define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,         \
@@ -559,18 +535,6 @@ struct Optional_ConstructsFromStdOptional
         BloombergLP::bslstl::                                                 \
             Optional_ConstructsFromStdOptional<TYPE, ANY_TYPE>::value,        \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
-
-#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)       \
-    typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::                                                \
-                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
-            BloombergLP::bslstl::                                             \
-                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
-            !BloombergLP::bslstl::                                            \
-                Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value,       \
-        optional<TYPE> >::type
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -2825,7 +2789,7 @@ class optional {
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const std::optional<ANY_TYPE>& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -2835,7 +2799,7 @@ class optional {
         // compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(std::optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -3067,7 +3031,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const std::optional<ANY_TYPE>& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -3077,7 +3041,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(std::optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -8822,7 +8786,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
 optional<TYPE, USES_BSLMA_ALLOC>::operator=(const std::optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -8842,7 +8806,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator=(const std::optional<ANY_TYPE>& rhs)
 template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
 optional<TYPE, USES_BSLMA_ALLOC>::operator=(std::optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -9200,7 +9164,7 @@ optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&)&
 optional<TYPE, false>::operator=(const std::optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -9220,7 +9184,7 @@ optional<TYPE, false>::operator=(const std::optional<ANY_TYPE>& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(std::optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -12826,7 +12790,7 @@ bool operator>=(const std::optional<LHS_TYPE>& lhs,
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
-#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL
+#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 #undef BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG
 
