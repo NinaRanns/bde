@@ -312,14 +312,18 @@ template <class TYPE, class ANY_TYPE>
 struct Optional_ConvertsFromBslOptional
 : bsl::integral_constant<
       bool,
-      Optional_ConvertsFrom<TYPE, bsl::optional<ANY_TYPE> >::value> {
+      Optional_ConvertsFrom<TYPE,
+                            bsl::optional<typename Optional_RemoveCVRef<
+                                ANY_TYPE>::type> >::value> {
 };
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_AssignsFromBslOptional
 : bsl::integral_constant<
       bool,
-      Optional_AssignsFrom<TYPE, bsl::optional<ANY_TYPE> >::value> {
+      Optional_AssignsFrom<TYPE,
+                           bsl::optional<typename Optional_RemoveCVRef<
+                               ANY_TYPE>::type> >::value> {
 };
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
@@ -352,30 +356,6 @@ struct Optional_AssignsFromStdOptional : bsl::integral_constant<bool, false> {
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
 template <class TYPE, class ANY_TYPE>
-struct Optional_ConvertsFromOptional
-: bsl::integral_constant<
-      bool,
-      Optional_ConvertsFromBslOptional<
-          TYPE,
-          typename Optional_RemoveCVRef<ANY_TYPE>::type>::value ||
-          Optional_ConvertsFromStdOptional<
-              TYPE,
-              typename Optional_RemoveCVRef<ANY_TYPE>::type>::value> {
-};
-
-template <class TYPE, class ANY_TYPE>
-struct Optional_AssignsFromOptional
-: bsl::integral_constant<
-      bool,
-      Optional_AssignsFromBslOptional<
-          TYPE,
-          typename Optional_RemoveCVRef<ANY_TYPE>::type>::value ||
-          Optional_AssignsFromStdOptional<
-              TYPE,
-              typename Optional_RemoveCVRef<ANY_TYPE>::type>::value> {
-};
-
-template <class TYPE, class ANY_TYPE>
 struct Optional_PropagatesAllocator
 : bsl::integral_constant<
       bool,
@@ -384,13 +364,6 @@ struct Optional_PropagatesAllocator
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
 };
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_ConstructsFromOptional
-: bsl::integral_constant<
-      bool,
-      !Optional_ConvertsFromOptional<TYPE, ANY_TYPE>::value &&
-          Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
-};
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConstructsFromType
@@ -410,14 +383,33 @@ struct Optional_ConstructsFromType
 
 // Macros to define common constraints that enable a constructor or assignment
 // operator.
-#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE)    \
+#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,          \
+                                                               ANY_TYPE)      \
     typename bsl::enable_if<                                                  \
-        BloombergLP::bslstl::                                                 \
-            Optional_ConstructsFromOptional<TYPE, ANY_TYPE>::value,           \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromBslOptional<TYPE, ANY_TYPE>::value &&    \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,        \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
-#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE)   \
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(                       \
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,         \
+                                                                ANY_TYPE)     \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(                   \
+                               TYPE,                                          \
+                               ANY_TYPE) = BloombergLP::bslstl::optNoSuchType
+
+#define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,          \
+                                                               ANY_TYPE)      \
+    typename bsl::enable_if<                                                  \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,        \
+        BloombergLP::bslstl::Optional_OptNoSuchType>::type
+
+#define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,         \
+                                                                ANY_TYPE)     \
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(                   \
                                TYPE,                                          \
                                ANY_TYPE) = BloombergLP::bslstl::optNoSuchType
 
@@ -496,16 +488,28 @@ struct Optional_ConstructsFromType
                                       U,                                      \
                                       V) = BloombergLP::bslstl::optNoSuchType
 
-#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)           \
+#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)       \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::Optional_ConvertsFromOptional<TYPE, ANY_TYPE>:: \
-                value &&                                                      \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromBslOptional<TYPE, ANY_TYPE>::value &&    \
             BloombergLP::bslstl::                                             \
                 Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
             BloombergLP::bslstl::                                             \
                 Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
             !BloombergLP::bslstl::                                            \
-                Optional_AssignsFromOptional<TYPE, ANY_TYPE>::value,          \
+                Optional_AssignsFromBslOptional<TYPE, ANY_TYPE>::value,       \
+        optional<TYPE> >::type
+
+#define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)       \
+    typename bsl::enable_if<                                                  \
+        !BloombergLP::bslstl::                                                \
+                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
+            BloombergLP::bslstl::                                             \
+                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
+            BloombergLP::bslstl::                                             \
+                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
+            !BloombergLP::bslstl::                                            \
+                Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value,       \
         optional<TYPE> >::type
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)                    \
@@ -577,8 +581,8 @@ struct Optional_DataImp {
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 #elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
 // {{{ BEGIN GENERATED CODE
-// The following section is automatically generated.  **DO NOT EDIT**
-// Generator command line: sim_cpp11_features.pl bslstl_optional.h
+// The following section is automatically generated.  **DO NOT EDIT** Generator
+// command line: sim_cpp11_features.pl bslstl_optional.h
 #ifndef BSLSTL_OPTIONAL_VARIADIC_LIMIT
 #define BSLSTL_OPTIONAL_VARIADIC_LIMIT 10
 #endif
@@ -586,7 +590,7 @@ struct Optional_DataImp {
 #define BSLSTL_OPTIONAL_VARIADIC_LIMIT_A BSLSTL_OPTIONAL_VARIADIC_LIMIT
 #endif
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_A >= 0
-    void emplace(bslma::Allocator                           *allocator);
+    void emplace(bslma::Allocator *allocator);
 #endif  // BSLSTL_OPTIONAL_VARIADIC_LIMIT_A >= 0
 
 #if BSLSTL_OPTIONAL_VARIADIC_LIMIT_A >= 1
@@ -1128,8 +1132,9 @@ class optional {
     optional(
         const optional<ANY_TYPE>& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                            const ANY_TYPE&),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+            TYPE,
+            const ANY_TYPE&),
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                           const ANY_TYPE&))
         // Create a disengaged 'optional' object if the specified 'original'
@@ -1148,8 +1153,9 @@ class optional {
     explicit optional(
         const optional<ANY_TYPE>& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                            const ANY_TYPE&),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+            TYPE,
+            const ANY_TYPE&),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -1173,8 +1179,8 @@ class optional {
     template <class ANY_TYPE>
     optional(optional<ANY_TYPE>&& original,
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
                  TYPE,
                  ANY_TYPE),
@@ -1190,7 +1196,8 @@ class optional {
     explicit optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
             TYPE,
             ANY_TYPE),
@@ -1205,7 +1212,8 @@ class optional {
     optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
                                                                   ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
@@ -1220,7 +1228,8 @@ class optional {
     explicit optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
                                                                   ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
@@ -1236,7 +1245,8 @@ class optional {
     optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
                                                                   ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
@@ -1251,7 +1261,8 @@ class optional {
     explicit optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE,
                                                                   ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
@@ -1265,8 +1276,8 @@ class optional {
     template <class ANY_TYPE>
     optional(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
                  TYPE,
                  ANY_TYPE),
@@ -1282,7 +1293,8 @@ class optional {
     explicit optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(
             TYPE,
             ANY_TYPE),
@@ -1298,7 +1310,7 @@ class optional {
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
     template <class ANY_TYPE = TYPE>
     optional(const std::optional<ANY_TYPE>& original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(
                  TYPE,
                  const ANY_TYPE&),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
@@ -1310,7 +1322,7 @@ class optional {
 
     template <class ANY_TYPE = TYPE>
     explicit optional(const std::optional<ANY_TYPE>& original,
-                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(
+                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(
                           TYPE,
                           const ANY_TYPE&),
                       BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE,
@@ -1322,7 +1334,7 @@ class optional {
 
     template <class ANY_TYPE = TYPE>
     optional(std::optional<ANY_TYPE>&& original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                      ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
@@ -1334,7 +1346,7 @@ class optional {
     template <class ANY_TYPE = TYPE>
     explicit optional(
         std::optional<ANY_TYPE>&& original,
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                 ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -1755,13 +1767,13 @@ class optional {
         // resolution unless 'ANY_TYPE' is convertible to 'TYPE'.
 
     template <class ANY_TYPE>
-    explicit optional(
-        bsl::allocator_arg_t,
-        allocator_type            allocator,
-        const optional<ANY_TYPE>& original,
-        BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                            const ANY_TYPE&));
+    explicit optional(bsl::allocator_arg_t,
+                      allocator_type            allocator,
+                      const optional<ANY_TYPE>& original,
+                      BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+                          TYPE,
+                          const ANY_TYPE&));
         // Create an 'optional' object having the value of the specified
         // original object. Use the specified 'allocator' to supply memory.
 
@@ -1779,7 +1791,8 @@ class optional {
         allocator_type       allocator,
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE));
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
@@ -1793,7 +1806,8 @@ class optional {
         allocator_type                                      allocator,
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE));
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
@@ -1807,7 +1821,7 @@ class optional {
     explicit optional(bsl::allocator_arg_t,
                       allocator_type                 allocator,
                       const std::optional<ANY_TYPE>& original,
-                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(
+                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(
                           TYPE,
                           const ANY_TYPE&));
         // If specified 'original' contains a value, initialize the
@@ -1820,7 +1834,7 @@ class optional {
         bsl::allocator_arg_t,
         allocator_type            allocator,
         std::optional<ANY_TYPE>&& original,
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                 ANY_TYPE));
         // If specified 'original' contains a value, initialize the
         // 'value_type' object by move construction from '*original'.
@@ -2677,7 +2691,7 @@ class optional {
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const optional<ANY_TYPE>& rhs)
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -2704,7 +2718,7 @@ class optional {
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -2753,7 +2767,7 @@ class optional {
         // object.  'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -2784,7 +2798,7 @@ class optional {
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const std::optional<ANY_TYPE>& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -2794,7 +2808,7 @@ class optional {
         // compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(std::optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -2948,7 +2962,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
 
     template <class ANY_TYPE = TYPE>
     optional(const std::optional<ANY_TYPE>& original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(
                  TYPE,
                  const ANY_TYPE&),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
@@ -2959,7 +2973,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
 
     template <class ANY_TYPE = TYPE>
     explicit optional(const std::optional<ANY_TYPE>& original,
-                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(
+                      BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(
                           TYPE,
                           const ANY_TYPE&),
                       BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE,
@@ -2970,7 +2984,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
 
     template <class ANY_TYPE = TYPE>
     optional(std::optional<ANY_TYPE>&& original,
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                      ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
@@ -2982,7 +2996,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
     template <class ANY_TYPE = TYPE>
     explicit optional(
         std::optional<ANY_TYPE>&& original,
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                                 ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -3006,7 +3020,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const optional<ANY_TYPE>& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -3016,7 +3030,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // compatible.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -3026,7 +3040,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'ANY_TYPE' are compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const std::optional<ANY_TYPE>& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -3036,7 +3050,7 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // compatible.
 
     template <class ANY_TYPE = TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
     operator=(std::optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -3172,8 +3186,9 @@ class optional<TYPE, false> {
     optional(
         const optional<ANY_TYPE>& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                            const ANY_TYPE&),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+            TYPE,
+            const ANY_TYPE&),
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                           const ANY_TYPE&));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -3184,8 +3199,9 @@ class optional<TYPE, false> {
     explicit optional(
         const optional<ANY_TYPE>& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                            const ANY_TYPE&),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+            TYPE,
+            const ANY_TYPE&),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -3201,8 +3217,8 @@ class optional<TYPE, false> {
     template <class ANY_TYPE>
     optional(optional<ANY_TYPE>&& original,
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -3214,7 +3230,8 @@ class optional<TYPE, false> {
     explicit optional(
         optional<ANY_TYPE>&& original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -3225,8 +3242,8 @@ class optional<TYPE, false> {
     template <class ANY_TYPE>
     optional(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
-                                                                 ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
              BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
                                                                ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
@@ -3238,7 +3255,8 @@ class optional<TYPE, false> {
     explicit optional(
         BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
         BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
-        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
         BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
         // Create a disengaged 'optional' object if the specified 'original'
         // object is disengaged, and an 'optional' object with the value of
@@ -4005,7 +4023,7 @@ class optional<TYPE, false> {
         // 'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, const ANY_TYPE&) &
     operator=(const optional<ANY_TYPE>& rhs);
     // Disengage this object if the specified 'rhs' object is disengaged, and
     // assign to this object the value of 'rhs.value()' (of 'ANY_TYPE')
@@ -4015,7 +4033,7 @@ class optional<TYPE, false> {
 
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES)
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)& operator=(
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)& operator=(
                                                      optional<ANY_TYPE>&& rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -4063,7 +4081,7 @@ class optional<TYPE, false> {
         // object.  'rhs' is left in a valid but unspecified state.
 
     template <class ANY_TYPE>
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)& operator=(
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)& operator=(
                       BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > rhs);
         // Disengage this object if the specified 'rhs' object is disengaged,
         // and move assign to this object the value of 'rhs.value()' (of
@@ -6285,7 +6303,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     optional<ANY_TYPE>&& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
                                                                      ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
@@ -6301,7 +6319,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     optional<ANY_TYPE>&& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
                                                                      ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
@@ -6317,7 +6335,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    optional<ANY_TYPE>&&                                               original,
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(original.get_allocator())
@@ -6333,7 +6351,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    optional<ANY_TYPE>&&                                               original,
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(original.get_allocator())
@@ -6350,7 +6368,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(MoveUtil::access(original).get_allocator())
@@ -6367,7 +6385,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
    BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+   BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR(TYPE, ANY_TYPE),
    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : d_allocator(MoveUtil::access(original).get_allocator())
@@ -6384,7 +6402,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
                                                                      ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
@@ -6401,7 +6419,7 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR(TYPE,
                                                                      ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
@@ -6420,7 +6438,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     const std::optional<ANY_TYPE>& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                            const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
@@ -6434,7 +6452,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     const std::optional<ANY_TYPE>& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                            const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
@@ -6448,7 +6466,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     std::optional<ANY_TYPE>&& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     if (original.has_value()) {
@@ -6461,7 +6479,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, USES_BSLMA_ALLOC>::optional(
     std::optional<ANY_TYPE>&& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     if (original.has_value()) {
@@ -7154,7 +7172,8 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
     allocator_type            allocator,
     const optional<ANY_TYPE>& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, const ANY_TYPE&))
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&))
 : d_allocator(allocator)
 {
     if (original.has_value()) {
@@ -7172,7 +7191,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
   allocator_type                                                     allocator,
   optional<ANY_TYPE>&&                                               original,
   BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-  BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE))
+  BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE))
 : d_allocator(allocator)
 {
     if (original.has_value()) {
@@ -7189,7 +7208,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
   allocator_type                                                     allocator,
   BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> >                original,
   BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-  BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE))
+  BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE))
 : d_allocator(allocator)
 {
     optional<ANY_TYPE>& lvalue = original;
@@ -7209,7 +7228,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
     bsl::allocator_arg_t,
     allocator_type                 allocator,
     const std::optional<ANY_TYPE>& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                            const ANY_TYPE&))
 : d_allocator(allocator)
 {
@@ -7225,7 +7244,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::optional(
     bsl::allocator_arg_t,
     allocator_type            allocator,
     std::optional<ANY_TYPE>&& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE))
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE))
 : d_allocator(allocator)
 {
     if (original.has_value()) {
@@ -8738,7 +8757,7 @@ optional<TYPE, USES_BSLMA_ALLOC>& optional<TYPE, USES_BSLMA_ALLOC>::operator=(
 template <class TYPE, bool USES_BSLMA_ALLOC>
     template <class ANY_TYPE>
     inline
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &
     optional<TYPE, USES_BSLMA_ALLOC>::operator=(optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -8773,7 +8792,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator=(ANY_TYPE&& rhs)
 template <class TYPE, bool USES_BSLMA_ALLOC>
     template <class ANY_TYPE>
     inline
-    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+    BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &
     optional<TYPE, USES_BSLMA_ALLOC>::
     operator=(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > rhs)
 {
@@ -8798,7 +8817,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&) &
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&) &
 optional<TYPE, USES_BSLMA_ALLOC>::operator=(const std::optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -8818,7 +8837,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator=(const std::optional<ANY_TYPE>& rhs)
 template <class TYPE, bool USES_BSLMA_ALLOC>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE) &
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &
 optional<TYPE, USES_BSLMA_ALLOC>::operator=(std::optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -9043,7 +9062,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     const std::optional<ANY_TYPE>& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                            const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : OptionalBase(original)
@@ -9055,7 +9074,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     const std::optional<ANY_TYPE>& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE,
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,
                                                            const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : OptionalBase(original)
@@ -9067,7 +9086,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     std::optional<ANY_TYPE>&& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : OptionalBase(std::move(original))
 {
@@ -9078,7 +9097,7 @@ template <class ANY_TYPE>
 inline
 optional<TYPE, false>::optional(
     std::optional<ANY_TYPE>&& original,
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 : OptionalBase(std::move(original))
 {
@@ -9136,7 +9155,7 @@ optional<TYPE, false>::operator=(optional&& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, const ANY_TYPE&)&
 optional<TYPE, false>::operator=(const optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -9156,7 +9175,7 @@ optional<TYPE, false>::operator=(const optional<ANY_TYPE>& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -9176,7 +9195,7 @@ optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, const ANY_TYPE&)&
 optional<TYPE, false>::operator=(const std::optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -9196,7 +9215,7 @@ optional<TYPE, false>::operator=(const std::optional<ANY_TYPE>& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(std::optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -9313,7 +9332,8 @@ inline
 optional<TYPE, false>::optional(
     const optional<ANY_TYPE>& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
 {
     if (original.has_value()) {
@@ -9327,7 +9347,8 @@ inline
 optional<TYPE, false>::optional(
     const optional<ANY_TYPE>& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
 {
     if (original.has_value()) {
@@ -9342,7 +9363,7 @@ inline
 optional<TYPE, false>::optional(
     optional<ANY_TYPE>&& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     if (original.has_value()) {
@@ -9356,7 +9377,7 @@ inline
 optional<TYPE, false>::optional(
     optional<ANY_TYPE>&& original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     if (original.has_value()) {
@@ -9370,7 +9391,7 @@ inline
 optional<TYPE, false>::optional(
     BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     optional<ANY_TYPE>& lvalue = original;
@@ -9385,7 +9406,7 @@ inline
 optional<TYPE, false>::optional(
     BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > original,
     BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
-    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
     BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
 {
     optional<ANY_TYPE>& lvalue = original;
@@ -10696,7 +10717,7 @@ optional<TYPE, false>::operator=(BloombergLP::bslmf::MovableRef<optional> rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, const ANY_TYPE&)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, const ANY_TYPE&)&
 optional<TYPE, false>::operator=(const optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
@@ -10717,7 +10738,7 @@ optional<TYPE, false>::operator=(const optional<ANY_TYPE>& rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
@@ -10784,7 +10805,7 @@ optional<TYPE, false>::operator=(BloombergLP::bslmf::MovableRef<TYPE> rhs)
 template <class TYPE>
 template <class ANY_TYPE>
 inline
-BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL(TYPE, ANY_TYPE)&
+BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)&
 optional<TYPE, false>::
 operator=(BloombergLP::bslmf::MovableRef<optional<ANY_TYPE> > rhs)
 {
@@ -12789,21 +12810,24 @@ bool operator>=(const std::optional<LHS_TYPE>& lhs,
 #endif
 }  // close namespace bsl
 
-#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_OPTIONAL
+#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL
+#undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL
+#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
+#undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR
-#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR
-#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM
-#undef BSLSTL_OPTIONAL_DECLARE_IF_SAME
-#undef BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT
-#undef BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT
-#undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_OPTIONAL
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_PROPAGATES_ALLOCATOR
+#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCT_DOES_NOT_PROPAGATE_ALLOCATOR
+#undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM
+#undef BSLSTL_OPTIONAL_DECLARE_IF_SAME
 #undef BSLSTL_OPTIONAL_DEFINE_IF_SAME
+#undef BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT
+#undef BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT
 #undef BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT
-#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_OPTIONAL
+#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL
+#undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM
 #undef BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG
 
