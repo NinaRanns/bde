@@ -16,6 +16,7 @@ bslstl_equalto
 bslstl_errc
 bslstl_error
 bslstl_forwarditerator
+bslstl_function_isreferencecompatible
 # bslstl_function_test
 bslstl_hash
 bslstl_hashtable
