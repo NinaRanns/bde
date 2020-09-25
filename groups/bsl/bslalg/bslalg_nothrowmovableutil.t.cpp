@@ -7,10 +7,10 @@
 #include <bslma_usesbslmaallocator.h>
 #include <bslma_testallocator.h>
 
+#include <bslmf_isconst.h>
 #include <bsls_asserttest.h>
 #include <bsls_bsltestutil.h>
 
-#include <bsltf_testvaluesarray.h>
 #include <bsltf_templatetestfacility.h>
 
 #include <stdio.h>   // 'printf'
@@ -27,72 +27,24 @@ using namespace BloombergLP;
 //  Internal implementation types:
 // [ 3] 'NothrowMovableUtil_Traits' class
 //
-// NothrowMovableWrapper class
-// ---------------------------
-//
 // TRAITS
-// [ 4] bsl::is_nothrow_move_constructible
-// [ 4] bslma::UsesBslmaAllocator
-// [ 4] bslma::UsesAllocatorArgT
-// [ 4] bslma::IsBitwiseMoveable
-//
-// TYPEDEFS
-// [ 4] allocator_type
-// [ 4] ValueType
-//
-// CREATORS
-// [ 5] NothrowMovableWrapper();
-// [ 5] NothrowMovableWrapper(bsl::allocator_arg_t, const allocator_type& allocator);
-// [ 6] NothrowMovableWrapper(const TYPE& val);  
-// [ 6] NothrowMovableWrapper(bsl::allocator_arg_t,
-//                            const allocator_type& allocator,
-//                            const TYPE&           val);
-// [ 6] NothrowMovableWrapper(bslmf::MovableRef<TYPE> val);
-// [ 6] NothrowMovableWrapper(bsl::allocator_arg_t    ,
-//                            const allocator_type&   allocator,
-//                            bslmf::MovableRef<TYPE> val);
-// [ 7] NothrowMovableWrapper(const NothrowMovableWrapper& original);
-// [ 7] NothrowMovableWrapper(bsl::allocator_arg_t      ,
-//                            const allocator_type&     alloc,
-//                            const NothrowMovableWrapper& original);
-// [ 7] NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper> original)
-//                            BSLS_KEYWORD_NOEXCEPT;
-// [ 7] NothrowMovableWrapper(bsl::allocator_arg_t                  ,
-//                            const allocator_type&                 alloc,
-//                            bslmf::MovableRef<NothrowMovableWrapper> original);
-// [  ] ~NothrowMovableWrapper();
-//
-// MANIPULATORS
-// [ 8] ValueType& unwrap();
-// [ 8] operator ValueType&();
-//
-// ACCESSORS
-// [ 8] ValueType const& unwrap() const;
-// [ 8] operator const ValueType&() const;
-// [ 8] allocator_type get_allocator() const;
-//
-//
-//  'NothrowMovableUtil' class
-//  ---------------------------------
-//
-// TRAITS
-// [  ] IsWrapped
-// [  ] WrappedType
-// [  ] UnwrappedType
+// [ 4] IsWrapped
+// [ 4] WrappedType
+// [ 4] UnwrappedType
 //
 // STATIC METHODS
-// [  ] WrappedType<TYPE>::type wrap(TYPE&);
-// [  ] WrappedType<TYPE>::type wrap(TYPE const&);
-// [  ] WrappedType<:RemoveReference<TYPE>::type>::type
+// [ 5] WrappedType<TYPE>::type wrap(TYPE&);
+// [ 5] WrappedType<TYPE>::type wrap(TYPE const&);
+// [ 5] WrappedType<:RemoveReference<TYPE>::type>::type
 //        wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
-// [  ] UnwrappedType<TYPE>::type unwrap(TYPE&);
-// [  ] UnwrappedType<TYPE>::type unwrap(TYPE const&);
-// [  ] WrappedType<RemoveReference<TYPE>::type>::type
+// [ 6] UnwrappedType<TYPE>::type unwrap(TYPE&);
+// [ 6] UnwrappedType<TYPE>::type unwrap(TYPE const&);
+// [ 6] WrappedType<RemoveReference<TYPE>::type>::type
 //          unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
 //
 // ----------------------------------------------------------------------------
-// [ 3] BREATHING TEST
-
+// [ 2] USAGE EXAMPLE
+// [ 1] BREATHING TEST
 //=============================================================================
 //                       STANDARD BDE ASSERT TEST MACRO
 //-----------------------------------------------------------------------------
@@ -170,6 +122,284 @@ int simpleFunction(int i)
 typedef void (*BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE)();
 typedef void (BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE)();
 
+typedef bslalg::NothrowMovableWrapper<int> NTMB_INT;
+typedef bslalg::NothrowMovableWrapper<const int> NTMB_CONST_INT;
+typedef bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>
+                             NTMB_FUNCTION_PTR_TYPE;
+
+
+
+#define BSLALG_NOTHROWMOVABLEUTIL_TEST_TYPES                                  \
+    int, const int,BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE,               \
+    BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE, NTMB_INT, NTMB_CONST_INT,        \
+    NTMB_FUNCTION_PTR_TYPE
+
+class TrackableValue
+{
+    // This class tracks a value through a series of move and copy operations
+    // and has an easily-testable moved-from state.  An instance stores an
+    // unsigned integer value and a pair of bits, one indicating if the value
+    // was copied, another if it was moved (or neither or both).  When
+    // assigned a value at construction, via assignment, or via a mutating
+    // operation (such as +=), the move and copy bits are cleared, indicating
+    // that the new value has been neither moved nor copied.  When assigned a
+    // new value via copy construction or copy assignment, the copy bit is
+    // set and the move bit is cleared. When assigned a new value via move
+    // construction, move assignment, or swap, the copy bit is transferred
+    // from the original value and the move bit is set. Thus a value that is
+    // copied then moved will have both bits set but a value that is moved
+    // then copy has only the copy bit set.  The copy and move bits are not
+    // salient attributes of the value and are thus not used for testing
+    // equality.
+
+    // PRIVATE CONSTANTS
+    enum {
+        e_NUM_FLAGS       = 2,
+        // Value is multiplied by the following value to make room for the
+        // flag bits.  Multiply and divide are used to scale the value
+        // because shift operations are not guaranteed to preserve sign.  The
+        // compiler will almost certainly replace these multiplication and
+        // divisions with more efficient arithmetic shift operations.
+        e_VALUE_MULTIPLIER = 1 << e_NUM_FLAGS,
+        e_FLAGS_MASK       = e_VALUE_MULTIPLIER - 1,
+        e_VALUE_MASK       = ~e_FLAGS_MASK,
+        e_COPIED_FLAG      = 0x01,
+        e_MOVED_FLAG       = 0x02,
+        e_MOVED_FROM_VAL   = 0x11111111, // Value assigned to moved-from object
+
+        // The moved from state has a value of e_MOVED_FROM_VAL, with neither
+        // flag set.
+        e_MOVED_FROM_STATE = e_MOVED_FROM_VAL * e_VALUE_MULTIPLIER
+    };
+
+    // PRIVATE DATA
+    mutable int d_valueAndFlags;
+
+    TrackableValue& setValue(int  v,
+                             bool movedFlag = false,
+                             bool copiedFlag = false);
+        // Set the value to the specified 'v'. Set the 'isMoved()'
+        // flag to the optionally-specified 'movedFlag' bit and the
+        // 'isCopied()' flag to the optionally-specified 'copiedFlag' bit.
+
+public:
+    // TRAITS
+    BSLMF_NESTED_TRAIT_DECLARATION(TrackableValue, bslmf::IsBitwiseMoveable);
+
+    // Constants
+    enum {
+        e_MIN            = INT_MIN / e_VALUE_MULTIPLIER,
+        e_MAX            = INT_MAX / e_VALUE_MULTIPLIER
+    };
+
+    // CREATORS
+    TrackableValue(int v = 0)
+        // Set value to the specified 'v' and set 'isMoved()' and 'isCopied()'
+        // to false.
+        { setValue(v); }
+
+    TrackableValue(const TrackableValue& other)
+        // Copy value from 'other', set 'isMoved()' to false and 'isCopied()'
+        // to true.
+        { setValue(other.value(), false, true); }
+
+    TrackableValue(bslmf::MovableRef<TrackableValue> other)
+        // Move value from 'other', set 'isMoved()' to true, and set
+        // 'isCopied()' to 'other.isCopied()', then set 'other' to the
+        // moved-from state.
+        { *this = bslmf::MovableRefUtil::move(other); }
+
+    //! ~TrackableValue() = default;
+
+    // MANIPULATORS
+    TrackableValue& operator=(int v)
+        // Set value to the specified 'v' and set 'isMoved()' and 'isCopied()'
+        // to false; then return '*this'.
+        { return setValue(v); }
+
+    TrackableValue& operator=(const TrackableValue& rhs)
+        // Set value to the specified 'rhs.value()' and set 'isMoved()' to
+        // false and 'isCopied()' to true; then return '*this'.
+        { return setValue(rhs.value(), false, true); }
+
+    TrackableValue& operator=(bslmf::MovableRef<TrackableValue> rhs);
+        // Move value from 'rhs', set 'isMoved()' to true, and set
+        // 'isCopied()' to 'other.isCopied()', then assign 'rhs' the
+        // value 'e_MOVED_FROM_VAL' and return '*this'.
+
+    void swap(TrackableValue& other);
+        // Exchange the values AND 'isCopied()' flags of '*this' and 'other',
+        // then set the 'isMoved()' flag of both to true.
+
+    void resetMoveCopiedFlags() const
+        // Set 'isMoved()' and 'isCopied() to false.
+        { d_valueAndFlags &= e_VALUE_MASK; }
+
+    void setValueRaw(int v);
+    void setIsMovedRaw(bool movedFlag);
+    void setIsCopiedRaw(bool copiedFlag);
+        // Set the constituent parts of this object without modifying the other
+        // parts. It is up to the caller to ensure that the flags are set
+        // consistently.
+
+    // ACCESSORS
+    int  value()       const { return d_valueAndFlags / e_VALUE_MULTIPLIER; }
+    bool isMoved()     const { return d_valueAndFlags & e_MOVED_FLAG; }
+    bool isCopied()    const { return d_valueAndFlags & e_COPIED_FLAG; }
+    bool isMovedFrom() const { return d_valueAndFlags == e_MOVED_FROM_STATE; }
+};
+
+// TrackableValue FREE FUNCTIONS
+MAYBE_UNUSED
+inline bool operator==(const TrackableValue& a, const TrackableValue& b) {
+    return a.value() == b.value();
+}
+
+MAYBE_UNUSED
+inline bool operator!=(const TrackableValue& a, const TrackableValue& b) {
+    return a.value() != b.value();
+}
+
+MAYBE_UNUSED
+inline void swap(TrackableValue& a, TrackableValue& b) { a.swap(b); }
+
+// IMPLEMENTATION OF TrackableValue
+inline
+TrackableValue& TrackableValue::setValue(int  v,
+                                         bool movedFlag,
+                                         bool copiedFlag) {
+    ASSERT(e_MIN <= v && v <= e_MAX);
+    d_valueAndFlags = v * e_VALUE_MULTIPLIER;
+    if (movedFlag)  d_valueAndFlags |= e_MOVED_FLAG;
+    if (copiedFlag) d_valueAndFlags |= e_COPIED_FLAG;
+    return *this;
+}
+
+inline
+TrackableValue&
+TrackableValue::operator=(bslmf::MovableRef<TrackableValue> other) {
+    TrackableValue& otherRef = bslmf::MovableRefUtil::access(other);
+    d_valueAndFlags = otherRef.d_valueAndFlags | e_MOVED_FLAG;
+    otherRef.d_valueAndFlags = e_MOVED_FROM_STATE;
+    return *this;
+}
+
+void TrackableValue::swap(TrackableValue& other) {
+    // Don't use std::swap<int> because don't want to #include <algorithm>
+    int tmp = d_valueAndFlags;
+    d_valueAndFlags = other.d_valueAndFlags;
+    other.d_valueAndFlags = tmp;
+    d_valueAndFlags       |= e_MOVED_FLAG;
+    other.d_valueAndFlags |= e_MOVED_FLAG;
+}
+
+void TrackableValue::setValueRaw(int v) {
+    d_valueAndFlags &= e_FLAGS_MASK;
+    d_valueAndFlags |= v * e_VALUE_MULTIPLIER;
+}
+
+void TrackableValue::setIsMovedRaw(bool movedFlag) {
+    d_valueAndFlags &= (e_VALUE_MASK | e_COPIED_FLAG);
+    if (movedFlag) d_valueAndFlags |= e_MOVED_FLAG;
+}
+
+void TrackableValue::setIsCopiedRaw(bool copiedFlag) {
+    d_valueAndFlags &= (e_VALUE_MASK | e_MOVED_FLAG);
+    if (copiedFlag) d_valueAndFlags |= e_COPIED_FLAG;
+}
+
+// End implementation of TrackableValue
+
+class TrackableValueWithAlloc
+{
+    // Trackable value with allocator.
+    // - Uses allocator
+    // - Not bitwise moveable
+    // - potentially-throwing move constructor
+
+    TrackableValue       d_trackable;
+    bsl::allocator<char> d_alloc;
+
+  public:
+    BSLMF_NESTED_TRAIT_DECLARATION(TrackableValueWithAlloc,
+                                   bslma::UsesBslmaAllocator);
+
+    typedef bsl::allocator<char> allocator_type;
+
+    explicit
+    TrackableValueWithAlloc(int v = 0)
+        : d_trackable(v), d_alloc() { }
+
+    explicit
+    TrackableValueWithAlloc(const allocator_type& alloc)
+        : d_trackable(0), d_alloc(alloc) { }
+
+    TrackableValueWithAlloc(int v, const allocator_type& alloc)
+        : d_trackable(v), d_alloc(alloc) { }
+
+    TrackableValueWithAlloc(const TrackableValueWithAlloc& original,
+                            const allocator_type& alloc = allocator_type())
+        : d_trackable(original.d_trackable), d_alloc(alloc) { }
+
+    // Move constructor propagates allocator
+    TrackableValueWithAlloc(
+        bslmf::MovableRef<TrackableValueWithAlloc> original)
+        : d_trackable(bslmf::MovableRefUtil::move(
+                          bslmf::MovableRefUtil::access(original).d_trackable))
+        , d_alloc(bslmf::MovableRefUtil::access(original).d_alloc) { }
+
+
+    TrackableValueWithAlloc(
+        bslmf::MovableRef<TrackableValueWithAlloc> original,
+        const allocator_type&                      alloc)
+        : d_trackable(bslmf::MovableRefUtil::move(
+                          bslmf::MovableRefUtil::access(original).d_trackable))
+        , d_alloc(alloc)
+    {
+    }
+
+    ~TrackableValueWithAlloc()
+        { memset((void *)this, 0xbb, sizeof(*this)); }
+
+    TrackableValueWithAlloc& operator=(const TrackableValueWithAlloc& rhs)
+        { d_trackable = rhs.d_trackable; return *this; }
+
+    TrackableValueWithAlloc& operator=(
+        bslmf::MovableRef<TrackableValueWithAlloc> rhs) {
+        TrackableValueWithAlloc& rhsRef = rhs;
+        d_trackable = bslmf::MovableRefUtil::move(rhsRef.d_trackable);
+
+        return *this;
+    }
+
+    void setValue(int v) { d_trackable = v; }
+    void resetMoveCopiedFlags() const
+        // Set 'isMoved()' and 'isCopied() to false.
+    {   d_trackable.resetMoveCopiedFlags();  }
+
+    // ACCESSORS
+    int value() const { return d_trackable.value(); }
+    bool isMoved()     const { return d_trackable.isMoved(); }
+    bool isCopied()    const { return d_trackable.isCopied(); }
+    bool isMovedFrom() const { return d_trackable.isMovedFrom(); }
+
+    allocator_type get_allocator() const { return d_alloc; }
+    bslma::Allocator *allocator() const { return d_alloc.mechanism(); }
+};
+
+MAYBE_UNUSED inline
+bool operator==(const TrackableValueWithAlloc& a,
+                const TrackableValueWithAlloc& b)
+{
+    return a.value() == b.value();
+}
+
+MAYBE_UNUSED inline
+bool operator!=(const TrackableValueWithAlloc& a,
+                const TrackableValueWithAlloc& b)
+{
+    return a.value() != b.value();
+}
 
 //=============================================================================
 //                             USAGE EXAMPLES
@@ -430,6 +660,84 @@ namespace {
 
 } // end unnamed namespace
 
+
+template <class TYPE,
+          bool USES_BSLMA_ALLOC =
+              BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
+class Test_Util {
+    // This class provided test utilities which have different behaviour
+    // depending on whether 'TYPE is allocator-aware or not.  The main template
+    // is for allocator-aware types.
+
+  public:
+    static bool checkAllocator(const TYPE&                 obj,
+                               const bsl::allocator<char>& expected);
+        // Check if, for the specified 'obj', 'obj.get_allocator()' returns the
+        // specified 'expected' allocator.
+
+    static bool hasSameAllocator(const TYPE& obj, const TYPE& other);
+        // Check if, for the specified 'obj' and specified 'other',
+        // 'obj.get_allocator() == other.get_allocator()';
+};
+
+template <class TYPE>
+class Test_Util<TYPE, false> {
+    // This class provided test utilities which have different behaviour
+    // depending on whether 'TYPE is allocator-aware or not.  This
+    // specialization is for non allocator-aware types.
+
+  public:
+    static bool checkAllocator(const TYPE&, const bsl::allocator<char>&);
+        // return 'true'.
+
+    static bool hasSameAllocator(const TYPE&, const TYPE&);
+        // return 'true'.
+};
+
+template <class TYPE, bool USES_BSLMA_ALLOC>
+inline
+bool Test_Util<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
+                                          const TYPE&                 obj,
+                                          const bsl::allocator<char>& expected)
+{
+    return (expected == obj.get_allocator());
+}
+
+template <class TYPE, bool USES_BSLMA_ALLOC>
+inline
+bool Test_Util<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
+                                                         const TYPE& other)
+{
+    return (obj.allocator() == other.allocator());
+}
+
+template <class TYPE>
+inline bool
+Test_Util<TYPE, false>::checkAllocator(const TYPE&,
+                                       const bsl::allocator<char>&)
+{
+    return true;
+}
+
+template <class TYPE>
+inline bool
+Test_Util<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
+{
+    return true;
+}
+
+template <class TYPE>
+bool checkAllocator(const TYPE& obj, const bsl::allocator<char>& allocator)
+{
+    return Test_Util<TYPE>::checkAllocator(obj, allocator);
+}
+
+template <class TYPE>
+bool hasSameAllocator(const TYPE& obj1, const TYPE& obj2)
+{
+    return Test_Util<TYPE>::hasSameAllocator(obj1, obj2);
+}
+
 // ============================================================================
 //                          TEST DRIVER TEMPLATE
 // ----------------------------------------------------------------------------
@@ -439,68 +747,269 @@ class TestDriver {
     // This class template provides a namespace for testing the 'bslalg::NothrowMovableWrapper'
     // type.
 
+  public: 
+    //PUBLIC TYPES
+    enum {
+        E_LVALUE_REF,
+        E_CONST_LVALUE_REF,
+        E_MOVABLE_REF
+    };
+
   private:
     // PRIVATE TYPES
-    typedef TEST_TYPE ValueType;
-        // ValueType under test.
-
-    typedef bslalg::NothrowMovableUtil Obj;
+    typedef BloombergLP::bslalg::NothrowMovableUtil Obj;
         // Type under test.
 
-    typedef bslalg::NothrowMovableWrapper<ValueType> Wrapper;
-        // Type under test.    
+    typedef typename Obj::UnwrappedType<TEST_TYPE>::type   ValueType;
+        // Unwrapped type
+
+    typedef typename bsl::remove_cv<ValueType>::type   NonConstValueType;
+        // non const version of ValueType.  This is needed for 
+        // checkValueCategory overloads.
+
+    typedef typename Obj::WrappedType<TEST_TYPE>::type     WrapperType;
+        // Wrapped type
 
   public:
 
-    static void testCase3();
+    static int checkValueCategory(NonConstValueType &);
+    static int checkValueCategory(const NonConstValueType &);
+    static int checkValueCategory(BloombergLP::bslmf::MovableRef<NonConstValueType>);
+        // Helper functions to determine the value category of an expression
+
+    static void testCase6();
+        // TESTING 'unwrap' METHOD
+
+    static void testCase5();
+        // TESTING 'wrap' METHOD
+    
+    static void testCase4();
+        // TESTING 'NothrowMovableUtil' TRAITS
+
 };
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase3()
+int TestDriver<TYPE>::checkValueCategory(NonConstValueType &)
+{
+    return E_LVALUE_REF;
+}
+template <class TYPE>
+int TestDriver<TYPE>::checkValueCategory(const NonConstValueType &)
+{
+    return E_CONST_LVALUE_REF;
+}
+template <class TYPE>
+int TestDriver<TYPE>::checkValueCategory(BloombergLP::bslmf::MovableRef<NonConstValueType>)
+{
+    return E_MOVABLE_REF;
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase6()
 {
     // --------------------------------------------------------------------
-    // TESTING 'NothrowMovableUtil_Traits' CLASS
+    // TESTING 'unwrap' METHOD
     //
     // Concerns:
+    //: 1 Invoking `unwrap` method with an argument of an unwrapped type 
+    //:   returns a reference to the argument. 
+    //: 2 Invoking `unwrap` method with an argument of a wrapped type returns
+    //:   a reference to the wrapped object.
+    //: 3 The value category of the returned reference matches the value
+    //:   category of the argument.
     //
     // Plan:
+    //: 1 Using a matrix of all value categories, invoke unwrap and
+    //:   verify the returned reference has the correct value category using
+    //:   `checkValueCategory` helper function.  [C-3]
+    //: 2 in step 1, check the returned reference object matches the value
+    //:   of the `unwrap` argument.  [C-1], [C-2]
     //
     // Testing:
-    //  NothrowMovableUtil_Traits::IsWrapped
-    //  NothrowMovableUtil_Traits::UnwrappedType
-    //  NothrowMovableUtil_Traits::WrappedType
+    //   UnwrappedType<TYPE>::type unwrap(TYPE&);
+    //   UnwrappedType<TYPE>::type unwrap(TYPE const&);
+    //   WrappedType<RemoveReference<TYPE>::type>::type
+    //          unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nTESTING 'NothrowMovableUtil_Traits' CLASS"
-                "\n===========================================\n");
+        printf("\nTESTING `unwrap' METHOD"
+               "\n=======================\n");
+    typedef bslalg::ConstructorProxy<TYPE> TypeWithAllocator;
+    bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+    bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+    bslma::DefaultAllocatorGuard dag(&da);
+    if (veryVerbose) printf("\tCalling unwrape with a non const lvalue ref.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        TYPE &x = xBuffer.object();
+        ValueType exp(3);
+        ValueType &unwrappedX = Obj::unwrap(x);
+
+        ASSERT(checkValueCategory(Obj::unwrap(x)) == 
+        (bsl::is_const<ValueType>::value?E_CONST_LVALUE_REF:E_LVALUE_REF));
+        ASSERT(unwrappedX == exp);
+        ASSERT(checkAllocator(unwrappedX, &oa));
+    }
+    if (veryVerbose) printf("\tCalling unwrape with a const lvalue ref.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        const TYPE &x = xBuffer.object();
+        ValueType exp(3);
+
+        const ValueType &unwrappedX = Obj::unwrap(x);
+        ASSERT(checkValueCategory(Obj::unwrap(x)) == E_CONST_LVALUE_REF);
+        ASSERT(unwrappedX == exp);
+        ASSERT(checkAllocator(unwrappedX, &oa));
+    }
+    if (veryVerbose) printf("\tCalling unwrape with a non const movable ref.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        TYPE &x = xBuffer.object();
+        ValueType exp(3);
+        BloombergLP::bslmf::MovableRef<ValueType> unwrappedX = Obj::unwrap(MoveUtil::move(x));
+
+        ASSERT(checkValueCategory(Obj::unwrap(MoveUtil::move(x))) == 
+                (bsl::is_const<ValueType>::value?E_CONST_LVALUE_REF:E_MOVABLE_REF));
+        ASSERT(unwrappedX == exp);
+        ASSERT(checkAllocator(unwrappedX, &oa));
+    }
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase5()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'wrap' METHOD
+    //
+    // Concerns:
+    //: 1 Invoking `wrap` method with an argument of an unwrapped type returns
+    //:   a wrapper object containing a copy of the argument. 
+    //: 2 Invoking `wrap` method with an argument of a wrapped type returns a
+    //:   copy of the same object.
+    //: 3 It is possible to wrap a const object.
+    //: 3 The argument is moved from whenever possible.
+    //
+    // Plan:
+    //: 1 Create an object of `TYPE` from a `ValueType` object.  Using the 
+    //:   `wrap`  method, created a Wrapper object. Verify that the Wrapper  
+    //:   object contains a copy of the original ValueType object.  [C-1][C-2]
+    //: 2 In step 1, use a const object of `TYPE`.  [C-3]
+    //: 3 In step 1, invoke wrap by moving from the original object.  Verify 
+    //:   the object inside the returned wrapper has been created by move
+    //:   construction. 
+    //
+    // Testing:
+    //   static typename WrappedType<TYPE>::type wrap(TYPE&       f);
+    //   static typename WrappedType<TYPE>::type wrap(TYPE const& f);
+    //   static typename WrappedType<
+    //      typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
+    //      wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE)         f);
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING `wrap' METHOD"
+               "\n=====================\n");
+
+    typedef bslalg::ConstructorProxy<TYPE> TypeWithAllocator;
+    bslma::TestAllocator         da("default", veryVeryVeryVerbose);
+    bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
+    bslma::DefaultAllocatorGuard dag(&da);
+    if (veryVerbose) printf("\tWrapping a non const object.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        TYPE &x = xBuffer.object();
+        ValueType exp(3);
+
+        const WrapperType &wrappedX = Obj::wrap(x);
+
+        ASSERT(wrappedX.unwrap() == exp);
+        ASSERT(wrappedX.unwrap().isCopied());
+        ASSERT(!wrappedX.unwrap().isMoved());
+        ASSERT(checkAllocator(wrappedX.unwrap(), &da));
+    }
+    if (veryVerbose) printf("\tWrapping a const object.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        const TYPE &x = xBuffer.object();
+        ValueType exp(3);
+
+        const WrapperType &wrappedX = Obj::wrap(x);
+
+        ASSERT(wrappedX.unwrap() == exp);
+        ASSERT(wrappedX.unwrap().isCopied());
+        ASSERT(!wrappedX.unwrap().isMoved());
+        ASSERT(checkAllocator(wrappedX.unwrap(), &da));
+    }
+    if (veryVerbose) printf("\tWrapping a non const rvalue .\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        TYPE &x = xBuffer.object();
+        ValueType exp(3);
+        ValueType &val = x;
+        val.resetMoveCopiedFlags(); 
+        const WrapperType &wrappedX = Obj::wrap(MoveUtil::move(x));
+        
+        // If TYPE is const, wrap will perform a copy. Otherwise, it will do a move
+        ASSERT(wrappedX.unwrap() == exp);
+        ASSERT(wrappedX.unwrap().isCopied() == bsl::is_const<ValueType>::value);
+        ASSERT(wrappedX.unwrap().isMoved()  != bsl::is_const<ValueType>::value);
+        ASSERT(checkAllocator(wrappedX.unwrap(),
+                    (bsl::is_const<ValueType>::value?&da:&oa)));
+    }
+    /* 
+    // the following can not be made to work in C++03, and the questino is 
+    // if we should have it working in C++11 ? If yes, we need a const T&& 
+    // overload of wrap. The current overload set does not compile, as opposed
+    // to does the wrong thing.
+    {
+        const TYPE x(ValueType(3)); 
+        ValueType exp(3);
+        const ValueType &val = x;
+        val.resetMoveCopiedFlags(); 
+        const WrapperType &wrappedX = Obj::wrap(MoveUtil::move(x));
+        
+        ASSERT(wrappedX.unwrap() == exp);
+        ASSERT(wrappedX.unwrap().isCopied());
+        ASSERT(!wrappedX.unwrap().isMoved());
+    }
+    */
+
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase4()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'NothrowMovableUtil' TRAITS
+    //
+    // Concerns:
+    //: 1 `IsWrapped`, `UnwrappedType`, and `WrappedType` trait correspond to
+    //:    the same named member of `NothrowMovableUtil_Traits`
+    //
+    // Plan:
+    //: 1 For given type `TYPE`, check that `IsWrapped` returns the same value
+    //:   as `NothrowMovableUtil_Traits<TYPE>::IsWrapped`.  [C-1]
+    //: 2 For given type `TYPE`, check that `UnwrappedType` and `WrappedType` 
+    //:   returns the same type as the same named member of 
+    //:   `NothrowMovableUtil_Traits<TYPE>`.  [C-1]
+    //
+    // Testing:
+    //  NothrowMovableUtil::IsWrapped
+    //  NothrowMovableUtil::UnwrappedType
+    //  NothrowMovableUtil::WrappedType
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING 'NothrowMovableUtil' TRAITS"
+                "\n==================================\n");
 
     {
-        ASSERT(!(bslalg::NothrowMovableUtil_Traits<TYPE>::IsWrapped::value));
-        ASSERT(!(bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::UnwrappedType,
-            TYPE>::value) || 
-            (bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::UnwrappedType,
-            TYPE *>::value));
-        ASSERT(!(bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::WrappedType,
-            typename bslalg::NothrowMovableWrapper<typename bsl::remove_cv<TYPE>::type> >::value)
-            ||
-            (bsl::is_function<TYPE>::value) &&
-            (bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::WrappedType,
-            typename bslalg::NothrowMovableWrapper<TYPE*> >::value));
+        ASSERT((bslalg::NothrowMovableUtil_Traits<TYPE>::IsWrapped::value ==
+                bslalg::NothrowMovableUtil::IsWrapped<TYPE>::value)); 
 
-        ASSERT((bslalg::NothrowMovableUtil_Traits<Wrapper>::IsWrapped::value));
         ASSERT((bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::UnwrappedType,
-            ValueType>::value));
-        ASSERT((bsl::is_same<
-            typename bslalg::NothrowMovableUtil_Traits<Wrapper>::WrappedType,
-            Wrapper>::value));   
+                typename bslalg::NothrowMovableUtil_Traits<TYPE>::UnwrappedType,
+                typename bslalg::NothrowMovableUtil::UnwrappedType<TYPE>::type>::value)); 
+    
+            ASSERT((bsl::is_same<
+                typename bslalg::NothrowMovableUtil_Traits<TYPE>::WrappedType,
+                typename bslalg::NothrowMovableUtil::WrappedType<TYPE>::type>::value)); 
     }
 
 }
@@ -520,12 +1029,35 @@ int main(int argc, char *argv[])
     printf("TEST " __FILE__ " CASE %d\n", test);
 
     switch (test) { case 0:  // Zero is always the leading case.
+        case 6: {
+            RUN_EACH_TYPE(TestDriver,
+                      testCase6,
+                      TrackableValue, TrackableValueWithAlloc,
+                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>, 
+                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValueWithAlloc>,
+                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>, 
+                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValueWithAlloc>);
+        } break;        
+        case 5: {
+            RUN_EACH_TYPE(TestDriver,
+                      testCase5,
+                      TrackableValue, TrackableValueWithAlloc,
+                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>, 
+                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValueWithAlloc>/*,
+                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>, 
+                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValueWithAlloc>*/);
+        } break;
         case 4: {
+            RUN_EACH_TYPE(TestDriver,
+                      testCase4,
+                      BSLALG_NOTHROWMOVABLEUTIL_TEST_TYPES);
+        } break;
+        case 3: {
             // --------------------------------------------------------------------
-            // TESTING 'NothrowMovableUtil' TRAITS
+            // TESTING 'NothrowMovableUtil_Traits' TRAITS
             //
-            //  This test checks the correct behaviour of 'NothrowMovableUtil' 
-            //  traits when `TYPE` is not a specialization of NothrowMovableWrapper`
+            //  This test checks the correct behaviour of 'NothrowMovableUtil_Traits' 
+            //  traits.
             //
             // Concerns:
             //: 1 `IsWrapped` trait is satisfied if and only if 'TYPE' is a
@@ -533,8 +1065,9 @@ int main(int argc, char *argv[])
             //: 2 `WrappedType::type` is `NothrowMovableWrapper<TYPE>' if `TYPE` is 
             //:   not a specialization of `NothrowMovableWrapper`, and `TYPE' 
             //:   otherwise.
-            //: 2 `WrappedType::type` is `TYPE` if `TYPE` is not a specialization of
-            //:   `NothrowMovableWrapper`, and `TYPE::ValueType` otherwise.
+            //: 3 `UnWrappedType::type` is `TYPE` if `TYPE` is not a specialization of
+            //:   `NothrowMovableWrapper` and `TYPE is not a funciton, `TYPE*` if TYPE 
+            //:    is a function, and `TYPE::ValueType` otherwise.
             //
             // Plan:
             //: 1 Using a `TYPE` which is not a specialization of 
@@ -543,101 +1076,94 @@ int main(int argc, char *argv[])
             //: 2 In step 1, check that `WrappedType::type` is 
             //:   `NothrowMovableWrapper<TYPE>'.  [C-2] 
             //: 3 In step 1, check that `UnwrappedType::type` is 
-            //:   `TYPE`.  [C-2] 
-            //: 4 Using a `NothrowMovableWrapper<TYPE> as test type, check that 
+            //:   `TYPE`.  [C-3] 
+            //: 4 In step 3, using a function type `TYPE`, verify that  `UnwrappedType::type` is 
+            //:   `TYPE*`
+            //: 5 Using a `NothrowMovableWrapper<TYPE> as test type, check that 
             //:   `IsWrapped` trait is satisfied.  [C-1]
-            //: 5 In step 5, check that `WrappedType::type` is `TYPE'.  [C-2] 
-            //: 6 In step 6, check that `UnwrappedType::type` is 
-            //:   `TYPE::ValueType`.  [C-2] 
+            //: 6 In step 5, check that `WrappedType::type` is `TYPE'.  [C-2] 
+            //: 7 In step 6, check that `UnwrappedType::type` is 
+            //:   `TYPE::ValueType`.  [C-3] 
             //  
             // Testing:
-            //  NothrowMovableUtil::IsWrapped
-            //  NothrowMovableUtil::UnwrappedType
-            //  NothrowMovableUtil::WrappedType
+            //  NothrowMovableUtil_Traits::IsWrapped
+            //  NothrowMovableUtil_Traits::UnwrappedType
+            //  NothrowMovableUtil_Traits::WrappedType
             // --------------------------------------------------------------------
             if (verbose)
-                printf("\nTESTING 'NothrowMovableUtil' TRAITS"
+                printf("\nTESTING 'NothrowMovableUtil_Traits' TRAITS"
                         "\n=========================================\n");
-
+            if (veryVerbose)
+                printf("\tNon-wrapped types.\n");
             {
-                ASSERT(!(bslalg::NothrowMovableUtil::IsWrapped<int>::value));
+                ASSERT(!(bslalg::NothrowMovableUtil_Traits<int>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<int>::type,
+                    bslalg::NothrowMovableUtil_Traits<int>::UnwrappedType,
                     int>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<int>::type,
+                    bslalg::NothrowMovableUtil_Traits<int>::WrappedType,
                     bslalg::NothrowMovableWrapper<int> >::value));
 
-                ASSERT(!(bslalg::NothrowMovableUtil::IsWrapped<const int>::value));
+                ASSERT(!(bslalg::NothrowMovableUtil_Traits<const int>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<const int>::type,
+                    bslalg::NothrowMovableUtil_Traits<const int>::UnwrappedType,
                     const int>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<const int>::type,
-                    bslalg::NothrowMovableWrapper<int> >::value));
+                    bslalg::NothrowMovableUtil_Traits<const int>::WrappedType,
+                    bslalg::NothrowMovableWrapper<const int> >::value));
                     
-                ASSERT(!(bslalg::NothrowMovableUtil::IsWrapped<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::value));
+                ASSERT(!(bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::UnwrappedType,
                     BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::WrappedType,
                     bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE> >::value));
 
-                ASSERT(!(bslalg::NothrowMovableUtil::IsWrapped<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::value));
+                ASSERT(!(bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::UnwrappedType,
                     BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::WrappedType,
                     bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *> >::value));
             }
+            if (veryVerbose)
+                printf("\tWrapped types.\n");
             {
 
-                typedef bslalg::NothrowMovableWrapper<int> NTMB_INT;
-                typedef bslalg::NothrowMovableWrapper<const int> NTMB_CONST_INT;
-                typedef bslalg::NothrowMovableWrapper<BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>
-                             NTMB_FUNCTION_PTR_TYPE;
-                
-
-                
-                ASSERT((bslalg::NothrowMovableUtil::IsWrapped<NTMB_INT>::value));
+                ASSERT((bslalg::NothrowMovableUtil_Traits<NTMB_INT>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<NTMB_INT>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_INT>::UnwrappedType,
                     int>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<NTMB_INT>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_INT>::WrappedType,
                     NTMB_INT>::value));
 
-                ASSERT((bslalg::NothrowMovableUtil::IsWrapped<NTMB_CONST_INT>::value));
+                ASSERT((bslalg::NothrowMovableUtil_Traits<NTMB_CONST_INT>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<NTMB_CONST_INT>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_CONST_INT>::UnwrappedType,
                     const int>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<NTMB_CONST_INT>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_CONST_INT>::WrappedType,
                     NTMB_CONST_INT >::value));
                     
-                ASSERT((bslalg::NothrowMovableUtil::IsWrapped<NTMB_FUNCTION_PTR_TYPE>::value));
+                ASSERT((bslalg::NothrowMovableUtil_Traits<NTMB_FUNCTION_PTR_TYPE>::IsWrapped::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::UnwrappedType<NTMB_FUNCTION_PTR_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_FUNCTION_PTR_TYPE>::UnwrappedType,
                     BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *>::value));
                 ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil::WrappedType<NTMB_FUNCTION_PTR_TYPE>::type,
+                    bslalg::NothrowMovableUtil_Traits<NTMB_FUNCTION_PTR_TYPE>::WrappedType,
                     NTMB_FUNCTION_PTR_TYPE >::value));
             }
         } break;    
-      case 3: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase3,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-      } break;
       case 2: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
         // --------------------------------------------------------------------
 
-        if (verbose) printf("\nBREATHING TEST"
-                            "\n==============\n");
+        if (verbose) printf("\nUSAGE EXAMPLE"
+                            "\n============\n");
 
         usageExample2();
       } break;

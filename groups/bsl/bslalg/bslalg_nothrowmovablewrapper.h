@@ -338,8 +338,10 @@ class NothrowMovableWrapper
 
     typedef bslmf::MovableRefUtil MovableRefUtil;
 
+    typedef typename bsl::remove_cv<TYPE>::type StoredType;
+
     // DATA
-    bsls::ObjectBuffer<TYPE> d_buffer;
+    bsls::ObjectBuffer<StoredType> d_buffer;
 
     // NOT IMPLEMENTED
     NothrowMovableWrapper&
@@ -452,6 +454,28 @@ class NothrowMovableWrapper
     allocator_type get_allocator() const;
         // Return the allocator used to construct this object.  Note that this
         // method will fail to instantiate unless 'TYPE' is allocator-aware.
+};
+
+
+                       // ======================================
+                        // class template NothrowMovableWrapper
+                        // ======================================
+
+template <class TYPE>
+class NothrowMovableWrapper<NothrowMovableWrapper<TYPE> >
+{
+    // This specialization is for wrapped types. We do not support wrapping a wrapped type.
+    BSLMF_ASSERT( !sizeof(TYPE) && "Cannot wrap a wrapped object");
+};
+
+                       // ======================================
+                        // class template NothrowMovableWrapper
+                        // ======================================
+
+template <class TYPE>
+class NothrowMovableWrapper<const NothrowMovableWrapper<TYPE> >
+{
+    BSLMF_ASSERT( !sizeof(TYPE) && "Cannot wrap a wrapped object");
 };
 
 }  // close package namespace
