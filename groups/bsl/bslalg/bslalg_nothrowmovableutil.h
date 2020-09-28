@@ -1,4 +1,4 @@
-// bslalg_nothrowmovableutil.h                                     -*-C++-*-
+// bslalg_nothrowmovableutil.h                                        -*-C++-*-
 
 #ifndef INCLUDED_BSLALG_NOTHROWMOVABLEUTIL
 #define INCLUDED_BSLALG_NOTHROWMOVABLEUTIL
@@ -16,22 +16,21 @@ BSLS_IDENT("$Id: $")
 //@AUTHOR: Pablo Halpern (phalpern)
 //
 //@DESCRIPTION:  This component provides a utility struct,
-// 'bslalg::NothrowMovableUtil', that provides a namespace for static
-// functions 'wrap' and 'unwrap' with a uniform interface such that unwrapping
-// an object that is not wrapped or wrapping an object that is already wrapped
-// are noops.  This utility struct also provides type traits for determining
-// whether a type is wrapped and for deducing the type of the wrapped and
-// unwrapped object.
+// 'bslalg::NothrowMovableUtil', that provides a namespace for static functions
+// 'wrap' and 'unwrap' with a uniform interface such that unwrapping an object
+// that is not wrapped or wrapping an object that is already wrapped are noops.
+// This utility struct also provides type traits for determining whether a type
+// is wrapped and for deducing the type of the wrapped and unwrapped object.
 //
 ///Usage
 ///-----
 //
 ///Example 1
 ///- - - - -
-// In this example, we define a class template, 'CountedType<TYPE>',
-// that is little more than just a a wrapper around 'TYPE' that counts the
-// number of extant 'CountedType' objects.  We begin by defining the static
-// count member along with the single value member:
+// In this example, we define a class template, 'CountedType<TYPE>', that is
+// little more than just a a wrapper around 'TYPE' that counts the number of
+// extant 'CountedType' objects.  We begin by defining the static count member
+// along with the single value member:
 //..
 //  template <class TYPE>
 //  class CountedType {
@@ -43,12 +42,11 @@ BSLS_IDENT("$Id: $")
 //..
 // Because of externally-imposed requirements, the move constructor for
 // 'CountedType' must provide the strong guarantee; i.e., if the move
-// constructor of 'TYPE' throws an exception, then the moved-from
-// 'CountedType' object must be left unchanged.  To support this requirement,
-// we next define a private static function, 'MoveIfNoexcept', similar to the
-// standard 'std::move_if_noexcept', that returns a movable reference if its
-// argument is nothrow move constructible and a const lvalue reference
-// otherwise:
+// constructor of 'TYPE' throws an exception, then the moved-from 'CountedType'
+// object must be left unchanged.  To support this requirement, we next define
+// a private static function, 'MoveIfNoexcept', similar to the standard
+// 'std::move_if_noexcept', that returns a movable reference if its argument is
+// nothrow move constructible and a const lvalue reference otherwise:
 //..
 //      // PRIVATE CLASS FUNCTIONS
 //      template <class TP>
@@ -101,8 +99,7 @@ BSLS_IDENT("$Id: $")
 //  }
 //..
 // Next, we implement the value constructor and move constructor, which simply
-// copy their argument into the 'd_value' data members and increment the
-// count:
+// copy their argument into the 'd_value' data members and increment the count:
 //..
 //  template <class TYPE>
 //  CountedType<TYPE>::CountedType(const TYPE& val) : d_value(val)
@@ -141,8 +138,8 @@ BSLS_IDENT("$Id: $")
 //..
 // To test the 'CountedType' class template, assume a simple client type,
 // 'SomeType' that makes it easy to detect if it was move constructed.
-// 'SomeType' holds an 'int' value which is set to -1 when it is moved from,
-// as shown here:
+// 'SomeType' holds an 'int' value which is set to -1 when it is moved from, as
+// shown here:
 //..
 //  class SomeType {
 //      int d_value;
@@ -158,11 +155,11 @@ BSLS_IDENT("$Id: $")
 //..
 // Notice that 'SomeType' neglected to declare its move constructor as
 // 'noexcept'.  This might be an oversight or it could be an old class that
-// predates both 'noexcept' and the 'bsl::is_nothrow_move_constructible'
-// trait.  It is even be possible that the move constructor might throw
-// (though, of course, it doesn't in this simplified example).  Regardless,
-// the effect is that move-constructing a 'CountedType<SomeType>' will result
-// in the move constructor actually performing a copy:
+// predates both 'noexcept' and the 'bsl::is_nothrow_move_constructible' trait.
+// It is even be possible that the move constructor might throw (though, of
+// course, it doesn't in this simplified example).  Regardless, the effect is
+// that move-constructing a 'CountedType<SomeType>' will result in the move
+// constructor actually performing a copy:
 //..
 //  void main()
 //  {
@@ -188,26 +185,25 @@ BSLS_IDENT("$Id: $")
 ///Example 2
 ///- - - - -
 // Note that, in the last two lines of Example 1, we must call 'unwrap' in
-// order to access the 'SomeType' object inside of the
-// 'NothrowMovableWrapper'.  This is one situation where it would be
-// attractive to have an overloadable "operator dot" so that both
-// 'CoundedThing' and 'NothrowMovableWrapper' could be transparent proxy
-// types.  C++ does not have overloadable operator dot, but we can create a
-// 'CountedType' that is more intelligent about the existance of
-// 'NothrowMovableWrapper' and automatically unwraps values for the user's
-// convenience.
+// order to access the 'SomeType' object inside of the 'NothrowMovableWrapper'.
+// This is one situation where it would be attractive to have an overloadable
+// "operator dot" so that both 'CoundedThing' and 'NothrowMovableWrapper' could
+// be transparent proxy types.  C++ does not have overloadable operator dot,
+// but we can create a 'CountedType' that is more intelligent about the
+// existance of 'NothrowMovableWrapper' and automatically unwraps values for
+// the user's convenience.
 //
 // Rather than starting from scratch, we'll build our new counted type,
-// 'CountedType2' on 'CountedType'.  We start be defining a single data
-// member of type 'CountedType':
+// 'CountedType2' on 'CountedType'.  We start be defining a single data member
+// of type 'CountedType':
 //..
 //  template <class TYPE>
 //  class CountedType2 {
 //      CountedType<TYPE> d_data;
 //..
 // Next, for convenience, we add a public data type, 'ValueType' for the value
-// stored within 'CountedType2'.  However, rather than defining 'ValueType'
-// as simply 'TYPE', we unwrap it, in case 'TYPE' is an instantiation of
+// stored within 'CountedType2'.  However, rather than defining 'ValueType' as
+// simply 'TYPE', we unwrap it, in case 'TYPE' is an instantiation of
 // 'NothrowMovableWrapper':
 //..
 //  public:
@@ -233,11 +229,11 @@ BSLS_IDENT("$Id: $")
 //          : d_data(bslmf::MovableRefUtil::move(
 //                       bslmf::MovableRefUtil::access(original).d_data)) { }
 //..
-// Finally, we implement the 'value()' members such that the returned values
-// do not need to be unwrapped.  As in the case of the 'UnwrappedType'
-// metafunction, the 'unwrap()' function in 'NothrowMovableUtil'
-// handles both wrapped and unwrapped arguments, unwrapping the latter and
-// returning an unmodified reference to the former:
+// Finally, we implement the 'value()' members such that the returned values do
+// not need to be unwrapped.  As in the case of the 'UnwrappedType'
+// metafunction, the 'unwrap()' function in 'NothrowMovableUtil' handles both
+// wrapped and unwrapped arguments, unwrapping the latter and returning an
+// unmodified reference to the former:
 //..
 //      // MANIPULATORS
 //      ValueType& value()
@@ -299,17 +295,17 @@ namespace bslalg {
 // 'BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE)' instead of
 // 'MovableRef<TYPE>' in situations where 'TYPE' must be deduced.
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-# define BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) TYPE&&
+#define BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) TYPE&&
 #else
-# define BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) bslmf::MovableRef<TYPE>
+#define BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) bslmf::MovableRef<TYPE>
 #endif
 
 template <class TYPE, bool = bsl::is_function<TYPE>::value>
 struct NothrowMovableUtil_Traits;
 
-                        // =============================
-                        // struct NothrowMovableUtil
-                        // =============================
+                         // =========================
+                         // struct NothrowMovableUtil
+                         // =========================
 
 struct NothrowMovableUtil {
     // Namesapace for 'NothrowMovableWrapper' traits and utilities.
@@ -317,8 +313,8 @@ struct NothrowMovableUtil {
     // TRAITS
     template <class TYPE>
     struct IsWrapped : NothrowMovableUtil_Traits<TYPE>::IsWrapped {
-        // Metafunction evaluating to 'true_type' if 'TYPE' is a
-        // specialization of 'NothrowMovableWrapper'; otherwise, 'false_type'.
+        // Metafunction evaluating to 'true_type' if 'TYPE' is a specialization
+        // of 'NothrowMovableWrapper'; otherwise, 'false_type'.
     };
 
     template <class TYPE>
@@ -327,8 +323,7 @@ struct NothrowMovableUtil {
         // 'NothrowMovableWrapper', then 'type' is 'TYPE'; otherwise 'type' is
         // 'NothrowMovableWrapper<TYPE>'.
 
-        typedef typename
-        NothrowMovableUtil_Traits<TYPE>::WrappedType type;
+        typedef typename NothrowMovableUtil_Traits<TYPE>::WrappedType type;
     };
 
     template <class TYPE>
@@ -337,89 +332,80 @@ struct NothrowMovableUtil {
         // 'NothrowMovableWrapper', then 'type' is 'TYPE::ValueType'; otherwise
         // 'type' is 'TYPE'.
 
-        typedef typename
-        NothrowMovableUtil_Traits<TYPE>::UnwrappedType type;
+        typedef typename NothrowMovableUtil_Traits<TYPE>::UnwrappedType type;
     };
 
     // CLASS METHODS
     template <class TYPE>
-    static typename WrappedType<TYPE>::type wrap(TYPE&       f);
+    static typename WrappedType<TYPE>::type wrap(TYPE& f);
     template <class TYPE>
     static typename WrappedType<TYPE>::type wrap(TYPE const& f);
     template <class TYPE>
     static typename WrappedType<
         typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
-    wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE)         f);
-        // Return a wrapped copy of the specified 'f' object.  If 'f' is
-        // already wrapped, return a simple copy of 'f' without wrapping it
-        // again.  Note that the overloads taking an lvalue argument prevent
-        // the overload taking an rvalue argument from treating the argument
-        // as a forwarding reference.
+        wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f);
+    // Return a wrapped copy of the specified 'f' object.  If 'f' is already
+    // wrapped, return a simple copy of 'f' without wrapping it again.  Note
+    // that the overloads taking an lvalue argument prevent the overload taking
+    // an rvalue argument from treating the argument as a forwarding reference.
 
     template <class TYPE>
-    static typename UnwrappedType<TYPE>::type&       unwrap(TYPE&       f);
+    static typename UnwrappedType<TYPE>::type& unwrap(TYPE& f);
     template <class TYPE>
     static typename UnwrappedType<TYPE>::type const& unwrap(TYPE const& f);
     template <class TYPE>
-    static bslmf::MovableRef<
-        typename UnwrappedType<
-            typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type>
-    unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE)                   f);
-        // Return a reference to the object wrapped in the specified 'f'
-        // object.  If 'f' is wrapped, simply return a reference to 'f'.  Note
-        // that the overloads taking an lvalue argument prevent the overload
-        // taking an rvalue argument from treating the argument as a
-        // forwarding reference.
+    static bslmf::MovableRef<typename UnwrappedType<
+        typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type>
+        unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f);
+    // Return a reference to the object wrapped in the specified 'f' object.
+    // If 'f' is wrapped, simply return a reference to 'f'.  Note that the
+    // overloads taking an lvalue argument prevent the overload taking an
+    // rvalue argument from treating the argument as a forwarding reference.
 };
 
 }  // close package namespace
 
-                        // ----------------------------------------
-                        // class template NothrowMovableUtil_Traits
-                        // ----------------------------------------
+                  // ----------------------------------------
+                  // class template NothrowMovableUtil_Traits
+                  // ----------------------------------------
 
 namespace bslalg {
 
 template <class TYPE>
-struct NothrowMovableUtil_Traits<TYPE, false /* is_function */>
-{
-    // Component-private class -- do not use.
-    // This specialization of traits is for non-function types that are not
-    // wrapped.
+struct NothrowMovableUtil_Traits<TYPE, false /* is_function */> {
+    // Component-private class -- do not use.  This specialization of traits is
+    // for non-function types that are not wrapped.
 
-    // Cannot instantiate on reference types or array types.
-    //BSLMF_ASSERT(! bslmf::MovableRefUtil::IsReference<TYPE>::value);
-    //BSLMF_ASSERT(! bsl::is_array<TYPE>::value);
+    // Cannot instantiate on reference types or array types.  BSLMF_ASSERT(!
+    // bslmf::MovableRefUtil::IsReference<TYPE>::value); BSLMF_ASSERT(!
+    // bsl::is_array<TYPE>::value);
 
-    typedef bsl::false_type                                    IsWrapped;
-    typedef TYPE                                               UnwrappedType;
-    typedef NothrowMovableWrapper<TYPE>                        WrappedType;
+    typedef bsl::false_type             IsWrapped;
+    typedef TYPE                        UnwrappedType;
+    typedef NothrowMovableWrapper<TYPE> WrappedType;
 };
 
 template <class TYPE>
-struct NothrowMovableUtil_Traits<TYPE, true /* is_function */>
-{
-    // Component-private class -- do not use.
-    // This specialization of traits is for function types that are not
-    // wrapped.  This specialization is NOT for function pointers or function
-    // references.
+struct NothrowMovableUtil_Traits<TYPE, true /* is_function */> {
+    // Component-private class -- do not use.  This specialization of traits is
+    // for function types that are not wrapped.  This specialization is NOT for
+    // function pointers or function references.
     //
     // 'UnwrappedType' is an object type, and is thus the decayed version of
     // 'TYPE', i.e., a function pointer.  Since 'unwrap' always returns a
-    // reference, this decay means that, 'unwrap(f)' will not compile if 'f'
-    // is a function or reference to function.  However
-    // 'UnwrappedType pf = f;' will work whether 'f' is a function or not.
+    // reference, this decay means that, 'unwrap(f)' will not compile if 'f' is
+    // a function or reference to function.  However 'UnwrappedType pf = f;'
+    // will work whether 'f' is a function or not.
 
-    typedef bsl::false_type              IsWrapped;
-    typedef TYPE*                        UnwrappedType;
-    typedef NothrowMovableWrapper<TYPE*> WrappedType;
+    typedef bsl::false_type                IsWrapped;
+    typedef TYPE                          *UnwrappedType;
+    typedef NothrowMovableWrapper<TYPE *>  WrappedType;
 };
 
 template <class TYPE>
-struct NothrowMovableUtil_Traits<NothrowMovableWrapper<TYPE>, false>
-{
-    // Component-private class -- do not use.
-    // This specialization is for wrapped types.
+struct NothrowMovableUtil_Traits<NothrowMovableWrapper<TYPE>, false> {
+    // Component-private class -- do not use.  This specialization is for
+    // wrapped types.
 
     typedef bsl::true_type              IsWrapped;
     typedef TYPE                        UnwrappedType;
@@ -432,9 +418,9 @@ struct NothrowMovableUtil_Traits<NothrowMovableWrapper<TYPE>, false>
 //                TEMPLATE AND INLINE IMPLEMENTATIONS
 // ===========================================================================
 
-                        // -----------------------------------------
-                        // struct template NothrowMovableUtil
-                        // -----------------------------------------
+                 // -----------------------------------------
+                 // struct template NothrowMovableUtil
+                 // -----------------------------------------
 
 // PUBLIC CLASS METHODS
 template <class TYPE>
@@ -457,12 +443,12 @@ template <class TYPE>
 inline
 typename bslalg::NothrowMovableUtil::WrappedType<
     typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
-bslalg::NothrowMovableUtil::
-wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f)
+    bslalg::NothrowMovableUtil::wrap(
+        BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f)
 {
-    return typename WrappedType<
-        typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
-        (bslmf::MovableRefUtil::move(f));
+    return
+        typename WrappedType<typename bslmf::MovableRefUtil::RemoveReference<
+            TYPE>::type>::type(bslmf::MovableRefUtil::move(f));
 }
 
 template <class TYPE>
@@ -483,10 +469,10 @@ bslalg::NothrowMovableUtil::unwrap(TYPE const& f)
 
 template <class TYPE>
 inline
-bslmf::MovableRef<
-    typename bslalg::NothrowMovableUtil::UnwrappedType<
-        typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type>
-bslalg::NothrowMovableUtil::unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f)
+bslmf::MovableRef<typename bslalg::NothrowMovableUtil::UnwrappedType<
+    typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type>
+    bslalg::NothrowMovableUtil::unwrap(
+        BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f)
 {
     typename bslalg::NothrowMovableUtil::UnwrappedType<TYPE>::type& r =
         bslmf::MovableRefUtil::access(f);
@@ -495,7 +481,7 @@ bslalg::NothrowMovableUtil::unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE
 
 }  // close enterprise namespace
 
-#endif // ! defined(INCLUDED_BSLALG_NOTHROWMOVABLEUTIL)
+#endif  // ! defined(INCLUDED_BSLALG_NOTHROWMOVABLEUTIL)
 
 // ----------------------------------------------------------------------------
 // Copyright 2020 Bloomberg Finance L.P.

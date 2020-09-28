@@ -1,13 +1,11 @@
-// bslalg_nothrowmovableutil.cpp                                   -*-C++-*-
+// bslalg_nothrowmovableutil.cpp                                      -*-C++-*-
 
 #include <bslalg_nothrowmovableutil.h>
 
 #include <bsls_ident.h>
 BSLS_IDENT("$Id$ $CSID$")
 
-namespace BloombergLP {
-
-} // Close namespace BloombergLP
+namespace BloombergLP {}  // Close namespace BloombergLP
 
 // ----------------------------------------------------------------------------
 // Copyright 2020 Bloomberg Finance L.P.
