@@ -22,8 +22,15 @@ using namespace BloombergLP;
 // ----------------------------------------------------------------------------
 //                                  Overview
 //                                  --------
+// The component under test is a wrapper class holding an object of 'TYPE', and
+// providing no other functionality other than returning the wrapped object.
+// The use of this class communicates to specific clients (see
+// 'bslstl_function') that the wrapped object should be treated as-if it has a
+// 'noexcept' move constructor, even in C++03, where 'noexcept' does not exist.
+// The tests will check the correct functionality of the component under test
+// as specified in the component's documentation.
 //
-//
+// ----------------------------------------------------------------------------
 // TRAITS
 // [ 4] bsl::is_nothrow_move_constructible
 // [ 4] bslma::UsesBslmaAllocator
@@ -57,7 +64,7 @@ using namespace BloombergLP;
 //                            const allocator_type&                 alloc,
 //                            bslmf::MovableRef<NothrowMovableWrapper>
 //                            original);
-// [  ] ~NothrowMovableWrapper();
+// [ 9] ~NothrowMovableWrapper();
 //
 // MANIPULATORS
 // [ 8] ValueType& unwrap();
@@ -65,47 +72,55 @@ using namespace BloombergLP;
 //
 // ACCESSORS
 // [ 8] ValueType const& unwrap() const;
-// [ 8] operator const ValueType&() const;
+// [ 8] operator ValueType const&() const;
 // [ 8] allocator_type get_allocator() const;
 //
 // ----------------------------------------------------------------------------
-// [ 3] BREATHING TEST
-//=============================================================================
-//                       STANDARD BDE ASSERT TEST MACRO
-//-----------------------------------------------------------------------------
-// NOTE: THIS IS A LOW-LEVEL COMPONENT AND MAY NOT USE ANY C++ LIBRARY
-// FUNCTIONS, INCLUDING IOSTREAMS.
-static int testStatus = 0;
+// [ 2] USAGE EXAMPLE
+// [ 1] BREATHING TEST
 
-void aSsErT(bool b, const char *s, int i)
+// ============================================================================
+//                     STANDARD BSL ASSERT TEST FUNCTION
+// ----------------------------------------------------------------------------
+
+namespace {
+
+int testStatus = 0;
+
+void aSsErT(bool condition, const char *message, int line)
 {
-    if (b) {
-        printf("Error " __FILE__ "(%d): %s    (failed)\n", i, s);
-        if (testStatus >= 0 && testStatus <= 100)
+    if (condition) {
+        printf("Error " __FILE__ "(%d): %s    (failed)\n", line, message);
+
+        if (0 <= testStatus && testStatus <= 100) {
             ++testStatus;
+        }
     }
 }
 
-#define ASSERT(X)                                                             \
-    {                                                                         \
-        aSsErT(!(X), #X, __LINE__);                                           \
-    }
+}  // close unnamed namespace
 
-//=============================================================================
-//                       STANDARD BDE TEST DRIVER MACROS
-//-----------------------------------------------------------------------------
-#define LOOP_ASSERT BSLS_BSLTESTUTIL_LOOP_ASSERT
+// ============================================================================
+//               STANDARD BSL TEST DRIVER MACRO ABBREVIATIONS
+// ----------------------------------------------------------------------------
+
+#define ASSERT       BSLS_BSLTESTUTIL_ASSERT
+#define ASSERTV      BSLS_BSLTESTUTIL_ASSERTV
+
+#define LOOP_ASSERT  BSLS_BSLTESTUTIL_LOOP_ASSERT
+#define LOOP0_ASSERT BSLS_BSLTESTUTIL_LOOP0_ASSERT
+#define LOOP1_ASSERT BSLS_BSLTESTUTIL_LOOP1_ASSERT
 #define LOOP2_ASSERT BSLS_BSLTESTUTIL_LOOP2_ASSERT
 #define LOOP3_ASSERT BSLS_BSLTESTUTIL_LOOP3_ASSERT
 #define LOOP4_ASSERT BSLS_BSLTESTUTIL_LOOP4_ASSERT
 #define LOOP5_ASSERT BSLS_BSLTESTUTIL_LOOP5_ASSERT
 #define LOOP6_ASSERT BSLS_BSLTESTUTIL_LOOP6_ASSERT
 
-#define Q BSLS_BSLTESTUTIL_Q    // Quote identifier literally.
-#define P BSLS_BSLTESTUTIL_P    // Print identifier and value.
-#define P_ BSLS_BSLTESTUTIL_P_  // P(X) without '\n'.
-#define T_ BSLS_BSLTESTUTIL_T_  // Print a tab (w/o newline).
-#define L_ BSLS_BSLTESTUTIL_L_  // current Line number
+#define Q            BSLS_BSLTESTUTIL_Q   // Quote identifier literally.
+#define P            BSLS_BSLTESTUTIL_P   // Print identifier and value.
+#define P_           BSLS_BSLTESTUTIL_P_  // P(X) without '\n'.
+#define T_           BSLS_BSLTESTUTIL_T_  // Print a tab (w/o newline).
+#define L_           BSLS_BSLTESTUTIL_L_  // current Line number
 
 #define RUN_EACH_TYPE BSLTF_TEMPLATETESTFACILITY_RUN_EACH_TYPE
 
@@ -143,7 +158,7 @@ static int veryVeryVeryVerbose = 0;  // For test allocators
 typedef bslmf::MovableRefUtil MoveUtil;
 
 int simpleFunction(int i)
-    // A simple function that can be stored in nothrow wrapper.
+    // A simple function that can be stored in no-throw wrapper.
 {
     return i;
 }
@@ -157,9 +172,9 @@ class TrackableValue {
     // (such as +=), the move and copy bits are cleared, indicating that the
     // new value has been neither moved nor copied.  When assigned a new value
     // via copy construction or copy assignment, the copy bit is set and the
-    // move bit is cleared. When assigned a new value via move construction,
+    // move bit is cleared.  When assigned a new value via move construction,
     // move assignment, or swap, the copy bit is transferred from the original
-    // value and the move bit is set. Thus a value that is copied then moved
+    // value and the move bit is set.  Thus a value that is copied then moved
     // will have both bits set but a value that is moved then copy has only the
     // copy bit set.  The copy and move bits are not salient attributes of the
     // value and are thus not used for testing equality.
@@ -168,10 +183,10 @@ class TrackableValue {
     enum {
         e_NUM_FLAGS = 2,
         // Value is multiplied by the following value to make room for the
-        // flag bits.  Multiply and divide are used to scale the value
-        // because shift operations are not guaranteed to preserve sign.  The
-        // compiler will almost certainly replace these multiplication and
-        // divisions with more efficient arithmetic shift operations.
+        // flag bits.  Multiply and divide are used to scale the value because
+        // shift operations are not guaranteed to preserve sign.  The compiler
+        // will almost certainly replace these multiplication and divisions
+        // with more efficient arithmetic shift operations.
         e_VALUE_MULTIPLIER = 1 << e_NUM_FLAGS,
         e_FLAGS_MASK       = e_VALUE_MULTIPLIER - 1,
         e_VALUE_MASK       = ~e_FLAGS_MASK,
@@ -204,8 +219,12 @@ class TrackableValue {
         e_MAX = INT_MAX / e_VALUE_MULTIPLIER
     };
 
+    // STATIC DATA
+    static int s_numDestructorCalls;
+        // number of times the destructor of 'TrackableValue' has been invoked.
+
     // CREATORS
-    TrackableValue(int v = 0)
+    TrackableValue(int v = 0)                                       // IMPLICIT
         // Set value to the specified 'v' and set 'isMoved()' and 'isCopied()'
         // to false.
     {
@@ -213,21 +232,26 @@ class TrackableValue {
     }
 
     TrackableValue(const TrackableValue& other)
-        // Copy value from 'other', set 'isMoved()' to false and 'isCopied()'
-        // to true.
+        // Copy value from the specified 'other', set 'isMoved()' to false and
+        // 'isCopied()' to true.
     {
         setValue(other.value(), false, true);
     }
 
-    TrackableValue(bslmf::MovableRef<TrackableValue> other)
-        // Move value from 'other', set 'isMoved()' to true, and set
-        // 'isCopied()' to 'other.isCopied()', then set 'other' to the
+    TrackableValue(bslmf::MovableRef<TrackableValue> other)         // IMPLICIT
+        // Move value from the specified 'other', set 'isMoved()' to true, and
+        // set 'isCopied()' to 'other.isCopied()', then set 'other' to the
         // moved-from state.
     {
         *this = bslmf::MovableRefUtil::move(other);
     }
 
-    //! ~TrackableValue() = default;
+
+    ~TrackableValue()
+        // We count the number of destructor invocations
+    {
+        s_numDestructorCalls++;
+    };
 
     // MANIPULATORS
     TrackableValue& operator=(int v)
@@ -249,29 +273,89 @@ class TrackableValue {
         // to 'other.isCopied()', then assign 'rhs' the value
         // 'e_MOVED_FROM_VAL' and return '*this'.
 
-    void swap(TrackableValue& other);
-        // Exchange the values AND 'isCopied()' flags of '*this' and 'other',
-        // then set the 'isMoved()' flag of both to true.
-
     void resetMoveCopiedFlags()
         // Set 'isMoved()' and 'isCopied() to false.
     {
         d_valueAndFlags &= e_VALUE_MASK;
     }
 
-    void setValueRaw(int v);
-    void setIsMovedRaw(bool movedFlag);
-    void setIsCopiedRaw(bool copiedFlag);
+    void setIsCopiedRaw(bool);
+    void setIsMovedRaw(bool);
+    void setValueRaw(int);
         // Set the constituent parts of this object without modifying the other
-        // parts. It is up to the caller to ensure that the flags are set
+        // parts.  It is up to the caller to ensure that the flags are set
         // consistently.
 
+    void swap(TrackableValue& other);
+        // Exchange the values AND 'isCopied()' flags of '*this' and the
+        // specified 'other', then set the 'isMoved()' flag of both to true.
+
     // ACCESSORS
-    int  value() const { return d_valueAndFlags / e_VALUE_MULTIPLIER; }
-    bool isMoved() const { return d_valueAndFlags & e_MOVED_FLAG; }
     bool isCopied() const { return d_valueAndFlags & e_COPIED_FLAG; }
+    bool isMoved() const { return d_valueAndFlags & e_MOVED_FLAG; }
     bool isMovedFrom() const { return d_valueAndFlags == e_MOVED_FROM_STATE; }
+    int  value() const { return d_valueAndFlags / e_VALUE_MULTIPLIER; }
+
 };
+// IMPLEMENTATION OF TrackableValue
+
+// STATIC DATA
+int TrackableValue::s_numDestructorCalls = 0;
+
+// MANIPULATORS
+inline
+TrackableValue& TrackableValue::setValue(int  v,
+                                         bool movedFlag,
+                                         bool copiedFlag)
+{
+    ASSERT(e_MIN <= v && v <= e_MAX);
+    d_valueAndFlags = v * e_VALUE_MULTIPLIER;
+    if (movedFlag)
+        d_valueAndFlags |= e_MOVED_FLAG;
+    if (copiedFlag)
+        d_valueAndFlags |= e_COPIED_FLAG;
+    return *this;
+}
+
+inline
+TrackableValue& TrackableValue::operator=(
+                                       bslmf::MovableRef<TrackableValue> rhs)
+{
+    TrackableValue& otherRef = bslmf::MovableRefUtil::access(rhs);
+    d_valueAndFlags          = otherRef.d_valueAndFlags | e_MOVED_FLAG;
+    otherRef.d_valueAndFlags = e_MOVED_FROM_STATE;
+    return *this;
+}
+
+void TrackableValue::setIsCopiedRaw(bool copiedFlag)
+{
+    d_valueAndFlags &= (e_VALUE_MASK | e_MOVED_FLAG);
+    if (copiedFlag)
+        d_valueAndFlags |= e_COPIED_FLAG;
+}
+
+void TrackableValue::setIsMovedRaw(bool movedFlag)
+{
+    d_valueAndFlags &= (e_VALUE_MASK | e_COPIED_FLAG);
+    if (movedFlag)
+        d_valueAndFlags |= e_MOVED_FLAG;
+}
+
+void TrackableValue::setValueRaw(int v)
+{
+    d_valueAndFlags &= e_FLAGS_MASK;
+    d_valueAndFlags |= v * e_VALUE_MULTIPLIER;
+}
+
+void TrackableValue::swap(TrackableValue& other)
+{
+    // Don't use std::swap<int> because don't want to #include <algorithm>
+    int tmp               = d_valueAndFlags;
+    d_valueAndFlags       = other.d_valueAndFlags;
+    other.d_valueAndFlags = tmp;
+    d_valueAndFlags |= e_MOVED_FLAG;
+    other.d_valueAndFlags |= e_MOVED_FLAG;
+}
 
 // TrackableValue FREE FUNCTIONS
 MAYBE_UNUSED
@@ -293,61 +377,6 @@ inline
 void swap(TrackableValue& a, TrackableValue& b)
 {
     a.swap(b);
-}
-
-// IMPLEMENTATION OF TrackableValue
-inline
-TrackableValue& TrackableValue::setValue(int  v,
-                                         bool movedFlag,
-                                         bool copiedFlag)
-{
-    ASSERT(e_MIN <= v && v <= e_MAX);
-    d_valueAndFlags = v * e_VALUE_MULTIPLIER;
-    if (movedFlag)
-        d_valueAndFlags |= e_MOVED_FLAG;
-    if (copiedFlag)
-        d_valueAndFlags |= e_COPIED_FLAG;
-    return *this;
-}
-
-inline
-TrackableValue& TrackableValue::operator=(
-                                       bslmf::MovableRef<TrackableValue> other)
-{
-    TrackableValue& otherRef = bslmf::MovableRefUtil::access(other);
-    d_valueAndFlags          = otherRef.d_valueAndFlags | e_MOVED_FLAG;
-    otherRef.d_valueAndFlags = e_MOVED_FROM_STATE;
-    return *this;
-}
-
-void TrackableValue::swap(TrackableValue& other)
-{
-    // Don't use std::swap<int> because don't want to #include <algorithm>
-    int tmp               = d_valueAndFlags;
-    d_valueAndFlags       = other.d_valueAndFlags;
-    other.d_valueAndFlags = tmp;
-    d_valueAndFlags |= e_MOVED_FLAG;
-    other.d_valueAndFlags |= e_MOVED_FLAG;
-}
-
-void TrackableValue::setValueRaw(int v)
-{
-    d_valueAndFlags &= e_FLAGS_MASK;
-    d_valueAndFlags |= v * e_VALUE_MULTIPLIER;
-}
-
-void TrackableValue::setIsMovedRaw(bool movedFlag)
-{
-    d_valueAndFlags &= (e_VALUE_MASK | e_COPIED_FLAG);
-    if (movedFlag)
-        d_valueAndFlags |= e_MOVED_FLAG;
-}
-
-void TrackableValue::setIsCopiedRaw(bool copiedFlag)
-{
-    d_valueAndFlags &= (e_VALUE_MASK | e_MOVED_FLAG);
-    if (copiedFlag)
-        d_valueAndFlags |= e_COPIED_FLAG;
 }
 
 // End implementation of TrackableValue
@@ -426,21 +455,23 @@ class TrackableValueWithAlloc {
         return *this;
     }
 
-    void setValue(int v) { d_trackable = v; }
     void resetMoveCopiedFlags()
         // Set 'isMoved()' and 'isCopied() to false.
     {
         d_trackable.resetMoveCopiedFlags();
     }
 
-    // ACCESSORS
-    int  value() const { return d_trackable.value(); }
-    bool isMoved() const { return d_trackable.isMoved(); }
-    bool isCopied() const { return d_trackable.isCopied(); }
-    bool isMovedFrom() const { return d_trackable.isMovedFrom(); }
+    void setValue(int v) { d_trackable = v; }
 
-    allocator_type    get_allocator() const { return d_alloc; }
+    // ACCESSORS
     bslma::Allocator *allocator() const { return d_alloc.mechanism(); }
+    allocator_type    get_allocator() const { return d_alloc; }
+
+    bool isCopied() const { return d_trackable.isCopied(); }
+    bool isMoved() const { return d_trackable.isMoved(); }
+    bool isMovedFrom() const { return d_trackable.isMovedFrom(); }
+    int  value() const { return d_trackable.value(); }
+
 };
 
 MAYBE_UNUSED inline bool operator==(const TrackableValueWithAlloc& a,
@@ -481,7 +512,7 @@ class CountedType {
         // 'CountedType' object must be left unchanged.  To support this
         // requirement, we next define a private static function,
         // 'MoveIfNoexcept', similar to the standard 'std::move_if_noexcept',
-        // that returns a movable reference if its argument is nothrow move
+        // that returns a movable reference if its argument is no-throw move
         // constructible and a const lvalue reference otherwise:
         //..
         // PRIVATE CLASS FUNCTIONS
@@ -490,7 +521,7 @@ class CountedType {
         bsl::is_nothrow_move_constructible<TP>::value,
         bslmf::MovableRef<TP>,
         const TP&>::type
-    MoveIfNoexcept(TP& x);
+    MoveIfNoexcept(TP&);
         //..
         // We next finish out the class definition with a constructor, copy
         // constructor, move constructor, destructor, and member functions to
@@ -501,15 +532,16 @@ class CountedType {
     static int count() { return s_count; }
 
     // CREATORS
-    CountedType(const TYPE& val);
+    CountedType(const TYPE& val);                                   // IMPLICIT
         // Construct 'CountedType' from the specified 'val'.
 
     CountedType(const CountedType& original);
         // Copy construct '*this' from the specified 'original' object.
 
-    CountedType(bslmf::MovableRef<CountedType> original);
-        // Move construct '*this' from 'original'.  If an exception is thrown,
-        // by the constructor for 'TYPE' 'original' is unchanged.
+    CountedType(bslmf::MovableRef<CountedType> original);           // IMPLICIT
+        // Move construct '*this' from the specified 'original'.  If an
+        // exception is thrown, by the constructor for 'TYPE' 'original' is
+        // unchanged.
 
     ~CountedType() { --s_count; }
         // Destroy this object.
@@ -583,10 +615,10 @@ class SomeType {
     int d_value;
 
   public:
-    SomeType(int v = 0)
+    SomeType(int v = 0)                                             // IMPLICIT
     : d_value(v)
     {
-    }  // IMPLICIT
+    }
     SomeType(const SomeType& original)
     : d_value(original.d_value)
     {
@@ -626,13 +658,13 @@ void usageExample1()
     ASSERT(-1 == obj3.value().unwrap().value());  // moved from
     ASSERT(3 == obj4.value().unwrap().value());
 }
-}  // end unnamed namespace
+}  // close unnamed namespace
 
 template <class TYPE,
-          bool USES_BSLMA_ALLOC =
+          bool  USES_BSLMA_ALLOC =
               BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
 class Test_Util {
-    // This class provided test utilities which have different behaviour
+    // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  The main template
     // is for allocator-aware types.
 
@@ -649,7 +681,7 @@ class Test_Util {
 
 template <class TYPE>
 class Test_Util<TYPE, false> {
-    // This class provided test utilities which have different behaviour
+    // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  This
     // specialization is for non allocator-aware types.
 
@@ -695,12 +727,16 @@ Test_Util<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
 
 template <class TYPE>
 bool checkAllocator(const TYPE& obj, const bsl::allocator<char>& allocator)
+    // If 'TYPE' is allocator-aware, check if the allocator of the specified
+    // 'obj' is specified 'allocator'
 {
     return Test_Util<TYPE>::checkAllocator(obj, allocator);
 }
 
 template <class TYPE>
 bool hasSameAllocator(const TYPE& obj1, const TYPE& obj2)
+    // If 'TYPE' is allocator-aware, check if the allocator of the specified
+    // 'obj1' matches that of specified 'obj2'
 {
     return Test_Util<TYPE>::hasSameAllocator(obj1, obj2);
 }
@@ -737,7 +773,7 @@ class TestDriver {
 
   public:
     static void testCase8();
-        // ACCESORS AND MANIPULATORS
+        // ACCESSORS AND MANIPULATORS
 
     static void testCase7();
         // CONSTRUCTION FROM `NothrowMovableWrapper`
@@ -749,25 +785,45 @@ class TestDriver {
         // DEFAULT CONSTRUCTION
 
     static void testCase4();
-
-    static void testCase3();
+        // TRAITS AND TYPEDEFS
 };
 template <class TYPE>
 void TestDriver<TYPE>::testCase8()
 {
     // --------------------------------------------------------------------
-    //  ACCESORS AND MANIPULATORS
+    //  ACCESSORS AND MANIPULATORS
     //
-    // Concerns: Plan: Testing:
+    //  This test checks the functionality of accessors and manipulators.
+    //
+    // Concerns:
+    //: 1 That 'unwrap' function return a correctly const qualified reference
+    //:   to the wrapped object.
+    //: 2 That the conversion operators return a correctly const qualified
+    //:   reference to the wrapped object.
+    //: 3 That the 'get_allocator' method returns the allocator used to
+    //:   created the wrapped object, if the wrapped object type is allocator
+    //:   aware
+    //:
+    // Plan:
+    //: 1 Create a wrapper object of 'TYPE'. Using the 'unwrape' method, check
+    //:   that the returned reference matches the wrapped object.  [C-1]
+    //: 2 In step 1, call the 'unwrap' method through a const reference to
+    //:   the wrapper object.  [C-1]
+    //: 3 Repeat step 1 using the conversion operator.  [C-2]
+    //: 4 Repeat step 2 using the conversion operator.  [C-2]
+    //: 5 If 'TYPE' is allocator aware, check that 'get_allocator' return the
+    //:   allocator specified at wrapped construction time.  [C-3]
+    //
+    // Testing:
     //   ValueType& unwrap();
     //   operator ValueType&();
     //   ValueType const& unwrap() const;
-    //   operator const ValueType&() const;
+    //   operator ValueType const&() const;
     //   allocator_type get_allocator() const;
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nACCESORS AND MANIPULATORS"
-               "\n=========================\n");
+        printf("\nACCESSORS AND MANIPULATORS"
+               "\n==========================\n");
 
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
     bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
@@ -1105,7 +1161,7 @@ template <class TYPE>
 void TestDriver<TYPE>::testCase4()
 {
     // --------------------------------------------------------------------
-    // TESTING TRAITS AND TYPEDEFS
+    // TRAITS AND TYPEDEFS
     //
     //  This test checks the nested `NothrowMovableWrapper` traits  and
     //  pubic typedefs.
@@ -1131,8 +1187,8 @@ void TestDriver<TYPE>::testCase4()
     //   typedef ...  allocator_type;
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nTESTING TRAITS AND TYPEDEFS"
-               "\n===========================\n");
+        printf("\nTRAITS AND TYPEDEFS"
+               "\n===================\n");
 
     {
         ASSERT((bsl::is_nothrow_move_constructible<Obj>::value));
@@ -1170,6 +1226,90 @@ int main(int argc, char *argv[])
       case 0:  // Zero is always the leading case.
       case 9: {
         // --------------------------------------------------------------------
+        // DESTRUCTOR
+        //
+        //  This test checks that the destructor of the wrapped object is
+        //  invoked when 'NothrowMovableWrapper<TYPE>' object is destroyed.
+        //
+        // Concerns:
+        //: 1 Destroying a 'NothrowMovableWrapper<TYPE>' object invokes the
+        //:   destructor of the wrapped object.
+        //
+        // Plan:
+        //: 1 Create a 'NothrowMovableWrapper<TYPE>' object of a 'TYPE' which
+        //:   check for destructor invocation.  Check the destructor of 'TYPE'
+        //:   is invoked when 'NothrowMovableWrapper<TYPE>' object is
+        //:   destroyed.
+        //
+        // Testing:
+        //   ~NothrowMovableWrapper<TYPE>()
+        // --------------------------------------------------------------------
+
+        if (verbose)
+            printf("\n"
+                   "DESTRUCTOR"
+                   "\n"
+                   "=========="
+                   "\n");
+
+        int numDestructorCalls = TrackableValue::s_numDestructorCalls;
+        {
+            bslalg::NothrowMovableWrapper<TrackableValue> source;
+        }
+        ASSERT(numDestructorCalls+1 == TrackableValue::s_numDestructorCalls);
+
+      } break;
+      case 8: {
+
+        // --------------------------------------------------------------------
+        //  ACCESSORS AND MANIPULATORS
+        // --------------------------------------------------------------------
+
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase8,
+                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
+      } break;
+      case 7: {
+
+        // --------------------------------------------------------------------
+        //  CONSTRUCTION FROM `NothrowMovableWrapper`
+        // --------------------------------------------------------------------
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase7,
+                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
+      } break;
+      case 6: {
+
+        // --------------------------------------------------------------------
+        //  CONSTRUCTION FROM `TYPE`
+        // --------------------------------------------------------------------
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase6,
+                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
+      } break;
+      case 5: {
+
+        // --------------------------------------------------------------------
+        //  DEFAULT CONSTRUCTION
+        // --------------------------------------------------------------------
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase5,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+      } break;
+      case 4: {
+        // --------------------------------------------------------------------
+        //  TRAITS AND TYPEDEFS
+        // --------------------------------------------------------------------
+        RUN_EACH_TYPE(TestDriver,
+                      testCase4,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+      } break;
+      case 3: {
+        // --------------------------------------------------------------------
         // 'noexcept' SPECIFICATION
         //
         //  This test checks the `noexcept` specification of move constructor.
@@ -1199,51 +1339,30 @@ int main(int argc, char *argv[])
                        MoveUtil::move(source))));
 
       } break;
-      case 8: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase8,
-                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
-      } break;
-      case 7: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase7,
-                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
-      } break;
-      case 6: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase6,
-                      BSLALG_NOTHROWMOVABLEWRAPPER_TEST_TYPES);
-      } break;
-      case 5: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase5,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-      } break;
-      case 4: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase4,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-      } break;
       case 2: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
         // --------------------------------------------------------------------
 
         if (verbose)
-            printf("\nBREATHING TEST"
-                   "\n==============\n");
+            printf("\nUSAGE EXAMPLE"
+                   "\n=============\n");
 
         usageExample1();
       } break;
       case 1: {
         // --------------------------------------------------------------------
-        // BREATHING/USAGE TEST
+        // BREATHING TEST
         //
         // Concerns:
+        //: 1 That the basic 'NothrowMovableWrapper' functionality works as
+        // intended.
         //
         // Plan:
+        //: 1 Exercise basic methods of 'NothrowMovableWrapper'
         //
         // Testing:
+        //   BREATHING TEST
         //
         // --------------------------------------------------------------------
 
@@ -1272,6 +1391,7 @@ int main(int argc, char *argv[])
 
         bslalg::NothrowMovableWrapper<TrackableValue> ntmw3(
                                            bslmf::MovableRefUtil::move(ntmw1));
+
         const bslalg::NothrowMovableWrapper<TrackableValue>& NTMW3 = ntmw3;
         ASSERT(4 == NTMW3.unwrap().value());
         ASSERT(NTMW1.unwrap().isMovedFrom());
@@ -1279,6 +1399,7 @@ int main(int argc, char *argv[])
         ASSERT(!NTMW3.unwrap().isCopied());
 
         bslalg::NothrowMovableWrapper<int (*)(int)> funcWrap1(&simpleFunction);
+
         int (*&pfunc1)(int) = funcWrap1.unwrap();
         ASSERT(pfunc1 == &simpleFunction);
       } break;

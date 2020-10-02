@@ -26,8 +26,8 @@ BSLS_IDENT("$Id: $")
 ///Usage
 ///-----
 //
-///Example 1
-///- - - - -
+///Example
+///- - - -
 // In this example, we define a class template, 'CountedType<TYPE>', that is
 // little more than just a a wrapper around 'TYPE' that counts the number of
 // extant 'CountedType' objects.  We begin by defining the static count member
@@ -183,11 +183,10 @@ BSLS_IDENT("$Id: $")
 //  }
 //..
 //
-///Example 2
 ///- - - - -
-// Note that, in the last two lines of Example 1, we must call 'unwrap' in
-// order to access the 'SomeType' object inside of the 'NothrowMovableWrapper'.
-// This is one situation where it would be attractive to have an overloadable
+// Note that, in the last two lines of 'main', we must call 'unwrap' in order
+// to access the 'SomeType' object inside of the 'NothrowMovableWrapper'.  This
+// is one situation where it would be attractive to have an overloadable
 // "operator dot" so that both 'CoundedThing' and 'NothrowMovableWrapper' could
 // be transparent proxy types.  C++ does not have overloadable operator dot,
 // but we can create a 'CountedType' that is more intelligent about the
@@ -348,12 +347,13 @@ struct NothrowMovableUtil {
     static bslmf::MovableRef<typename UnwrappedType<
         typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type>
         unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f);
-    // Return a reference to the object wrapped in the specified 'f' object.
-    // If 'f' is wrapped, simply return a reference to 'f'.  Note that the
-    // overloads taking an lvalue argument prevent the overload taking an
-    // rvalue argument from treating the argument as a forwarding reference.
-    // The return type is chosen so both the value category and constness of
-    // the parameter are preserved even in the case of const rvalue reference.
+        // Return a reference to the object wrapped in the specified 'f'
+        // object.  If 'f' is wrapped, simply return a reference to 'f'.  Note
+        // that the overloads taking an lvalue argument prevent the overload
+        // taking an rvalue argument from treating the argument as a forwarding
+        // reference.  The return type is chosen so both the value category and
+        // constness of the parameter are preserved even in the case of const
+        // rvalue reference.
 
     template <class TYPE>
     static typename WrappedType<TYPE>::type wrap(TYPE& f);
@@ -366,10 +366,11 @@ struct NothrowMovableUtil {
     static typename WrappedType<
         typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
         wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE) f);
-    // Return a wrapped copy of the specified 'f' object.  If 'f' is already
-    // wrapped, return a simple copy of 'f' without wrapping it again.  Note
-    // that the overloads taking an lvalue argument prevent the overload taking
-    // an rvalue argument from treating the argument as a forwarding reference.
+        // Return a wrapped copy of the specified 'f' object.  If 'f' is
+        // already wrapped, return a simple copy of 'f' without wrapping it
+        // again.  Note that the overloads taking an lvalue argument prevent
+        // the overload taking an rvalue argument from treating the argument as
+        // a forwarding reference.
 };
 
 }  // close package namespace
