@@ -9,22 +9,23 @@ BSLS_IDENT("$Id: $")
 //@PURPOSE: Provide a wrapper that asserts a noexcept move constructor.
 //
 //@CLASSES:
-// bslalg::NothrowMovableWrapper: wrapper class with nexcept move constructor
+// bslalg::NothrowMovableWrapper: wrapper class with noexcept move constructor
 //
 //@SEE_ALSO: bslstl_function
 //
 //@AUTHOR: Pablo Halpern (phalpern)
 //
 //@DESCRIPTION:  This component provides a wrapper class template
-// 'bslalg::NothrowMovableWrapper<TYPE>' holding an of 'TYPE', and providing no
-// other functionality other than returning the wrapped object.  The use of
-// this class communicates to specific clients (see 'bslstl_function') that the
-// wrapped object should be treated as-if it has a 'noexcept' move constructor,
-// even in C++03, where 'noexcept' does not exist.  The client might, for
-// example, move the object using efficient, non-exception-safe logic rather
-// than, e.g., copying the object or storing it in heap memory so that its
-// pointer can be moved.  The behavior is undefined if the move constructor is
-// invoked and *does* throw; typically resulting in 'terminate' being invoked.
+// 'bslalg::NothrowMovableWrapper<TYPE>' holding an object of 'TYPE', and
+// providing no other functionality other than returning the wrapped object.
+// The use of this class communicates to specific clients (see
+// 'bslstl_function') that the wrapped object should be treated as-if it has a
+// 'noexcept' move constructor, even in C++03, where 'noexcept' does not exist.
+// The client might, for example, move the object using efficient,
+// non-exception-safe logic rather than, e.g., copying the object or storing it
+// in heap memory so that its pointer can be moved.  The behavior is undefined
+// if the move constructor is invoked and *does* throw; typically resulting in
+// 'terminate' being invoked.
 //
 //
 ///Usage
@@ -51,7 +52,7 @@ BSLS_IDENT("$Id: $")
 // object must be left unchanged.  To support this requirement, we next define
 // a private static function, 'MoveIfNoexcept', similar to the standard
 // 'std::move_if_noexcept', that returns a movable reference if its argument is
-// nothrow move constructible and a const lvalue reference otherwise:
+// no-throw move constructible and a const lvalue reference otherwise:
 //..
 //      // PRIVATE CLASS FUNCTIONS
 //      template <class TP>
@@ -121,11 +122,10 @@ BSLS_IDENT("$Id: $")
 //..
 // We're now ready implement the move constructor.  Logically, we would simply
 // move the value from 'original' into the 'd_value' member of '*this', but an
-// exception thrown 'TYPE''s move constructor would leave 'original' in a
-// (valid but) unspecified state, violating the strong guarantee.  Instead, we
-// move the value only if we know that the move will succeed; otherwise, we
-// copy it.  This behavior is facilitated by the 'MoveIfNoexcept' function
-// defined above:
+// exception thrown 'TYPE's move constructor would leave 'original' in a (valid
+// but) unspecified state, violating the strong guarantee.  Instead, we move
+// the value only if we know that the move will succeed; otherwise, we copy it.
+// This behavior is facilitated by the 'MoveIfNoexcept' function defined above:
 //..
 //  template <class TYPE>
 //  CountedType<TYPE>::CountedType(bslmf::MovableRef<CountedType> original)
@@ -143,7 +143,7 @@ BSLS_IDENT("$Id: $")
 //..
 // To test the 'CountedType' class template, assume a simple client type,
 // 'SomeType' that makes it easy to detect if it was move constructed.
-// 'SomeType' holds an 'int' value which is set to -1 when it is moved from, as
+// 'SomeType' holds an 'int' value that is set to -1 when it is moved from, as
 // shown here:
 //..
 //  class SomeType {
@@ -174,8 +174,8 @@ BSLS_IDENT("$Id: $")
 //      assert(1 == obj2.value().value());
 //..
 // For the purpose of this example, we can be sure that 'SomeThing' will not
-// throw on move, at least not in our applcation.  In order to obtain the
-// expected move optimiztion, we next wrap our 'SomeType in a
+// throw on move, at least not in our application.  In order to obtain the
+// expected move optimization, we next wrap our 'SomeType in a
 // 'bslalg::NothrowMovableWrapper':
 //..
 //      CountedType<bslalg::NothrowMovableWrapper<SomeType> >
@@ -195,7 +195,7 @@ BSLS_IDENT("$Id: $")
 // "operator dot" so that both 'CoundedThing' and 'NothrowMovableWrapper' could
 // be transparent proxy types.  C++ does not have overloadable operator dot,
 // but we can create a 'CountedType' that is more intelligent about the
-// existance of 'NothrowMovableWrapper' and automatically unwraps values for
+// existence of 'NothrowMovableWrapper' and automatically unwraps values for
 // the user's convenience.
 //
 // Rather than starting from scratch, we'll build our new counted type,
@@ -374,81 +374,90 @@ class NothrowMovableWrapper {
 
     // CREATORS
     NothrowMovableWrapper();
-    NothrowMovableWrapper(bsl::allocator_arg_t,
-                          const allocator_type& allocator);
+    NothrowMovableWrapper(bsl::allocator_arg_t, const allocator_type& alloc);
         // Value-initialize the object wrapped by '*this'.  For allocator-aware
-        // 'TYPE', optionally specify an 'allocator' (e.g., the address of a
+        // 'TYPE', optionally specify an 'alloc' (e.g., the address of a
         // 'bslma::Allocator' object) to supply memory; otherwise, the default
         // allocator is used.
 
-    NothrowMovableWrapper(const TYPE& val);  // IMPLICIT
+    NothrowMovableWrapper(const TYPE& val);                         // IMPLICIT
     NothrowMovableWrapper(bsl::allocator_arg_t,
-                          const allocator_type& allocator,
+                          const allocator_type& alloc,
                           const TYPE&           val);
-        // Wrap the specified 'val', using 'TYPE''s (possibly extended) copy
+        // Wrap the specified 'val', using 'TYPE's (possibly extended) copy
         // constructor.  For allocator-aware 'TYPE', optionally specify an
-        // 'allocator' (e.g., the address of a 'bslma::Allocator' object) to
-        // supply memory; otherwise, the default allocator is used.
+        // 'alloc' (e.g., the address of a 'bslma::Allocator' object) to supply
+        // memory; otherwise, the default allocator is used.
 
-    NothrowMovableWrapper(bslmf::MovableRef<TYPE> val);  // IMPLICIT
-        // Wrap the specified 'val', using 'TYPE''s move constructor.  Note
+    NothrowMovableWrapper(bslmf::MovableRef<TYPE> val);             // IMPLICIT
+        // Wrap the specified 'val', using 'TYPE's move constructor.  Note
         // that this move constructor is unconditionally 'noexcept', as that
         // is the entire purpose of this wrapper.
 
     NothrowMovableWrapper(bsl::allocator_arg_t,
-                          const allocator_type&   allocator,
+                          const allocator_type&   alloc,
                           bslmf::MovableRef<TYPE> val);
-        // Wrap the specified 'val', using 'TYPE''s extended move constructor.
-        // Use the specified 'allocator' (e.g., the address of a
-        // 'bslma::Allocator' object) to supply memory.  Note that this
-        // constructor will not be selected by overload resolution unless
-        // 'TYPE' is allocator aware.
+        // Wrap the specified 'val', using 'TYPE's extended move constructor.
+        // Use the specified 'alloc' (e.g., the address of a 'bslma::Allocator'
+        // object) to supply memory.  Note that this constructor will not be
+        // selected by overload resolution unless 'TYPE' is allocator aware.
 
     NothrowMovableWrapper(const NothrowMovableWrapper& original);
-        // Copy construct from the specified 'original' wrapper using 'TYPE''s
+        // Copy construct from the specified 'original' wrapper using 'TYPE's
         // copy constructor.
 
     NothrowMovableWrapper(bsl::allocator_arg_t,
                           const allocator_type&        alloc,
                           const NothrowMovableWrapper& original);
-        // Copy construct from the specified 'original' wrapper using 'TYPE''s
-        // extended copy constructor.  Use the specified 'allocator' (e.g., the
+        // Copy construct from the specified 'original' wrapper using 'TYPE's
+        // extended copy constructor.  Use the specified 'alloc' (e.g., the
         // address of a 'bslma::Allocator' object) to supply memory.  Note that
         // this constructor will not be selected by overload resolution unless
         // 'TYPE' is allocator aware.
 
     NothrowMovableWrapper(
       bslmf::MovableRef<NothrowMovableWrapper> original) BSLS_KEYWORD_NOEXCEPT;
-        // Move construct from the specified 'original' wrapper using 'TYPE''s
-        // move constructor.
+                                                                    // IMPLICIT
+        //Move construct from the specified 'original' wrapper using
+        // 'TYPE's move constructor.
 
     NothrowMovableWrapper(bsl::allocator_arg_t,
                           const allocator_type&                    alloc,
                           bslmf::MovableRef<NothrowMovableWrapper> original);
-        // Move construct from the specified 'original' wrapper using 'TYPE''s
-        // extended move constructor.  Use the specified 'allocator' (e.g., the
+        // Move construct from the specified 'original' wrapper using 'TYPE's
+        // extended move constructor.  Use the specified 'alloc' (e.g., the
         // address of a 'bslma::Allocator' object) to supply memory.  Note that
         // this constructor will not be selected by overload resolution unless
         // 'TYPE' is allocator aware.
 
     ~NothrowMovableWrapper();
-        // Destroy this object, invoking 'TYPE''s destructor.
+        // Destroy this object, invoking 'TYPE's destructor.
 
     // MANIPULATORS
     ValueType& unwrap();
-               operator ValueType&() { return unwrap(); }
-        // Return a modifiable reference the wrapped object.  Note that the
-        // conversion operator is inplace inline to work around MSVC 2013 bug.
+        // Return a reference offering modifiable access the wrapped object.
+
+    operator ValueType&()
+        // Return a reference offering modifiable access the wrapped object.
+    {
+        // Must be in-place inline to work around MSVC 2013 bug.
+        return unwrap();
+    }
 
     // ACCESSORS
-    ValueType const& unwrap() const;
-                     operator ValueType const&() const { return unwrap(); }
-        // Return a const reference the wrapped object.  Note that the
-        // conversion operator is inplace inline to work around MSVC 2013 bug.
-
     allocator_type get_allocator() const;
         // Return the allocator used to construct this object.  Note that this
         // method will fail to instantiate unless 'TYPE' is allocator-aware.
+
+    ValueType const& unwrap() const;
+        // Return a reference offering modifiable access the wrapped object.
+
+    operator ValueType const&() const
+        // Return a reference offering modifiable access the wrapped object.
+    {
+        // Must be in-place inline to work around MSVC 2013 bug.
+        return unwrap();
+    }
 };
 
                     // ====================================
@@ -457,7 +466,7 @@ class NothrowMovableWrapper {
 
 template <class TYPE>
 class NothrowMovableWrapper<NothrowMovableWrapper<TYPE> > {
-    // This specialization is for wrapped types. We do not support wrapping a
+    // This specialization is for wrapped types.  We do not support wrapping a
     // wrapped type.
     BSLMF_ASSERT(!sizeof(TYPE) && "Cannot wrap a wrapped object");
 };
@@ -488,11 +497,10 @@ bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper()
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
-                                               bsl::allocator_arg_t,
-                                               const allocator_type& allocator)
+                                                   bsl::allocator_arg_t,
+                                                   const allocator_type& alloc)
 {
-    bslma::ConstructionUtil::construct(d_buffer.address(),
-                                       allocator.mechanism());
+    bslma::ConstructionUtil::construct(d_buffer.address(), alloc.mechanism());
 }
 
 template <class TYPE>
@@ -505,12 +513,12 @@ bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(const TYPE& val)
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
-                                               bsl::allocator_arg_t,
-                                               const allocator_type& allocator,
-                                               const TYPE&           val)
+                                                   bsl::allocator_arg_t,
+                                                   const allocator_type& alloc,
+                                                   const TYPE&           val)
 {
     bslma::ConstructionUtil::construct(
-        d_buffer.address(), allocator.mechanism(), val);
+        d_buffer.address(), alloc.mechanism(), val);
 }
 
 template <class TYPE>
@@ -525,12 +533,12 @@ bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
-                                             bsl::allocator_arg_t,
-                                             const allocator_type&   allocator,
-                                             bslmf::MovableRef<TYPE> val)
+                                                 bsl::allocator_arg_t,
+                                                 const allocator_type&   alloc,
+                                                 bslmf::MovableRef<TYPE> val)
 {
     bslma::ConstructionUtil::construct(d_buffer.address(),
-                                       allocator.mechanism(),
+                                       alloc.mechanism(),
                                        bslmf::MovableRefUtil::move(val));
 }
 
@@ -546,12 +554,12 @@ bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
-                                        bsl::allocator_arg_t,
-                                        const allocator_type&        allocator,
-                                        const NothrowMovableWrapper& original)
+                                         bsl::allocator_arg_t,
+                                         const allocator_type&        alloc,
+                                         const NothrowMovableWrapper& original)
 {
     bslma::ConstructionUtil::construct(
-        d_buffer.address(), allocator.mechanism(), original.unwrap());
+        d_buffer.address(), alloc.mechanism(), original.unwrap());
 }
 
 template <class TYPE>
@@ -569,13 +577,13 @@ bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
 template <class TYPE>
 inline
 bslalg::NothrowMovableWrapper<TYPE>::NothrowMovableWrapper(
-                            bsl::allocator_arg_t,
-                            const allocator_type&                    allocator,
-                            bslmf::MovableRef<NothrowMovableWrapper> original)
+                             bsl::allocator_arg_t,
+                             const allocator_type&                    alloc,
+                             bslmf::MovableRef<NothrowMovableWrapper> original)
 {
     bslma::ConstructionUtil::construct(
         d_buffer.address(),
-        allocator.mechanism(),
+        alloc.mechanism(),
         bslmf::MovableRefUtil::move(
             bslmf::MovableRefUtil::access(original).unwrap()));
 }
@@ -599,18 +607,18 @@ bslalg::NothrowMovableWrapper<TYPE>::unwrap()
 // ACCESSORS
 template <class TYPE>
 inline
-typename bslalg::NothrowMovableWrapper<TYPE>::ValueType const&
-bslalg::NothrowMovableWrapper<TYPE>::unwrap() const
-{
-    return d_buffer.object();
-}
-
-template <class TYPE>
-inline
 typename bslalg::NothrowMovableWrapper<TYPE>::allocator_type
 bslalg::NothrowMovableWrapper<TYPE>::get_allocator() const
 {
     return d_buffer.object().allocator();
+}
+
+template <class TYPE>
+inline
+typename bslalg::NothrowMovableWrapper<TYPE>::ValueType const&
+bslalg::NothrowMovableWrapper<TYPE>::unwrap() const
+{
+    return d_buffer.object();
 }
 
 }  // close enterprise namespace

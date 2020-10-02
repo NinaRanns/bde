@@ -33,14 +33,14 @@ using namespace BloombergLP;
 // [ 4] UnwrappedType
 //
 // STATIC METHODS
-// [ 5] WrappedType<TYPE>::type wrap(TYPE&);
-// [ 5] WrappedType<TYPE>::type wrap(TYPE const&);
-// [ 5] WrappedType<:RemoveReference<TYPE>::type>::type
-//        wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
-// [ 6] UnwrappedType<TYPE>::type unwrap(TYPE&);
-// [ 6] UnwrappedType<TYPE>::type unwrap(TYPE const&);
-// [ 6] WrappedType<RemoveReference<TYPE>::type>::type
-//          unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
+// [ 5] wrap(TYPE&);
+// [ 5] wrap(TYPE const&);
+// [ 5] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
+// [ 5] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE);
+// [ 6] unwrap(TYPE&);
+// [ 6] unwrap(TYPE const&);
+// [ 6] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
+// [ 6] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
 //
 // ----------------------------------------------------------------------------
 // [ 2] USAGE EXAMPLE
@@ -107,13 +107,7 @@ static int veryVeryVeryVerbose = 0;  // For test allocators
 //                  GLOBAL TYPEDEFS/CONSTANTS FOR TESTING
 //-----------------------------------------------------------------------------
 
-#if __cplusplus >= 201703L
-#define MAYBE_UNUSED [[maybe_unused]]
-#elif defined(BSLS_PLATFORM_CMP_GNU) || defined(BSLS_PLATFORM_CMP_CLANG)
-#define MAYBE_UNUSED __attribute__((unused))
-#else
 #define MAYBE_UNUSED
-#endif
 
 typedef bslmf::MovableRefUtil MoveUtil;
 
@@ -722,7 +716,7 @@ template <class TYPE,
           bool USES_BSLMA_ALLOC =
               BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
 class Test_Util {
-    // This class provided test utilities which have different behaviour
+    // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  The main template
     // is for allocator-aware types.
 
@@ -739,7 +733,7 @@ class Test_Util {
 
 template <class TYPE>
 class Test_Util<TYPE, false> {
-    // This class provided test utilities which have different behaviour
+    // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  This
     // specialization is for non allocator-aware types.
 
@@ -806,7 +800,12 @@ class TestDriver {
 
   public:
     //PUBLIC TYPES
-    enum { E_LVALUE_REF, E_CONST_LVALUE_REF, E_MOVABLE_REF };
+    enum {
+        E_LVALUE_REF,
+        E_CONST_LVALUE_REF,
+        E_MOVABLE_REF,
+        E_CONST_MOVABLE_REF
+    };
 
   private:
     // PRIVATE TYPES
@@ -828,6 +827,8 @@ class TestDriver {
     static int checkValueCategory(const NonConstValueType&);
     static int checkValueCategory(
                             BloombergLP::bslmf::MovableRef<NonConstValueType>);
+    static int checkValueCategory(
+                      BloombergLP::bslmf::MovableRef<const NonConstValueType>);
         // Helper functions to determine the value category of an expression
 
     static void testCase6();
@@ -856,6 +857,12 @@ int TestDriver<TYPE>::checkValueCategory(
 {
     return E_MOVABLE_REF;
 }
+template <class TYPE>
+int TestDriver<TYPE>::checkValueCategory(
+                       BloombergLP::bslmf::MovableRef<const NonConstValueType>)
+{
+    return E_CONST_MOVABLE_REF;
+}
 
 template <class TYPE>
 void TestDriver<TYPE>::testCase6()
@@ -879,10 +886,10 @@ void TestDriver<TYPE>::testCase6()
     //:   of the `unwrap` argument.  [C-1], [C-2]
     //
     // Testing:
-    //   UnwrappedType<TYPE>::type unwrap(TYPE&);
-    //   UnwrappedType<TYPE>::type unwrap(TYPE const&);
-    //   WrappedType<RemoveReference<TYPE>::type>::type
-    //          unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE);
+    //   unwrap(TYPE&);
+    //   unwrap(TYPE const&);
+    //   unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
+    //   unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
     // --------------------------------------------------------------------
     if (verbose)
         printf("\nTESTING `unwrap' METHOD"
@@ -918,7 +925,7 @@ void TestDriver<TYPE>::testCase6()
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
     if (veryVerbose)
-        printf("\tCalling unwrape with a non const movable ref.\n");
+        printf("\tCalling unwrap with a non const movable ref.\n");
     {
         TypeWithAllocator                         xBuffer(ValueType(3), &oa);
         TYPE&                                     x = xBuffer.object();
@@ -927,8 +934,22 @@ void TestDriver<TYPE>::testCase6()
             Obj::unwrap(MoveUtil::move(x));
 
         ASSERT(checkValueCategory(Obj::unwrap(MoveUtil::move(x))) ==
-               (bsl::is_const<ValueType>::value ? E_CONST_LVALUE_REF
+               (bsl::is_const<ValueType>::value ? E_CONST_MOVABLE_REF
                                                 : E_MOVABLE_REF));
+        ASSERT(unwrappedX == exp);
+        ASSERT(checkAllocator(unwrappedX, &oa));
+    }
+    if (veryVerbose)
+        printf("\tCalling unwrap with a const movable ref.\n");
+    {
+        TypeWithAllocator xBuffer(ValueType(3), &oa);
+        const TYPE&       x = xBuffer.object();
+        ValueType         exp(3);
+        BloombergLP::bslmf::MovableRef<const ValueType> unwrappedX =
+            Obj::unwrap(MoveUtil::move(x));
+
+        ASSERT(checkValueCategory(Obj::unwrap(MoveUtil::move(x))) ==
+               E_CONST_MOVABLE_REF);
         ASSERT(unwrappedX == exp);
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
@@ -945,7 +966,7 @@ void TestDriver<TYPE>::testCase5()
     //: 2 Invoking `wrap` method with an argument of a wrapped type returns a
     //:   copy of the same object.
     //: 3 It is possible to wrap a const object.
-    //: 3 The argument is moved from whenever possible.
+    //: 4 The argument is moved from whenever possible.
     //
     // Plan:
     //: 1 Create an object of `TYPE` from a `ValueType` object.  Using the
@@ -954,14 +975,13 @@ void TestDriver<TYPE>::testCase5()
     //: 2 In step 1, use a const object of `TYPE`.  [C-3]
     //: 3 In step 1, invoke wrap by moving from the original object.  Verify
     //:   the object inside the returned wrapper has been created by move
-    //:   construction.
+    //:   construction if move is possible.  [C-4]
     //
     // Testing:
-    //   static typename WrappedType<TYPE>::type wrap(TYPE&       f);
-    //   static typename WrappedType<TYPE>::type wrap(TYPE const& f);
-    //   static typename WrappedType<
-    //      typename bslmf::MovableRefUtil::RemoveReference<TYPE>::type>::type
-    //      wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE)         f);
+    //   wrap(TYPE& );
+    //   wrap(TYPE const&);
+    //   wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
+    //   wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
     // --------------------------------------------------------------------
     if (verbose)
         printf("\nTESTING `wrap' METHOD"
@@ -1000,7 +1020,7 @@ void TestDriver<TYPE>::testCase5()
         ASSERT(checkAllocator(wrappedX.unwrap(), &da));
     }
     if (veryVerbose)
-        printf("\tWrapping a non const rvalue .\n");
+        printf("\tWrapping a non const movable ref .\n");
     {
         TypeWithAllocator xBuffer(ValueType(3), &oa);
         TYPE&             x = xBuffer.object();
@@ -1018,23 +1038,19 @@ void TestDriver<TYPE>::testCase5()
         ASSERT(checkAllocator(wrappedX.unwrap(),
                               (bsl::is_const<ValueType>::value ? &da : &oa)));
     }
-    /* 
-    // the following can not be made to work in C++03, and the questino is 
-    // if we should have it working in C++11 ? If yes, we need a const T&& 
-    // overload of wrap. The current overload set does not compile, as opposed
-    // to does the wrong thing.
+    if (veryVerbose)
+        printf("\tWrapping a const movable ref .\n");
     {
-        const TYPE x(ValueType(3)); 
-        ValueType exp(3);
-        const ValueType &val = x;
-        val.resetMoveCopiedFlags(); 
-        const WrapperType &wrappedX = Obj::wrap(MoveUtil::move(x));
-        
+        const TYPE       x(ValueType(3));
+        ValueType        exp(3);
+        const ValueType& val = x;
+        val.resetMoveCopiedFlags();
+        const WrapperType& wrappedX = Obj::wrap(MoveUtil::move(x));
+
         ASSERT(wrappedX.unwrap() == exp);
         ASSERT(wrappedX.unwrap().isCopied());
         ASSERT(!wrappedX.unwrap().isMoved());
     }
-    */
 }
 template <class TYPE>
 void TestDriver<TYPE>::testCase4()
@@ -1109,13 +1125,17 @@ int main(int argc, char *argv[])
                 const TrackableValueWithAlloc>);
       } break;
       case 5: {
-        RUN_EACH_TYPE(TestDriver,
-                      testCase5,
-                      TrackableValue, TrackableValueWithAlloc,
-                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>, 
-                      BloombergLP::bslalg::NothrowMovableWrapper<TrackableValueWithAlloc>/*,
-                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>, 
-                      BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValueWithAlloc>*/);
+        RUN_EACH_TYPE(
+            TestDriver,
+            testCase5,
+            TrackableValue,
+            TrackableValueWithAlloc,
+            BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>,
+            BloombergLP::bslalg::NothrowMovableWrapper<
+                TrackableValueWithAlloc>,
+            BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>,
+            BloombergLP::bslalg::NothrowMovableWrapper<
+                const TrackableValueWithAlloc>);
       } break;
       case 4: {
         RUN_EACH_TYPE(TestDriver,
@@ -1263,14 +1283,17 @@ int main(int argc, char *argv[])
       } break;
       case 1: {
         // --------------------------------------------------------------------
-        // BREATHING/USAGE TEST
+        // BREATHING TEST
         //
         // Concerns:
+        //: 1. That the basic 'NothrowMovableUtil' functionality works as
+        // intended.
         //
         // Plan:
+        //: 1. Wrap and unwrap an object.
         //
         // Testing:
-        //
+        //   This test exercises the component but tests nothing.
         // --------------------------------------------------------------------
 
         if (verbose)
