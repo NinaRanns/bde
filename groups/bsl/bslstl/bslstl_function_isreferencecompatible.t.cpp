@@ -13,11 +13,23 @@ using namespace BloombergLP;
 //=============================================================================
 //                             TEST PLAN
 //-----------------------------------------------------------------------------
+//                                  Overview
+//                                  --------
+//
+// The metafunction under test is used to determine if, for template types
+// 'FROM_TYPE' and 'TO_TYPE', the specified 'FROM_TYPE' parameter type can be
+// substituted for a reference to the specified 'TO_TYPE' parameter type with
+// no loss of information.  By default, this metafunction yields 'true_type'
+// if,  after stripping off any reference and/or 'const' qualifier from
+// 'FROM_TYPE', it is the same as 'TO_TYPE'; else it yields 'false_type'.
+// However, this template can be specialized to yield 'true_type for other
+// parameters that have compatible references.  The tests will verify the
+// default behaviour of the metafunction under test, as well as the behaviour
+// in the presence of a user provided specialization.  The tests will also
+// verify the specialization for const 'TO_TYPE'.
 //
 //
-
 //-----------------------------------------------------------------------------
-
 //=============================================================================
 //                       STANDARD BDE ASSERT TEST MACRO
 //-----------------------------------------------------------------------------
@@ -145,7 +157,7 @@ void testIsReferenceCompatible()
     // the result type has a const member 'value' such that 'value ==
     // EXP'. Also instantiate 'Function_IsReferenceCompatible<T, U>' with
     // every combination of const and reference qualifiers on 'T' and const
-    // quailifier on 'U', verifying the expected result 'value' (which is
+    // qualifier on 'U', verifying the expected result 'value' (which is
     // sometimes 'false' even if 'EXP' is true).
 {
     using namespace BloombergLP;
