@@ -223,7 +223,7 @@ class TrackableValue {
         e_MAX = INT_MAX / e_VALUE_MULTIPLIER
     };
 
-    // STATIC DATA
+    // PUBLIC CLASS DATA
     static int s_numDestructorCalls;
         // number of times the destructor of 'TrackableValue' has been invoked.
 
@@ -303,7 +303,7 @@ class TrackableValue {
 };
 // IMPLEMENTATION OF TrackableValue
 
-// STATIC DATA
+// PUBLIC CLASS DATA
 int TrackableValue::s_numDestructorCalls = 0;
 
 // MANIPULATORS
@@ -792,6 +792,7 @@ class TestDriver {
     static void testCase4();
         // TRAITS AND TYPEDEFS
 };
+
 template <class TYPE>
 void TestDriver<TYPE>::testCase8()
 {
@@ -804,8 +805,10 @@ void TestDriver<TYPE>::testCase8()
     //: 1 That the 'unwrap' method returns a reference to the wrapped object.  
     //:   If invoked on a const wrapper, the returned reference is const 
     //:   qualified.
+    //:
     //: 2 That the conversion operators return the same thing as the 'unwrap'
     //:   method
+    //:
     //: 3 That the 'get_allocator' method returns the allocator used to
     //:   created the wrapped object, if the wrapped object type is 
     //:   allocator-aware.
@@ -813,10 +816,14 @@ void TestDriver<TYPE>::testCase8()
     // Plan:
     //: 1 Create a wrapper object of 'TYPE'. Using the 'unwrap' method, check
     //:   that the returned reference matches the wrapped object.  [C-1]
+    //:
     //: 2 In step 1, call the 'unwrap' method through a const reference to
     //:   the wrapper object.  [C-1]
+    //:
     //: 3 Repeat step 1 using the conversion operator.  [C-2]
+    //:
     //: 4 Repeat step 2 using the conversion operator.  [C-2]
+    //:
     //: 5 If 'TYPE' is allocator-aware, check that 'get_allocator' return the
     //:   allocator specified at wrapped construction time.  [C-3]
     //
@@ -874,14 +881,17 @@ void TestDriver<TYPE>::testCase7()
     // Concerns:
     //: 1 'NothrowMovableWrapper<TYPE>' object constructed from an object of
     //:   'NothrowMovableWrapper', has the value of the original object.
+    //:
     //: 2 If the argument to the constructor is an lvalue or a movable ref to 
     //:   a const object, the 'ValueType' object is copy constructed.  If 
     //:   the argument to the constructor is a movable ref to a non const
     //:   object, the 'ValueType' object is move constructed.
+    //:
     //: 3 If 'TYPE' is allocator-aware and no allocator was provided at
     //:   construction time, the 'ValueType' object will use the default
     //:   allocator if the original was copied from, and the allocator of the
     //:   original object if the original object was moved from.
+    //:
     //: 4 If 'TYPE' is allocator-aware and allocator was provided at
     //:   construction time, the 'ValueType' object will use the provided
     //:   allocator.
@@ -890,20 +900,23 @@ void TestDriver<TYPE>::testCase7()
     //: 1 Construct an object of 'NothrowMovableWrapper<TYPE>' from another
     //:   'NothrowMovableWrapper<TYPE>'  object.  Check that the values of the
     //:    two objects match.  [C-1]
+    //:
     //: 2 If 'TYPE' is allocator-aware, check that the 'ValueType' object of
     //:   the 'NothrowMovableWrapper<TYPE>' has been constructed using the
     //:   correct allocator.  [C-3]
+    //:
     //: 3 If 'TYPE' is allocator-aware, repeat step 1 using the allocator
     //:   extended default constructor and check the value of the resulting
     //:   object.  [C-1]
+    //:
     //: 4 In step 3, check that the 'ValueType' object of the
     //:   'NothrowMovableWrapper<TYPE>' has been constructed using the
     //:   provided allocator.  [C-4]
     //
     // Testing:
     //   NothrowMovableWrapper(const NothrowMovableWrapper& original);
-    //   NothrowMovableWrapper(bsl::allocator_arg_t      ,
-    //                         const allocator_type&     alloc,
+    //   NothrowMovableWrapper(bsl::allocator_arg_t         ,
+    //                         const allocator_type&        alloc,
     //                         const NothrowMovableWrapper& original);
     //   NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper>
     //   original);

@@ -35,27 +35,27 @@ using namespace BloombergLP;
 // unwrapped type, and that the deduced wrapped and unwrapped type are correct.
 //-----------------------------------------------------------------------------
 //  Internal implementation types:
-// [ 3] NothrowMovableUtil_Traits::IsWrapped
-// [ 3] NothrowMovableUtil_Traits::UnwrappedType
-// [ 3] NothrowMovableUtil_Traits::WrappedType
+// [ 2] NothrowMovableUtil_Traits::IsWrapped
+// [ 2] NothrowMovableUtil_Traits::UnwrappedType
+// [ 2] NothrowMovableUtil_Traits::WrappedType
 //
 // TRAITS
-// [ 4] IsWrapped
-// [ 4] WrappedType
-// [ 4] UnwrappedType
+// [ 3] IsWrapped
+// [ 3] WrappedType
+// [ 3] UnwrappedType
 //
 // STATIC METHODS
-// [ 5] wrap(TYPE&);
-// [ 5] wrap(TYPE const&);
-// [ 5] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
-// [ 5] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE);
-// [ 6] unwrap(TYPE&);
-// [ 6] unwrap(TYPE const&);
-// [ 6] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE));
-// [ 6] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
+// [ 4] wrap(TYPE&)
+// [ 4] wrap(TYPE const&)
+// [ 4] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE))
+// [ 4] wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE)
+// [ 5] unwrap(TYPE&)
+// [ 5] unwrap(TYPE const&)
+// [ 5] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(TYPE))
+// [ 5] unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE))
 //
 // ----------------------------------------------------------------------------
-// [ 2] USAGE EXAMPLE
+// [ 6] USAGE EXAMPLE
 // [ 1] BREATHING TEST
 
 
@@ -222,19 +222,19 @@ class TrackableValue {
         setValue(v);
     }
 
-    TrackableValue(const TrackableValue& other)
-        // Copy value from the specified 'other', set 'isMoved()' to false and
+    TrackableValue(const TrackableValue& original)
+        // Copy value from the specified 'original', set 'isMoved()' to false and
         //  'isCopied()' to 'true'.
     {
-        setValue(other.value(), false, true);
+        setValue(original.value(), false, true);
     }
 
-    TrackableValue(bslmf::MovableRef<TrackableValue> other)
-        // Move value from the specified 'other', set 'isMoved()' to true, and
-        // set 'isCopied()' to 'other.isCopied()', then set 'other' to the
+    TrackableValue(bslmf::MovableRef<TrackableValue> original)
+        // Move value from the specified 'original', set 'isMoved()' to true, and
+        // set 'isCopied()' to 'original.isCopied()', then set 'original' to the
         // moved-from state.
     {
-        *this = bslmf::MovableRefUtil::move(other);
+        *this = bslmf::MovableRefUtil::move(original);
     }
 
     //! ~TrackableValue() = default;
@@ -256,7 +256,7 @@ class TrackableValue {
 
     TrackableValue& operator=(bslmf::MovableRef<TrackableValue> rhs);
         // Move value from the specified 'rhs', set 'isMoved()' to true, and
-        // set 'isCopied()' to 'other.isCopied()', then assign 'rhs' the value
+        // set 'isCopied()' to 'rhs.isCopied()', then assign 'rhs' the value
         // 'e_MOVED_FROM_VAL' and return '*this'.
 
     void setIsCopiedRaw(bool);
@@ -482,16 +482,16 @@ namespace {
 
 ///Example 1
 ///- - - - -
-// In this example, we define a class template, 'CountedType<TYPE>', that is
-// little more than just a a wrapper around 'TYPE' that counts the count member
-// along with the single value member:
+// In this example, we define a class template, 'CountedType<TYPE>', a wrapper
+// around 'TYPE' that counts the count member along with the single value
+// member:
 //..
 template <class TYPE>
 class CountedType {
-    // CLASS DATA
+    // PUBLIC CLASS DATA
     static int s_count;
 
-    // DATA
+    // PUBLIC DATA
     TYPE d_value;
         //..
         // Because of externally-imposed requirements, the move constructor for
@@ -555,7 +555,7 @@ CountedType<TYPE>::MoveIfNoexcept(TP& x)
     return bslmf::MovableRefUtil::move(x);
 }
 //..
-// Next, we implement the value constructor and move constructor, which simply
+// Next, we implement the value constructor and copy constructor, which simply
 // copy their argument into the 'd_value' data members and increment the count:
 //..
 template <class TYPE>
@@ -574,7 +574,7 @@ CountedType<TYPE>::CountedType(const CountedType& original)
 //..
 // We're now ready implement the move constructor.  Logically, we would simply
 // move the value from 'original' into the 'd_value' member of '*this', but an
-// exception thrown 'TYPE''s move constructor would leave 'original' in a
+// exception thrown by 'TYPE''s move constructor would leave 'original' in a
 // (valid but) unspecified state, violating the strong guarantee.  Instead, we
 // move the value only if we know that the move will succeed; otherwise, we
 // copy it.  This behavior is facilitated by the 'MoveIfNoexcept' function
@@ -650,7 +650,7 @@ class SomeType {
 // Note that, in the last two lines of 'main', we must call 'unwrap' in order
 // to access the 'SomeType' object inside of the 'NothrowMovableWrapper'.  This
 // is one situation where it would be attractive to have an overloadable
-// "operator dot" so that both 'CoundedThing' and 'NothrowMovableWrapper' could
+// "operator dot" so that both 'CountedThing' and 'NothrowMovableWrapper' could
 // be transparent proxy types.  C++ does not have overloadable operator dot,
 // but we can create a 'CountedType' that is more intelligent about the
 // existance of 'NothrowMovableWrapper' and automatically unwraps values for
@@ -666,8 +666,11 @@ class CountedType2 {
         //..
         // Next, for convenience, we add a public data type, 'ValueType' for
         // the value stored within 'CountedType2'.  However, rather than
-        // defining 'ValueType' as simply 'TYPE', we unwrap it, in case 'TYPE'
-        // is an instantiation of 'NothrowMovableWrapper':
+        // defining 'ValueType' as simply 'TYPE', we want to know if it is an
+        // instantiation of 'NothrowMovableWrapper<TP>'.  If it is, we want a
+        // type that represents the unwrapped 'TP' rather than the full 'TYPE'.
+        // For this type transformation, we turn to the type traits defined in
+        // 'bslalg::NothrowMovableUtil':"
         //..
   public:
     // TYPES
@@ -839,7 +842,7 @@ class TestDriver {
 
   public:
     //  CONSTANTS
-    enum {
+    enum ValueCategory {
         k_LVALUE_REF,
         k_CONST_LVALUE_REF,
         k_MOVABLE_REF,
@@ -862,49 +865,58 @@ class TestDriver {
         // Wrapped type
 
   public:
-    static int checkValueCategory(NonConstValueType&);
-    static int checkValueCategory(const NonConstValueType&);
-    static int checkValueCategory(
+    static ValueCategory checkValueCategory(NonConstValueType&);
+    static ValueCategory checkValueCategory(const NonConstValueType&);
+    static ValueCategory checkValueCategory(
                             BloombergLP::bslmf::MovableRef<NonConstValueType>);
-    static int checkValueCategory(
+    static ValueCategory checkValueCategory(
                       BloombergLP::bslmf::MovableRef<const NonConstValueType>);
-        // Helper functions to determine the value category of an expression
+        // Helper functions to determine the value category of an expression.
+        // Returns the 'ValueCategory' value corresponding to the value
+        // category and the constness of the argument.
 
-    static void testCase4();
+    static void testCase3();
         // TESTING 'NothrowMovableUtil' TRAITS
 
-    static void testCase5();
+    static void testCase4();
         // TESTING 'wrap' METHOD
 
-    static void testCase6();
+    static void testCase5();
         // TESTING 'unwrap' METHOD
 };
 
 template <class TYPE>
-int TestDriver<TYPE>::checkValueCategory(NonConstValueType&)
+typename TestDriver<TYPE>::ValueCategory
+TestDriver<TYPE>::checkValueCategory(NonConstValueType&)
 {
     return k_LVALUE_REF;
 }
+
 template <class TYPE>
-int TestDriver<TYPE>::checkValueCategory(const NonConstValueType&)
+typename TestDriver<TYPE>::ValueCategory
+TestDriver<TYPE>::checkValueCategory(const NonConstValueType&)
 {
     return k_CONST_LVALUE_REF;
 }
+
 template <class TYPE>
-int TestDriver<TYPE>::checkValueCategory(
+typename TestDriver<TYPE>::ValueCategory
+TestDriver<TYPE>::checkValueCategory(
                              BloombergLP::bslmf::MovableRef<NonConstValueType>)
 {
     return k_MOVABLE_REF;
 }
+
 template <class TYPE>
-int TestDriver<TYPE>::checkValueCategory(
+typename TestDriver<TYPE>::ValueCategory
+TestDriver<TYPE>::checkValueCategory(
                        BloombergLP::bslmf::MovableRef<const NonConstValueType>)
 {
     return k_CONST_MOVABLE_REF;
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase6()
+void TestDriver<TYPE>::testCase5()
 {
     // --------------------------------------------------------------------
     // TESTING 'unwrap' METHOD
@@ -912,15 +924,23 @@ void TestDriver<TYPE>::testCase6()
     // Concerns:
     //: 1 Invoking 'unwrap' method with an argument of an unwrapped type
     //:   returns a reference to the argument.
+    //:
     //: 2 Invoking 'unwrap' method with an argument of a wrapped type returns
     //:   a reference to the wrapped object.
-    //: 3 The value category of the returned reference matches the value
+    //:
+    //: 3 That the value category of the returned reference matches the value
     //:   category of the argument.
+    //:
+    //: 4 That the returned reference is a const reference if the argument is
+    //:   a reference to a const unwrapped object or a reference to a wrapper
+    //:   of const type.  Otherwise, the returned reference is a reference to
+    //:   a modifiable object.
     //
     // Plan:
     //: 1 Using a matrix of all value categories, invoke unwrap and
-    //:   verify the returned reference has the correct value category using
-    //:   'checkValueCategory' helper function.  [C-3]
+    //:   verify the returned reference has the correct value category and
+    //:   constness using 'checkValueCategory' helper function.  [C-3][C-4]
+    //:
     //: 2 in step 1, check the returned reference object matches the value
     //:   of the 'unwrap' argument.  [C-1], [C-2]
     //
@@ -938,7 +958,7 @@ void TestDriver<TYPE>::testCase6()
     bslma::TestAllocator                   oa("other", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard           dag(&da);
     if (veryVerbose)
-        printf("\tCalling unwrape with a non const lvalue ref.\n");
+        printf("\tCalling unwrap with a non const lvalue ref.\n");
     {
         TypeWithAllocator xBuffer(ValueType(3), &oa);
         TYPE&             x = xBuffer.object();
@@ -952,7 +972,7 @@ void TestDriver<TYPE>::testCase6()
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
     if (veryVerbose)
-        printf("\tCalling unwrape with a const lvalue ref.\n");
+        printf("\tCalling unwrap with a const lvalue ref.\n");
     {
         TypeWithAllocator xBuffer(ValueType(3), &oa);
         const TYPE&       x = xBuffer.object();
@@ -997,7 +1017,7 @@ void TestDriver<TYPE>::testCase6()
     }
 }
 template <class TYPE>
-void TestDriver<TYPE>::testCase5()
+void TestDriver<TYPE>::testCase4()
 {
     // --------------------------------------------------------------------
     // TESTING 'wrap' METHOD
@@ -1005,9 +1025,12 @@ void TestDriver<TYPE>::testCase5()
     // Concerns:
     //: 1 Invoking 'wrap' method with an argument of an unwrapped type returns
     //:   a wrapper object containing a copy of the argument.
+    //:
     //: 2 Invoking 'wrap' method with an argument of a wrapped type returns a
     //:   copy of the same object.
+    //:
     //: 3 It is possible to wrap a const object.
+    //:
     //: 4 The argument is moved from if it is a movable ref to a non-const 
     //:   object having a move constructor
     //
@@ -1015,7 +1038,9 @@ void TestDriver<TYPE>::testCase5()
     //: 1 Create an object of 'TYPE' from a 'ValueType' object.  Using the
     //:   'wrap' method, created a Wrapper object.  Verify that the Wrapper
     //:   object contains a copy of the original ValueType object.  [C-1][C-2]
+    //:
     //: 2 Repeat step 1 using a const object of 'TYPE'.  [C-3]
+    //:
     //: 3 Repeat step 1 invoking wrap by moving from the original object.  
     //:   Verify the object inside the returned wrapper has been created by 
     //:   move construction if the original object is a non const object
@@ -1098,7 +1123,7 @@ void TestDriver<TYPE>::testCase5()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase4()
+void TestDriver<TYPE>::testCase3()
 {
     // --------------------------------------------------------------------
     // TESTING 'NothrowMovableUtil' TRAITS
@@ -1110,6 +1135,7 @@ void TestDriver<TYPE>::testCase4()
     // Plan:
     //: 1 For given type 'TYPE', check that 'IsWrapped' returns the same value
     //:   as 'NothrowMovableUtil_Traits<TYPE>::IsWrapped'.  [C-1]
+    //:
     //: 2 For given type 'TYPE', check that 'UnwrappedType' and 'WrappedType'
     //:   returns the same type as the same named member of
     //:   'NothrowMovableUtil_Traits<TYPE>'.  [C-1]
@@ -1157,27 +1183,20 @@ int main(int argc, char *argv[])
     switch (test) {
       case 0:  // Zero is always the leading case.
       case 6: {
-
         // --------------------------------------------------------------------
-        // TESTING 'unwrap' METHOD
+        // USAGE EXAMPLE
         // --------------------------------------------------------------------
 
-        RUN_EACH_TYPE(
-            TestDriver,
-            testCase6,
-            TrackableValue,
-            TrackableValueWithAlloc,
-            BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>,
-            BloombergLP::bslalg::NothrowMovableWrapper<
-                TrackableValueWithAlloc>,
-            BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>,
-            BloombergLP::bslalg::NothrowMovableWrapper<
-                const TrackableValueWithAlloc>);
+        if (verbose)
+            printf("\nUSAGE EXAMPLE"
+                   "\n============\n");
+
+        usageExample();
       } break;
       case 5: {
 
         // --------------------------------------------------------------------
-        // TESTING 'wrap' METHOD
+        // TESTING 'unwrap' METHOD
         // --------------------------------------------------------------------
 
         RUN_EACH_TYPE(
@@ -1195,14 +1214,32 @@ int main(int argc, char *argv[])
       case 4: {
 
         // --------------------------------------------------------------------
+        // TESTING 'wrap' METHOD
+        // --------------------------------------------------------------------
+
+        RUN_EACH_TYPE(
+            TestDriver,
+            testCase4,
+            TrackableValue,
+            TrackableValueWithAlloc,
+            BloombergLP::bslalg::NothrowMovableWrapper<TrackableValue>,
+            BloombergLP::bslalg::NothrowMovableWrapper<
+                TrackableValueWithAlloc>,
+            BloombergLP::bslalg::NothrowMovableWrapper<const TrackableValue>,
+            BloombergLP::bslalg::NothrowMovableWrapper<
+                const TrackableValueWithAlloc>);
+      } break;
+      case 3: {
+
+        // --------------------------------------------------------------------
         // TESTING 'NothrowMovableUtil' TRAITS
         // --------------------------------------------------------------------
 
         RUN_EACH_TYPE(TestDriver,
-                      testCase4,
+                      testCase3,
                       BSLALG_NOTHROWMOVABLEUTIL_TEST_TYPES);
       } break;
-      case 3: {
+      case 2: {
         // --------------------------------------------------------------------
         // TESTING 'NothrowMovableUtil_Traits' TRAITS
         //
@@ -1329,17 +1366,6 @@ int main(int argc, char *argv[])
                                      WrappedFunctionPtrType>::WrappedType,
                                  WrappedFunctionPtrType>::value));
         }
-      } break;
-      case 2: {
-        // --------------------------------------------------------------------
-        // USAGE EXAMPLE
-        // --------------------------------------------------------------------
-
-        if (verbose)
-            printf("\nUSAGE EXAMPLE"
-                   "\n============\n");
-
-        usageExample();
       } break;
       case 1: {
         // --------------------------------------------------------------------

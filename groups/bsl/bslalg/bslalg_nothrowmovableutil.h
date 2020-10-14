@@ -9,26 +9,27 @@ BSLS_IDENT("$Id: $")
 //@PURPOSE: Provide a wrapper that asserts a noexcept move constructor.
 //
 //@CLASSES:
-// bslalg::NothrowMovableUtil: namespace for managing wrappers
+// bslalg::NothrowMovableUtil: utilities for 'bslalg_nothrowmovablewrapper'
 //
 //@SEE_ALSO: bslalg_nothrowmovablewrapper
 //
 //@DESCRIPTION:  This component provides a utility struct,
-// 'bslalg::NothrowMovableUtil', that provides a namespace for static functions
-// 'wrap' and 'unwrap' with a uniform interface such that unwrapping an object
-// that is not wrapped or wrapping an object that is already wrapped are
-// no-ops.  This utility struct also provides type traits for determining
-// whether a type is wrapped and for deducing the type of the wrapped and
-// unwrapped object.
+// 'bslalg::NothrowMovableUtil', for managing 'bslalg_nothrowmovablewrapper'
+// objects. It provides a namespace for static functions 'wrap' and 'unwrap'
+// with a uniform interface such that unwrapping an object that is not wrapped
+// or wrapping an object that is already wrapped are no-ops.  This utility
+// struct also provides type traits for determining whether a type is wrapped
+// and for deducing the type of the wrapped and unwrapped object.
 //
 ///Usage
 ///-----
 //
 ///Example
 ///- - - -
-// In this example, we define a class template, 'CountedType<TYPE>', a wrapper around 'TYPE' that counts the number of
-// extant 'CountedType' objects.  We begin by defining the static count member
-// along with the single value member:
+// In this example, we define a class template, 'CountedType<TYPE>', a wrapper
+// around 'TYPE' that counts the number of extant 'CountedType' objects.  We
+// begin by defining the static count member along with the single value
+// member:
 //..
 //  template <class TYPE>
 //  class CountedType {
@@ -199,9 +200,9 @@ BSLS_IDENT("$Id: $")
 //..
 // Next, for convenience, we add a public data type, 'ValueType' for the value
 // stored within 'CountedType2'.  However, rather than defining 'ValueType' as
-// simply 'TYPE', we want to know if it is an instantiation of 
-// 'NothrowMovableWrapper<TP>'. If it is, we want a type that represents the 
-// unwrapped 'TP' rather than the full 'TYPE'. For this type transformation, we 
+// simply 'TYPE', we want to know if it is an instantiation of
+// 'NothrowMovableWrapper<TP>'. If it is, we want a type that represents the
+// unwrapped 'TP' rather than the full 'TYPE'. For this type transformation, we
 // turn to the type traits defined in 'bslalg::NothrowMovableUtil':
 //..
 //  public:
@@ -319,7 +320,7 @@ struct NothrowMovableUtil {
     template <class TYPE>
     struct WrappedType {
         // Metafunction: If 'TYPE' is a specialization of
-        // 'NothrowMovableWrapper', then 'WrappedType<TYPE>' is 'TYPE'; 
+        // 'NothrowMovableWrapper', then 'WrappedType<TYPE>' is 'TYPE';
         // otherwise 'WrappedType<TYPE>' is 'NothrowMovableWrapper<TYPE>'.
 
         typedef typename NothrowMovableUtil_Traits<TYPE>::WrappedType type;
@@ -328,7 +329,7 @@ struct NothrowMovableUtil {
     template <class TYPE>
     struct UnwrappedType {
         // Metafunction: If 'TYPE' is a specialization of
-        // 'NothrowMovableWrapper', then 'Unwrapped<TYPE>' is 
+        // 'NothrowMovableWrapper', then 'Unwrapped<TYPE>' is
         // 'TYPE::ValueType'; otherwise 'Unwrapped<TYPE>' is 'TYPE'.
 
         typedef typename NothrowMovableUtil_Traits<TYPE>::UnwrappedType type;
@@ -385,9 +386,12 @@ struct NothrowMovableUtil_Traits<TYPE, false /* is_function */> {
     // Component-private class -- do not use.  This specialization of traits is
     // for non-function types that are not wrapped.
 
-    // Cannot instantiate on reference types or array types.  
-    // BSLMF_ASSERT(!bslmf::MovableRefUtil::IsReference<TYPE>::value); 
-    // BSLMF_ASSERT(!bsl::is_array<TYPE>::value);
+    // Should not be instantiated on reference types or array types.  Assert
+    // for 'IsReference' needs to be commented out because in C++03
+    // 'NothrowMovableUtil_Traits' may be instantiated with a 'MovableRef'
+    // while doing overload resolution for calls to 'wrap'/'unwrap'.
+    // BSLMF_ASSERT(!bslmf::MovableRefUtil::IsReference<TYPE>::value);
+    BSLMF_ASSERT(!bsl::is_array<TYPE>::value);
 
     //TYPES
 
