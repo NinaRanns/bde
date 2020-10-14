@@ -7,7 +7,6 @@
 #include <bslma_testallocator.h>
 #include <bslma_usesbslmaallocator.h>
 
-#include <bslmf_isconst.h>
 #include <bsls_asserttest.h>
 #include <bsls_bsltestutil.h>
 
@@ -145,19 +144,19 @@ int simpleFunction(int i)
     return i;
 }
 
-typedef void (*BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE)();
-typedef void(BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE)();
+typedef void (*FunctionPtrType)();
+typedef void(FunctionType)();
 
-typedef bslalg::NothrowMovableWrapper<int>       NTMB_INT;
-typedef bslalg::NothrowMovableWrapper<const int> NTMB_CONST_INT;
+typedef bslalg::NothrowMovableWrapper<int>       WrappedInt;
+typedef bslalg::NothrowMovableWrapper<const int> WrappedConstInt;
 typedef bslalg::NothrowMovableWrapper<
-    BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>
-    NTMB_FUNCTION_PTR_TYPE;
+    FunctionPtrType>
+    WrappedFunctionPtrType;
 
 #define BSLALG_NOTHROWMOVABLEUTIL_TEST_TYPES                                  \
-    int, const int, BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE,              \
-        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE, NTMB_INT, NTMB_CONST_INT,    \
-        NTMB_FUNCTION_PTR_TYPE
+    int, const int, FunctionPtrType,              \
+        FunctionType, WrappedInt, WrappedConstInt,    \
+        WrappedFunctionPtrType
 
 class TrackableValue {
     // This class tracks a value through a series of move and copy operations
@@ -750,10 +749,10 @@ void usageExample()
 template <class TYPE,
           bool  USES_BSLMA_ALLOC =
               BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
-class Test_Util {
+class AllocatorTestUtil {
     // This class provided test utilities that have different behaviour
-    // depending on whether 'TYPE is allocator-aware or not.  The main template
-    // is for allocator-aware types.
+    // depending on whether 'TYPE is allocator-aware or not.  The primary 
+    // template is for allocator-aware types.
 
   public:
     static bool checkAllocator(const TYPE&                 obj,
@@ -767,7 +766,7 @@ class Test_Util {
 };
 
 template <class TYPE>
-class Test_Util<TYPE, false> {
+class AllocatorTestUtil<TYPE, false> {
     // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  This
     // specialization is for non allocator-aware types.
@@ -782,7 +781,7 @@ class Test_Util<TYPE, false> {
 
 template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
-bool Test_Util<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
+bool AllocatorTestUtil<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
                                           const TYPE&                 obj,
                                           const bsl::allocator<char>& expected)
 {
@@ -791,7 +790,7 @@ bool Test_Util<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
 
 template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
-bool Test_Util<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
+bool AllocatorTestUtil<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
                                                          const TYPE& other)
 {
     return (obj.allocator() == other.allocator());
@@ -799,7 +798,7 @@ bool Test_Util<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
 
 template <class TYPE>
 inline bool
-Test_Util<TYPE, false>::checkAllocator(const TYPE&,
+AllocatorTestUtil<TYPE, false>::checkAllocator(const TYPE&,
                                        const bsl::allocator<char>&)
 {
     return true;
@@ -807,25 +806,26 @@ Test_Util<TYPE, false>::checkAllocator(const TYPE&,
 
 template <class TYPE>
 inline bool
-Test_Util<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
+AllocatorTestUtil<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
 {
     return true;
 }
 
 template <class TYPE>
 bool checkAllocator(const TYPE& obj, const bsl::allocator<char>& allocator)
-    // If 'TYPE' is allocator-aware, check if the allocator of the specified
-    // 'obj' is specified 'allocator'
+    // If 'TYPE' is allocator-aware, return whether the allocator of the 
+    // specified 'obj' is specified 'allocator'; otherwise return 'true'.
 {
-    return Test_Util<TYPE>::checkAllocator(obj, allocator);
+    return AllocatorTestUtil<TYPE>::checkAllocator(obj, allocator);
 }
 
 template <class TYPE>
 bool hasSameAllocator(const TYPE& obj1, const TYPE& obj2)
-    // If 'TYPE' is allocator-aware, check if the allocator of the specified
-    // 'obj1' matches that of specified 'obj2'
+    // If 'TYPE' is allocator-aware, return whether the allocator of the 
+    // specified 'obj1' matches that of specified 'obj2'; otherwise return 
+    // 'true'.
 {
-    return Test_Util<TYPE>::hasSameAllocator(obj1, obj2);
+    return AllocatorTestUtil<TYPE>::hasSameAllocator(obj1, obj2);
 }
 
 // ============================================================================
@@ -835,30 +835,30 @@ bool hasSameAllocator(const TYPE& obj1, const TYPE& obj2)
 template <class TEST_TYPE>
 class TestDriver {
     // This class template provides a namespace for testing the
-    // 'bslalg::NothrowMovableWrapper' type.
+    // 'bslalg::NothrowMovableUtil' when used with 'TEST_TYPE'.
 
   public:
-    //PUBLIC TYPES
+    //  CONSTANTS
     enum {
-        E_LVALUE_REF,
-        E_CONST_LVALUE_REF,
-        E_MOVABLE_REF,
-        E_CONST_MOVABLE_REF
+        k_LVALUE_REF,
+        k_CONST_LVALUE_REF,
+        k_MOVABLE_REF,
+        k_CONST_MOVABLE_REF
     };
 
   private:
     // PRIVATE TYPES
-    typedef BloombergLP::bslalg::NothrowMovableUtil Obj;
-        // Type under test.
-
-    typedef typename Obj::UnwrappedType<TEST_TYPE>::type ValueType;
+    typedef BloombergLP::bslalg::NothrowMovableUtil Util;
+        // abbreviation for utility struct
+        
+    typedef typename Util::UnwrappedType<TEST_TYPE>::type ValueType;
         // Unwrapped type
 
     typedef typename bsl::remove_cv<ValueType>::type NonConstValueType;
         // non const version of ValueType.  This is needed for
         // checkValueCategory overloads.
 
-    typedef typename Obj::WrappedType<TEST_TYPE>::type WrapperType;
+    typedef typename Util::WrappedType<TEST_TYPE>::type WrappedType;
         // Wrapped type
 
   public:
@@ -883,24 +883,24 @@ class TestDriver {
 template <class TYPE>
 int TestDriver<TYPE>::checkValueCategory(NonConstValueType&)
 {
-    return E_LVALUE_REF;
+    return k_LVALUE_REF;
 }
 template <class TYPE>
 int TestDriver<TYPE>::checkValueCategory(const NonConstValueType&)
 {
-    return E_CONST_LVALUE_REF;
+    return k_CONST_LVALUE_REF;
 }
 template <class TYPE>
 int TestDriver<TYPE>::checkValueCategory(
                              BloombergLP::bslmf::MovableRef<NonConstValueType>)
 {
-    return E_MOVABLE_REF;
+    return k_MOVABLE_REF;
 }
 template <class TYPE>
 int TestDriver<TYPE>::checkValueCategory(
                        BloombergLP::bslmf::MovableRef<const NonConstValueType>)
 {
-    return E_CONST_MOVABLE_REF;
+    return k_CONST_MOVABLE_REF;
 }
 
 template <class TYPE>
@@ -910,9 +910,9 @@ void TestDriver<TYPE>::testCase6()
     // TESTING 'unwrap' METHOD
     //
     // Concerns:
-    //: 1 Invoking `unwrap` method with an argument of an unwrapped type
+    //: 1 Invoking 'unwrap' method with an argument of an unwrapped type
     //:   returns a reference to the argument.
-    //: 2 Invoking `unwrap` method with an argument of a wrapped type returns
+    //: 2 Invoking 'unwrap' method with an argument of a wrapped type returns
     //:   a reference to the wrapped object.
     //: 3 The value category of the returned reference matches the value
     //:   category of the argument.
@@ -920,9 +920,9 @@ void TestDriver<TYPE>::testCase6()
     // Plan:
     //: 1 Using a matrix of all value categories, invoke unwrap and
     //:   verify the returned reference has the correct value category using
-    //:   `checkValueCategory` helper function.  [C-3]
+    //:   'checkValueCategory' helper function.  [C-3]
     //: 2 in step 1, check the returned reference object matches the value
-    //:   of the `unwrap` argument.  [C-1], [C-2]
+    //:   of the 'unwrap' argument.  [C-1], [C-2]
     //
     // Testing:
     //   unwrap(TYPE&);
@@ -931,7 +931,7 @@ void TestDriver<TYPE>::testCase6()
     //   unwrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nTESTING `unwrap' METHOD"
+        printf("\nTESTING 'unwrap' METHOD"
                "\n=======================\n");
     typedef bslalg::ConstructorProxy<TYPE> TypeWithAllocator;
     bslma::TestAllocator                   da("default", veryVeryVeryVerbose);
@@ -943,11 +943,11 @@ void TestDriver<TYPE>::testCase6()
         TypeWithAllocator xBuffer(ValueType(3), &oa);
         TYPE&             x = xBuffer.object();
         ValueType         exp(3);
-        ValueType&        unwrappedX = Obj::unwrap(x);
+        ValueType&        unwrappedX = Util::unwrap(x);
 
-        ASSERT(checkValueCategory(Obj::unwrap(x)) ==
-               (bsl::is_const<ValueType>::value ? E_CONST_LVALUE_REF
-                                                : E_LVALUE_REF));
+        ASSERT(checkValueCategory(Util::unwrap(x)) ==
+               (bsl::is_const<ValueType>::value ? k_CONST_LVALUE_REF
+                                                : k_LVALUE_REF));
         ASSERT(unwrappedX == exp);
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
@@ -958,9 +958,9 @@ void TestDriver<TYPE>::testCase6()
         const TYPE&       x = xBuffer.object();
         ValueType         exp(3);
 
-        const ValueType& unwrappedX = Obj::unwrap(x);
+        const ValueType& unwrappedX = Util::unwrap(x);
 
-        ASSERT(checkValueCategory(Obj::unwrap(x)) == E_CONST_LVALUE_REF);
+        ASSERT(checkValueCategory(Util::unwrap(x)) == k_CONST_LVALUE_REF);
         ASSERT(unwrappedX == exp);
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
@@ -972,11 +972,11 @@ void TestDriver<TYPE>::testCase6()
         ValueType                                 exp(3);
 
         BloombergLP::bslmf::MovableRef<ValueType> unwrappedX =
-            Obj::unwrap(MoveUtil::move(x));
+            Util::unwrap(MoveUtil::move(x));
 
-        ASSERT(checkValueCategory(Obj::unwrap(MoveUtil::move(x))) ==
-               (bsl::is_const<ValueType>::value ? E_CONST_MOVABLE_REF
-                                                : E_MOVABLE_REF));
+        ASSERT(checkValueCategory(Util::unwrap(MoveUtil::move(x))) ==
+               (bsl::is_const<ValueType>::value ? k_CONST_MOVABLE_REF
+                                                : k_MOVABLE_REF));
         ASSERT(unwrappedX == exp);
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
@@ -988,10 +988,10 @@ void TestDriver<TYPE>::testCase6()
         ValueType         exp(3);
 
         BloombergLP::bslmf::MovableRef<const ValueType> unwrappedX =
-            Obj::unwrap(MoveUtil::move(x));
+            Util::unwrap(MoveUtil::move(x));
 
-        ASSERT(checkValueCategory(Obj::unwrap(MoveUtil::move(x))) ==
-               E_CONST_MOVABLE_REF);
+        ASSERT(checkValueCategory(Util::unwrap(MoveUtil::move(x))) ==
+               k_CONST_MOVABLE_REF);
         ASSERT(unwrappedX == exp);
         ASSERT(checkAllocator(unwrappedX, &oa));
     }
@@ -1003,21 +1003,23 @@ void TestDriver<TYPE>::testCase5()
     // TESTING 'wrap' METHOD
     //
     // Concerns:
-    //: 1 Invoking `wrap` method with an argument of an unwrapped type returns
+    //: 1 Invoking 'wrap' method with an argument of an unwrapped type returns
     //:   a wrapper object containing a copy of the argument.
-    //: 2 Invoking `wrap` method with an argument of a wrapped type returns a
+    //: 2 Invoking 'wrap' method with an argument of a wrapped type returns a
     //:   copy of the same object.
     //: 3 It is possible to wrap a const object.
-    //: 4 The argument is moved from whenever possible.
+    //: 4 The argument is moved from if it is a movable ref to a non-const 
+    //:   object having a move constructor
     //
     // Plan:
-    //: 1 Create an object of `TYPE` from a `ValueType` object.  Using the
-    //:   `wrap`  method, created a Wrapper object. Verify that the Wrapper
+    //: 1 Create an object of 'TYPE' from a 'ValueType' object.  Using the
+    //:   'wrap' method, created a Wrapper object.  Verify that the Wrapper
     //:   object contains a copy of the original ValueType object.  [C-1][C-2]
-    //: 2 In step 1, use a const object of `TYPE`.  [C-3]
-    //: 3 In step 1, invoke wrap by moving from the original object.  Verify
-    //:   the object inside the returned wrapper has been created by move
-    //:   construction if move is possible.  [C-4]
+    //: 2 Repeat step 1 using a const object of 'TYPE'.  [C-3]
+    //: 3 Repeat step 1 invoking wrap by moving from the original object.  
+    //:   Verify the object inside the returned wrapper has been created by 
+    //:   move construction if the original object is a non const object
+    //:   of a type with a move constructor.  [C-4]
     //
     // Testing:
     //   wrap(TYPE& );
@@ -1026,7 +1028,7 @@ void TestDriver<TYPE>::testCase5()
     //   wrap(BSLMF_NOTHROWMOVABLEWRAPPER_DEDUCE_RVREF(const TYPE));
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nTESTING `wrap' METHOD"
+        printf("\nTESTING 'wrap' METHOD"
                "\n=====================\n");
 
     typedef bslalg::ConstructorProxy<TYPE> TypeWithAllocator;
@@ -1040,7 +1042,7 @@ void TestDriver<TYPE>::testCase5()
         TYPE&             x = xBuffer.object();
         ValueType         exp(3);
 
-        const WrapperType& wrappedX = Obj::wrap(x);
+        const WrappedType& wrappedX = Util::wrap(x);
 
         ASSERT(wrappedX.unwrap() == exp);
         ASSERT(wrappedX.unwrap().isCopied());
@@ -1054,7 +1056,7 @@ void TestDriver<TYPE>::testCase5()
         const TYPE&       x = xBuffer.object();
         ValueType         exp(3);
 
-        const WrapperType& wrappedX = Obj::wrap(x);
+        const WrappedType& wrappedX = Util::wrap(x);
 
         ASSERT(wrappedX.unwrap() == exp);
         ASSERT(wrappedX.unwrap().isCopied());
@@ -1069,7 +1071,7 @@ void TestDriver<TYPE>::testCase5()
         ValueType         exp(3);
         ValueType&        val = x;
         val.resetMoveCopiedFlags();
-        const WrapperType& wrappedX = Obj::wrap(MoveUtil::move(x));
+        const WrappedType& wrappedX = Util::wrap(MoveUtil::move(x));
 
         // If TYPE is const, wrap will perform a copy.  Otherwise, it will do a
         // move
@@ -1087,13 +1089,14 @@ void TestDriver<TYPE>::testCase5()
         ValueType        exp(3);
         const ValueType& val = x;
         val.resetMoveCopiedFlags();
-        const WrapperType& wrappedX = Obj::wrap(MoveUtil::move(x));
+        const WrappedType& wrappedX = Util::wrap(MoveUtil::move(x));
 
         ASSERT(wrappedX.unwrap() == exp);
         ASSERT(wrappedX.unwrap().isCopied());
         ASSERT(!wrappedX.unwrap().isMoved());
     }
 }
+
 template <class TYPE>
 void TestDriver<TYPE>::testCase4()
 {
@@ -1101,15 +1104,15 @@ void TestDriver<TYPE>::testCase4()
     // TESTING 'NothrowMovableUtil' TRAITS
     //
     // Concerns:
-    //: 1 `IsWrapped`, `UnwrappedType`, and `WrappedType` trait correspond to
-    //:    the same named member of `NothrowMovableUtil_Traits`
+    //: 1 'IsWrapped', 'UnwrappedType', and 'WrappedType' trait correspond to
+    //:    the same named member of 'NothrowMovableUtil_Traits'
     //
     // Plan:
-    //: 1 For given type `TYPE`, check that `IsWrapped` returns the same value
-    //:   as `NothrowMovableUtil_Traits<TYPE>::IsWrapped`.  [C-1]
-    //: 2 For given type `TYPE`, check that `UnwrappedType` and `WrappedType`
+    //: 1 For given type 'TYPE', check that 'IsWrapped' returns the same value
+    //:   as 'NothrowMovableUtil_Traits<TYPE>::IsWrapped'.  [C-1]
+    //: 2 For given type 'TYPE', check that 'UnwrappedType' and 'WrappedType'
     //:   returns the same type as the same named member of
-    //:   `NothrowMovableUtil_Traits<TYPE>`.  [C-1]
+    //:   'NothrowMovableUtil_Traits<TYPE>'.  [C-1]
     //
     // Testing:
     //  NothrowMovableUtil::IsWrapped
@@ -1208,33 +1211,33 @@ int main(int argc, char *argv[])
         //  traits.
         //
         // Concerns:
-        //: 1 `IsWrapped` trait is satisfied if and only if 'TYPE' is a
-        //:  specialization of 'NothrowMovableWrapper`.
-        //: 2 `WrappedType::type` is `NothrowMovableWrapper<TYPE>' if `TYPE` is
-        //:   not a specialization of `NothrowMovableWrapper`, and `TYPE'
+        //: 1 'IsWrapped' trait is satisfied if and only if 'TYPE' is a
+        //:  specialization of 'NothrowMovableWrapper'.
+        //: 2 'WrappedType::type' is 'NothrowMovableWrapper<TYPE>' if 'TYPE' is
+        //:   not a specialization of 'NothrowMovableWrapper', and 'TYPE'
         //:   otherwise.
-        //: 3 `UnWrappedType::type` is `TYPE` if `TYPE` is not a specialization
+        //: 3 'UnWrappedType::type' is 'TYPE' if 'TYPE' is not a specialization
         // of
-        //:   `NothrowMovableWrapper` and `TYPE is not a function, `TYPE*` if
+        //:   'NothrowMovableWrapper' and 'TYPE is not a function, 'TYPE*' if
         // TYPE
-        //:    is a function, and `TYPE::ValueType` otherwise.
+        //:    is a function, and 'TYPE::ValueType' otherwise.
         //
         // Plan:
-        //: 1 Using a `TYPE` which is not a specialization of
-        //:   'NothrowMovableWrapper` check that `IsWrapped` trait is not
+        //: 1 Using a 'TYPE' which is not a specialization of
+        //:   'NothrowMovableWrapper' check that 'IsWrapped' trait is not
         //:   satisfied.  [C-1]
-        //: 2 In step 1, check that `WrappedType::type` is
-        //:   `NothrowMovableWrapper<TYPE>'.  [C-2]
-        //: 3 In step 1, check that `UnwrappedType::type` is
-        //:   `TYPE`.  [C-3]
-        //: 4 In step 3, using a function type `TYPE`, verify that
-        // `UnwrappedType::type` is
-        //:   `TYPE*`
-        //: 5 Using a `NothrowMovableWrapper<TYPE> as test type, check that
-        //:   `IsWrapped` trait is satisfied.  [C-1]
-        //: 6 In step 5, check that `WrappedType::type` is `TYPE'.  [C-2]
-        //: 7 In step 6, check that `UnwrappedType::type` is
-        //:   `TYPE::ValueType`.  [C-3]
+        //: 2 In step 1, check that 'WrappedType::type' is
+        //:   'NothrowMovableWrapper<TYPE>'.  [C-2]
+        //: 3 In step 1, check that 'UnwrappedType::type' is
+        //:   'TYPE'.  [C-3]
+        //: 4 In step 3, using a function type 'TYPE', verify that
+        // 'UnwrappedType::type' is
+        //:   'TYPE*'
+        //: 5 Using a 'NothrowMovableWrapper<TYPE> as test type, check that
+        //:   'IsWrapped' trait is satisfied.  [C-1]
+        //: 6 In step 5, check that 'WrappedType::type' is 'TYPE'.  [C-2]
+        //: 7 In step 6, check that 'UnwrappedType::type' is
+        //:   'TYPE::ValueType'.  [C-3]
         //
         // Testing:
         //  NothrowMovableUtil_Traits::IsWrapped
@@ -1266,65 +1269,65 @@ int main(int argc, char *argv[])
                     bslalg::NothrowMovableWrapper<const int> >::value));
 
             ASSERT(!(bslalg::NothrowMovableUtil_Traits<
-                     BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::IsWrapped::
+                     FunctionPtrType>::IsWrapped::
                          value));
             ASSERT((bsl::is_same<
                     bslalg::NothrowMovableUtil_Traits<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::
+                        FunctionPtrType>::
                         UnwrappedType,
-                    BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::value));
+                    FunctionPtrType>::value));
             ASSERT((bsl::is_same<
                     bslalg::NothrowMovableUtil_Traits<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE>::
+                        FunctionPtrType>::
                         WrappedType,
                     bslalg::NothrowMovableWrapper<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_PTR_TYPE> >::
+                        FunctionPtrType> >::
                         value));
 
             ASSERT(!(bslalg::NothrowMovableUtil_Traits<
-                     BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::IsWrapped::
+                     FunctionType>::IsWrapped::
                          value));
             ASSERT((bsl::is_same<
                     bslalg::NothrowMovableUtil_Traits<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::
+                        FunctionType>::
                         UnwrappedType,
-                    BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *>::value));
+                    FunctionType *>::value));
             ASSERT((bsl::is_same<
                     bslalg::NothrowMovableUtil_Traits<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE>::WrappedType,
+                        FunctionType>::WrappedType,
                     bslalg::NothrowMovableWrapper<
-                        BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *> >::value));
+                        FunctionType *> >::value));
         }
         if (veryVerbose)
             printf("\tWrapped types.\n");
         {
             ASSERT(
-              (bslalg::NothrowMovableUtil_Traits<NTMB_INT>::IsWrapped::value));
+              (bslalg::NothrowMovableUtil_Traits<WrappedInt>::IsWrapped::value));
             ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil_Traits<NTMB_INT>::UnwrappedType,
+                    bslalg::NothrowMovableUtil_Traits<WrappedInt>::UnwrappedType,
                     int>::value));
             ASSERT((bsl::is_same<
-                    bslalg::NothrowMovableUtil_Traits<NTMB_INT>::WrappedType,
-                    NTMB_INT>::value));
+                    bslalg::NothrowMovableUtil_Traits<WrappedInt>::WrappedType,
+                    WrappedInt>::value));
 
             ASSERT((bslalg::NothrowMovableUtil_Traits<
-                    NTMB_CONST_INT>::IsWrapped::value));
+                    WrappedConstInt>::IsWrapped::value));
             ASSERT((bsl::is_same<bslalg::NothrowMovableUtil_Traits<
-                                     NTMB_CONST_INT>::UnwrappedType,
+                                     WrappedConstInt>::UnwrappedType,
                                  const int>::value));
             ASSERT((bsl::is_same<bslalg::NothrowMovableUtil_Traits<
-                                     NTMB_CONST_INT>::WrappedType,
-                                 NTMB_CONST_INT>::value));
+                                     WrappedConstInt>::WrappedType,
+                                 WrappedConstInt>::value));
 
             ASSERT((bslalg::NothrowMovableUtil_Traits<
-                    NTMB_FUNCTION_PTR_TYPE>::IsWrapped::value));
+                    WrappedFunctionPtrType>::IsWrapped::value));
             ASSERT((bsl::is_same<
                     bslalg::NothrowMovableUtil_Traits<
-                        NTMB_FUNCTION_PTR_TYPE>::UnwrappedType,
-                    BSLALG_NOTHROWMOVABLEUTIL_FUNCTION_TYPE *>::value));
+                        WrappedFunctionPtrType>::UnwrappedType,
+                    FunctionType *>::value));
             ASSERT((bsl::is_same<bslalg::NothrowMovableUtil_Traits<
-                                     NTMB_FUNCTION_PTR_TYPE>::WrappedType,
-                                 NTMB_FUNCTION_PTR_TYPE>::value));
+                                     WrappedFunctionPtrType>::WrappedType,
+                                 WrappedFunctionPtrType>::value));
         }
       } break;
       case 2: {
@@ -1365,7 +1368,7 @@ int main(int argc, char *argv[])
       } break;
 
       default: {
-        fprintf(stderr, "WARNING: CASE `%d' NOT FOUND.\n", test);
+        fprintf(stderr, "WARNING: CASE '%d' NOT FOUND.\n", test);
         testStatus = -1;
       }
     }

@@ -27,8 +27,12 @@ using namespace BloombergLP;
 // The use of this class communicates to specific clients (see
 // 'bslstl_function') that the wrapped object should be treated as-if it has a
 // 'noexcept' move constructor, even in C++03, where 'noexcept' does not exist.
-// The tests will check the correct functionality of the component under test
-// as specified in the component's documentation.
+// The tests will check that all of the constructors correctly construct the 
+// wrapped object and that all of the manipulators and accessors correctly give 
+// access to the wrapped object.  Special consideration should be given to 
+// ensure that allocator-aware types are handles correctly and that 
+// non-allocator-aware types are treated as such.  The tests also verify that 
+// the wrapper has the correct traits, based on the wrapped type.
 //
 // ----------------------------------------------------------------------------
 // TRAITS
@@ -58,7 +62,7 @@ using namespace BloombergLP;
 //                            const allocator_type&     alloc,
 //                            const NothrowMovableWrapper& original);
 // [ 7] NothrowMovableWrapper(bslmf::MovableRef<NothrowMovableWrapper>
-// original)
+//                            original)
 //                            BSLS_KEYWORD_NOEXCEPT;
 // [ 7] NothrowMovableWrapper(bsl::allocator_arg_t                  ,
 //                            const allocator_type&                 alloc,
@@ -663,7 +667,7 @@ void usageExample1()
 template <class TYPE,
           bool  USES_BSLMA_ALLOC =
               BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value>
-class Test_Util {
+class AllocatorTestUtil {
     // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  The main template
     // is for allocator-aware types.
@@ -680,7 +684,7 @@ class Test_Util {
 };
 
 template <class TYPE>
-class Test_Util<TYPE, false> {
+class AllocatorTestUtil<TYPE, false> {
     // This class provided test utilities that have different behaviour
     // depending on whether 'TYPE is allocator-aware or not.  This
     // specialization is for non allocator-aware types.
@@ -695,7 +699,7 @@ class Test_Util<TYPE, false> {
 
 template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
-bool Test_Util<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
+bool AllocatorTestUtil<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
                                           const TYPE&                 obj,
                                           const bsl::allocator<char>& expected)
 {
@@ -704,7 +708,7 @@ bool Test_Util<TYPE, USES_BSLMA_ALLOC>::checkAllocator(
 
 template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
-bool Test_Util<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
+bool AllocatorTestUtil<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
                                                          const TYPE& other)
 {
     return (obj.allocator() == other.allocator());
@@ -712,7 +716,7 @@ bool Test_Util<TYPE, USES_BSLMA_ALLOC>::hasSameAllocator(const TYPE& obj,
 
 template <class TYPE>
 inline bool
-Test_Util<TYPE, false>::checkAllocator(const TYPE&,
+AllocatorTestUtil<TYPE, false>::checkAllocator(const TYPE&,
                                        const bsl::allocator<char>&)
 {
     return true;
@@ -720,25 +724,26 @@ Test_Util<TYPE, false>::checkAllocator(const TYPE&,
 
 template <class TYPE>
 inline bool
-Test_Util<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
+AllocatorTestUtil<TYPE, false>::hasSameAllocator(const TYPE&, const TYPE&)
 {
     return true;
 }
 
 template <class TYPE>
 bool checkAllocator(const TYPE& obj, const bsl::allocator<char>& allocator)
-    // If 'TYPE' is allocator-aware, check if the allocator of the specified
-    // 'obj' is specified 'allocator'
+    // If 'TYPE' is allocator-aware, return whether the allocator of the 
+    // specified 'obj' is specified 'allocator'; otherwise return 'true'.
 {
-    return Test_Util<TYPE>::checkAllocator(obj, allocator);
+    return AllocatorTestUtil<TYPE>::checkAllocator(obj, allocator);
 }
 
 template <class TYPE>
 bool hasSameAllocator(const TYPE& obj1, const TYPE& obj2)
-    // If 'TYPE' is allocator-aware, check if the allocator of the specified
-    // 'obj1' matches that of specified 'obj2'
+    // If 'TYPE' is allocator-aware, return whether the allocator of the 
+    // specified 'obj1' matches that of specified 'obj2'; otherwise return 
+    // 'true'.
 {
-    return Test_Util<TYPE>::hasSameAllocator(obj1, obj2);
+    return AllocatorTestUtil<TYPE>::hasSameAllocator(obj1, obj2);
 }
 
 //=============================================================================
@@ -776,10 +781,10 @@ class TestDriver {
         // ACCESSORS AND MANIPULATORS
 
     static void testCase7();
-        // CONSTRUCTION FROM `NothrowMovableWrapper`
+        // CONSTRUCTION FROM 'NothrowMovableWrapper'
 
     static void testCase6();
-        // CONSTRUCTION FROM `TYPE`
+        // CONSTRUCTION FROM 'TYPE'
 
     static void testCase5();
         // DEFAULT CONSTRUCTION
@@ -796,22 +801,23 @@ void TestDriver<TYPE>::testCase8()
     //  This test checks the functionality of accessors and manipulators.
     //
     // Concerns:
-    //: 1 That 'unwrap' function return a correctly const qualified reference
-    //:   to the wrapped object.
-    //: 2 That the conversion operators return a correctly const qualified
-    //:   reference to the wrapped object.
+    //: 1 That the 'unwrap' method returns a reference to the wrapped object.  
+    //:   If invoked on a const wrapper, the returned reference is const 
+    //:   qualified.
+    //: 2 That the conversion operators return the same thing as the 'unwrap'
+    //:   method
     //: 3 That the 'get_allocator' method returns the allocator used to
-    //:   created the wrapped object, if the wrapped object type is allocator
-    //:   aware
+    //:   created the wrapped object, if the wrapped object type is 
+    //:   allocator-aware.
     //:
     // Plan:
-    //: 1 Create a wrapper object of 'TYPE'. Using the 'unwrape' method, check
+    //: 1 Create a wrapper object of 'TYPE'. Using the 'unwrap' method, check
     //:   that the returned reference matches the wrapped object.  [C-1]
     //: 2 In step 1, call the 'unwrap' method through a const reference to
     //:   the wrapper object.  [C-1]
     //: 3 Repeat step 1 using the conversion operator.  [C-2]
     //: 4 Repeat step 2 using the conversion operator.  [C-2]
-    //: 5 If 'TYPE' is allocator aware, check that 'get_allocator' return the
+    //: 5 If 'TYPE' is allocator-aware, check that 'get_allocator' return the
     //:   allocator specified at wrapped construction time.  [C-3]
     //
     // Testing:
@@ -861,34 +867,38 @@ template <class TYPE>
 void TestDriver<TYPE>::testCase7()
 {
     // --------------------------------------------------------------------
-    //  CONSTRUCTION FROM `NothrowMovableWrapper`
-    //   This test will verify that `NothrowMovableWrapper<TYPE>` object
-    //   constructed from an object of `NothrowMovableWrapper` is as expected.
+    //  COPY AND MOVE CONSTRUCTORS
+    //   This test will verify that 'NothrowMovableWrapper<TYPE>' object
+    //   constructed from an object of 'NothrowMovableWrapper' is as expected.
     //
     // Concerns:
-    //: 1 `NothrowMovableWrapper<TYPE>` object constructed from an object of
-    //:   `NothrowMovableWrapper`, has the value of the original object.
-    //: 2 If `TYPE` is allocator-aware and no allocator was provided at
-    //:   construction time, the `valueType` object will use the default
-    //:   allocator if the original was copied from, ad the allocator of the
+    //: 1 'NothrowMovableWrapper<TYPE>' object constructed from an object of
+    //:   'NothrowMovableWrapper', has the value of the original object.
+    //: 2 If the argument to the constructor is an lvalue or a movable ref to 
+    //:   a const object, the 'ValueType' object is copy constructed.  If 
+    //:   the argument to the constructor is a movable ref to a non const
+    //:   object, the 'ValueType' object is move constructed.
+    //: 3 If 'TYPE' is allocator-aware and no allocator was provided at
+    //:   construction time, the 'ValueType' object will use the default
+    //:   allocator if the original was copied from, and the allocator of the
     //:   original object if the original object was moved from.
-    //: 3 If `TYPE` is allocator-aware and allocator was provided at
-    //:   construction time, the `valueType` object will use the provided
+    //: 4 If 'TYPE' is allocator-aware and allocator was provided at
+    //:   construction time, the 'ValueType' object will use the provided
     //:   allocator.
     //
     // Plan:
-    //: 1 Construct an object of `NothrowMovableWrapper<TYPE>` from another
-    //:   `NothrowMovableWrapper<TYPE>`  object.  Check that the values of the
+    //: 1 Construct an object of 'NothrowMovableWrapper<TYPE>' from another
+    //:   'NothrowMovableWrapper<TYPE>'  object.  Check that the values of the
     //:    two objects match.  [C-1]
-    //: 2 If `TYPE` is allocator-aware, check that the `valueType` object of
-    //:   the `NothrowMovableWrapper<TYPE>` has been constructed using the
-    //:   correct allocator.  [C-2]
-    //: 3 If `TYPE` is allocator-aware, repeat step 1 using the allocator
+    //: 2 If 'TYPE' is allocator-aware, check that the 'ValueType' object of
+    //:   the 'NothrowMovableWrapper<TYPE>' has been constructed using the
+    //:   correct allocator.  [C-3]
+    //: 3 If 'TYPE' is allocator-aware, repeat step 1 using the allocator
     //:   extended default constructor and check the value of the resulting
     //:   object.  [C-1]
-    //: 4 In step 3, check that the `valueType` object of the
-    //:   `NothrowMovableWrapper<TYPE>` has been constructed using the
-    //:   provided allocator.  [C-3]
+    //: 4 In step 3, check that the 'ValueType' object of the
+    //:   'NothrowMovableWrapper<TYPE>' has been constructed using the
+    //:   provided allocator.  [C-4]
     //
     // Testing:
     //   NothrowMovableWrapper(const NothrowMovableWrapper& original);
@@ -903,8 +913,8 @@ void TestDriver<TYPE>::testCase7()
     //                         original);
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nCONSTRUCTION FROM `NothrowMovableWrapper`"
-               "\n=========================================\n");
+        printf("\nCOPY AND MOVE CONSTRUCTORS"
+               "\n==========================\n");
 
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
     bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
@@ -912,12 +922,12 @@ void TestDriver<TYPE>::testCase7()
     bslma::DefaultAllocatorGuard dag(&da);
     if (veryVerbose)
         printf("\tNon allocator extended construction from "
-               "`NothrowMovableWrapper`.\n");
+               "'NothrowMovableWrapper'.\n");
     {
         ValueType        val(3);
         ObjWithAllocator sourceBuffer(val, &oa);
         Obj&             source  = sourceBuffer.object();
-        const Obj&       cSource = source;
+        const Obj&       SOURCE = source;
 
         source.unwrap().resetMoveCopiedFlags();
 
@@ -927,7 +937,7 @@ void TestDriver<TYPE>::testCase7()
         ASSERT(!x.unwrap().isMoved());
         ASSERT(x.unwrap().isCopied());
 
-        Obj x2(MoveUtil::move(cSource));
+        Obj x2(MoveUtil::move(SOURCE));
         ASSERT(x2.unwrap() == val);
         ASSERT(checkAllocator(x2, &da));
         ASSERT(!x2.unwrap().isMoved());
@@ -941,12 +951,12 @@ void TestDriver<TYPE>::testCase7()
     }
     if (veryVerbose)
         printf("\tAllocator extended construction from "
-               "`NothrowMovableWrapper`.\n");
+               "'NothrowMovableWrapper'.\n");
     {
         ValueType        val(3);
         ObjWithAllocator sourceBuffer(val, &oa);
         Obj&             source  = sourceBuffer.object();
-        const Obj&       cSource = source;
+        const Obj&       SOURCE = source;
 
         source.unwrap().resetMoveCopiedFlags();
 
@@ -957,7 +967,7 @@ void TestDriver<TYPE>::testCase7()
         ASSERT(!x.unwrap().isMoved());
         ASSERT(x.unwrap().isCopied());
 
-        ObjWithAllocator x2Buffer(MoveUtil::move(cSource), &ta);
+        ObjWithAllocator x2Buffer(MoveUtil::move(SOURCE), &ta);
         Obj&             x2 = x2Buffer.object();
         ASSERT(x2.unwrap() == val);
         ASSERT(checkAllocator(x2, &ta));
@@ -977,33 +987,33 @@ template <class TYPE>
 void TestDriver<TYPE>::testCase6()
 {
     // --------------------------------------------------------------------
-    //  CONSTRUCTION FROM `TYPE`
-    //   This test will verify that `NothrowMovableWrapper<TYPE>` constructed
-    //   from an object of `TYPE` is as expected.
+    //  CONSTRUCTION FROM 'TYPE'
+    //   This test will verify that 'NothrowMovableWrapper<TYPE>' constructed
+    //   from an object of 'TYPE' is as expected.
     //
     // Concerns:
-    //: 1 `NothrowMovableWrapper<TYPE>` object constructed from an object of
-    //:   `TYPE`, has the value of the original `TYPE` object.
-    //: 2 If `TYPE` is allocator-aware and no allocator was provided at
-    //:   construction time, the `valueType` object will use the same allocator
-    //:   as a `TYPE` object constructed from the same original object would.
-    //: 3 If `TYPE` is allocator-aware and allocator was provided at
-    //:   construction time, the `valueType` object will use the provided
+    //: 1 'NothrowMovableWrapper<TYPE>' object constructed from an object of
+    //:   'TYPE', has the value of the original 'TYPE' object.
+    //: 2 If 'TYPE' is allocator-aware and no allocator was provided at
+    //:   construction time, the 'ValueType' object will use the same allocator
+    //:   as a 'TYPE' object constructed from the same original object would.
+    //: 3 If 'TYPE' is allocator-aware and allocator was provided at
+    //:   construction time, the 'ValueType' object will use the provided
     //:   allocator.
     //
     // Plan:
-    //: 1 Construct an object of `NothrowMovableWrapper<TYPE>` from an `TYPE`
+    //: 1 Construct an object of 'NothrowMovableWrapper<TYPE>' from an 'TYPE'
     //:   object.  Check that the values of the two objects match.  [C-1]
-    //: 2 If `TYPE` is allocator-aware, check that the `valueType` object of
-    //:   the `NothrowMovableWrapper<TYPE>` has been constructed using the
-    //:   correct allocator by comparing it to an allocator from a `TYPE`
+    //: 2 If 'TYPE' is allocator-aware, check that the 'ValueType' object of
+    //:   the 'NothrowMovableWrapper<TYPE>' has been constructed using the
+    //:   correct allocator by comparing it to an allocator from a 'TYPE'
     // object
     //:   created in the same way.  [C-2]
-    //: 3 If `TYPE` is allocator-aware, repeat step 1 using the allocator
+    //: 3 If 'TYPE' is allocator-aware, repeat step 1 using the allocator
     //:   extended default constructor and check the value of the resulting
     //:   object.  [C-1]
-    //: 4 In step 3, check that the `valueType` object of the
-    //:   `NothrowMovableWrapper<TYPE>` has been constructed using the
+    //: 4 In step 3, check that the 'ValueType' object of the
+    //:   'NothrowMovableWrapper<TYPE>' has been constructed using the
     //:   provided allocator.  [C-3]
     //
     // Testing:
@@ -1012,13 +1022,13 @@ void TestDriver<TYPE>::testCase6()
     //                         const allocator_type& allocator,
     //                         const TYPE&           val);
     //   NothrowMovableWrapper(bslmf::MovableRef<TYPE> val)
-    //   BSLS_KEYWORD_NOEXCEPT;
+    //                         BSLS_KEYWORD_NOEXCEPT;
     //   NothrowMovableWrapper(bsl::allocator_arg_t    ,
     //                         const allocator_type&   allocator,
     //                         bslmf::MovableRef<TYPE> val);
     // --------------------------------------------------------------------
     if (verbose)
-        printf("\nCONSTRUCTION FROM `TYPE`"
+        printf("\nCONSTRUCTION FROM 'TYPE'"
                "\n=======================\n");
 
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
@@ -1026,11 +1036,11 @@ void TestDriver<TYPE>::testCase6()
     bslma::TestAllocator         ta("third", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard dag(&da);
     if (veryVerbose)
-        printf("\tNon allocator extended construction from `TYPE`.\n");
+        printf("\tNon allocator extended construction from 'TYPE'.\n");
     {
         ValueType        source(3);
         ValueType        sourceCopy(3);
-        const ValueType& cSource = source;
+        const ValueType& SOURCE = source;
 
         ValueType expected(source);
         Obj       x(source);
@@ -1039,8 +1049,8 @@ void TestDriver<TYPE>::testCase6()
         ASSERT(expected.isMoved() == x.unwrap().isMoved());
         ASSERT(expected.isCopied() == x.unwrap().isCopied());
 
-        ValueType expected2(MoveUtil::move(cSource));
-        Obj       x2(MoveUtil::move(cSource));
+        ValueType expected2(MoveUtil::move(SOURCE));
+        Obj       x2(MoveUtil::move(SOURCE));
         ASSERT(expected2 == x2.unwrap());
         ASSERT(hasSameAllocator(expected2, x2.unwrap()));
         ASSERT(expected2.isMoved() == x2.unwrap().isMoved());
@@ -1054,7 +1064,7 @@ void TestDriver<TYPE>::testCase6()
         ASSERT(expected3.isCopied() == x3.unwrap().isCopied());
     }
     if (veryVerbose)
-        printf("\tAllocator extended construction from `TYPE`.\n");
+        printf("\tAllocator extended construction from 'TYPE'.\n");
     {
         ValWithAllocator sourceBuffer(3, &oa);
         ValueType&       source = sourceBuffer.object();
@@ -1062,7 +1072,7 @@ void TestDriver<TYPE>::testCase6()
         ValWithAllocator sourceCopyBuffer(3, &oa);
         ValueType&       sourceCopy = sourceCopyBuffer.object();
 
-        const ValueType cSource = sourceBuffer.object();
+        const ValueType SOURCE = sourceBuffer.object();
 
         ValWithAllocator expectedBuffer(source, &ta);
         ValueType&       expected = expectedBuffer.object();
@@ -1073,9 +1083,9 @@ void TestDriver<TYPE>::testCase6()
         ASSERT(expected.isMoved() == x.unwrap().isMoved());
         ASSERT(expected.isCopied() == x.unwrap().isCopied());
 
-        ValWithAllocator expected2Buffer(MoveUtil::move(cSource), &ta);
+        ValWithAllocator expected2Buffer(MoveUtil::move(SOURCE), &ta);
         ValueType&       expected2 = expected2Buffer.object();
-        ObjWithAllocator x2Buffer(MoveUtil::move(cSource), &ta);
+        ObjWithAllocator x2Buffer(MoveUtil::move(SOURCE), &ta);
         Obj&             x2 = x2Buffer.object();
         ASSERT(expected2 == x2.unwrap());
         ASSERT(hasSameAllocator(expected2, x2.unwrap()));
@@ -1099,30 +1109,30 @@ void TestDriver<TYPE>::testCase5()
     // --------------------------------------------------------------------
     //  DEFAULT CONSTRUCTION
     //   This test will verify that default constructed
-    //   `NothrowMovableWrapper` contains a default constructed `valueType`
+    //   'NothrowMovableWrapper' contains a default constructed 'ValueType'
     //   object.
     //
     // Concerns:
-    //: 1 Default constructed `NothrowMovableWrapper` contains a default
-    //:   constructed `valueType` object.
-    //: 2 If `TYPE` is allocator-aware and no allocator was provided at
-    //:   construction time, the `valueType` object will use the default
+    //: 1 Default constructed 'NothrowMovableWrapper' contains a default
+    //:   constructed 'ValueType' object.
+    //: 2 If 'TYPE' is allocator-aware and no allocator was provided at
+    //:   construction time, the 'ValueType' object will use the default
     //:   allocator.
-    //: 3 If `TYPE` is allocator-aware and allocator was provided at
-    //:   construction time, the `valueType` object will use the provided
+    //: 3 If 'TYPE' is allocator-aware and allocator was provided at
+    //:   construction time, the 'ValueType' object will use the provided
     //:   allocator.
     //
     // Plan:
-    //: 1 Default construct an object of `TYPE` and a
-    //:   `NothrowMovableWrapper<TYPE>` object.  Check that the values of the
-    //:   two object match.  [C-1]
-    //: 2 If `TYPE` is allocator-aware, check that the `valueType` object of
-    //:   the `NothrowMovableWrapper<TYPE>` has been constructed using the
+    //: 1 Default construct an object of 'TYPE' and a
+    //:   'NothrowMovableWrapper<TYPE>' object.  Check that the values of the
+    //:   two objects match.  [C-1]
+    //: 2 If 'TYPE' is allocator-aware, check that the 'ValueType' object of
+    //:   the 'NothrowMovableWrapper<TYPE>' has been constructed using the
     //:   default allocator.  [C-2]
-    //: 3 If `TYPE` is allocator-aware, repeat step 1 using the allocator
+    //: 3 If 'TYPE' is allocator-aware, repeat step 1 using the allocator
     //:   extended default constructor.  [C-1]
-    //: 4 In step 3, check that the `valueType` object of the
-    //:   `NothrowMovableWrapper<TYPE>` has been constructed using the
+    //: 4 In step 3, check that the 'ValueType' object of the
+    //:   'NothrowMovableWrapper<TYPE>' has been constructed using the
     //:   provided allocator.  [C-3]
     //
     // Testing:
@@ -1163,19 +1173,19 @@ void TestDriver<TYPE>::testCase4()
     // --------------------------------------------------------------------
     // TRAITS AND TYPEDEFS
     //
-    //  This test checks the nested `NothrowMovableWrapper` traits  and
+    //  This test checks the nested 'NothrowMovableWrapper' traits  and
     //  pubic typedefs.
     //
     // Concerns:
-    //: 1 If and only if `TYPE` is allocator-aware,
-    //:   `NothrowMovableWrapper<TYPE>` is allocator aware and satisfies
-    //:   `UsesAllocatorArgT` trait.
-    //: 2 If and only if `TYPE` is `IsBitwiseMoveable`,
-    //:   `NothrowMovableWrapper<TYPE>` is `IsBitwiseMoveable`.
-    //: 3 `NothrowMovableWrapper<TYPE>::ValueType` is `TYPE`.
-    //: 4 If and only if `TYPE` is allocator-aware,
-    //:   `NothrowMovableWrapper<TYPE>::allocator_type` is
-    //:   `bsl::allocator<char>`
+    //: 1 If and only if 'TYPE' is allocator-aware,
+    //:   'NothrowMovableWrapper<TYPE>' is allocator-aware and satisfies
+    //:   'UsesAllocatorArgT' trait.
+    //: 2 If and only if 'TYPE' is 'IsBitwiseMoveable',
+    //:   'NothrowMovableWrapper<TYPE>' is 'IsBitwiseMoveable'.
+    //: 3 'NothrowMovableWrapper<TYPE>::ValueType' is 'TYPE'.
+    //: 4 If and only if 'TYPE' is allocator-aware,
+    //:   'NothrowMovableWrapper<TYPE>::allocator_type' is
+    //:   'bsl::allocator<char>'
     //
     // Plan:
     //
@@ -1273,7 +1283,7 @@ int main(int argc, char *argv[])
       case 7: {
 
         // --------------------------------------------------------------------
-        //  CONSTRUCTION FROM `NothrowMovableWrapper`
+        //  CONSTRUCTION FROM 'NothrowMovableWrapper'
         // --------------------------------------------------------------------
 
         RUN_EACH_TYPE(TestDriver,
@@ -1283,7 +1293,7 @@ int main(int argc, char *argv[])
       case 6: {
 
         // --------------------------------------------------------------------
-        //  CONSTRUCTION FROM `TYPE`
+        //  CONSTRUCTION FROM 'TYPE'
         // --------------------------------------------------------------------
 
         RUN_EACH_TYPE(TestDriver,
@@ -1312,7 +1322,7 @@ int main(int argc, char *argv[])
         // --------------------------------------------------------------------
         // 'noexcept' SPECIFICATION
         //
-        //  This test checks the `noexcept` specification of move constructor.
+        //  This test checks the 'noexcept' specification of move constructor.
         //
         // Concerns:
         //: 1 The 'noexcept' specification has been applied to the move
@@ -1322,7 +1332,7 @@ int main(int argc, char *argv[])
         //: 1 Apply the unary 'noexcept' operator to move constructor
         //
         // Testing:
-        //   CONCERN: move constructor is `noexcept`
+        //   CONCERN: move constructor is 'noexcept'
         // --------------------------------------------------------------------
 
         if (verbose)
@@ -1405,7 +1415,7 @@ int main(int argc, char *argv[])
       } break;
 
       default: {
-        fprintf(stderr, "WARNING: CASE `%d' NOT FOUND.\n", test);
+        fprintf(stderr, "WARNING: CASE '%d' NOT FOUND.\n", test);
         testStatus = -1;
       }
     }
