@@ -377,6 +377,8 @@ class NothrowMovableWrapper<NothrowMovableWrapper<TYPE> > {
 
 template <class TYPE>
 class NothrowMovableWrapper<const NothrowMovableWrapper<TYPE> > {
+    // This specialization is for wrapped types.  We do not support wrapping a
+    // wrapped type.
     BSLMF_ASSERT(!sizeof(TYPE) && "Cannot wrap a wrapped object");
 };
 
