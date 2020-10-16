@@ -116,15 +116,16 @@ BSLS_IDENT("$Id: $")
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 #include <type_traits>
-#endif
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
+
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 //In C++17, bsl::optional for non-aa types inherits from std::optional
 #include <optional>
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
-#if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 #include <initializer_list>
-#endif
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 
 namespace bsl {
 
@@ -135,9 +136,9 @@ using std::nullopt;
 
 #else
 
-                              // ===============
-                              // class nullopt_t
-                              // ===============
+                              // ================
+                              // struct nullopt_t
+                              // ================
 struct nullopt_t {
     // This trivial tag type is used to create 'optional' objects in a
     // disengaged state.  It is not default constructible so the following
@@ -223,6 +224,8 @@ extern const Optional_OptNoSuchType optNoSuchType;
 
 template <class U, class V, bool D>
 struct Optional_IsConstructible : std::is_constructible<U, V> {
+    // [TBD] Doc here
+
 };
 
 template <class U, class V, bool D>
@@ -236,30 +239,30 @@ struct Optional_IsTriviallyDestructible
 
 #else
 
-// The 'bool' template parameter represents the desired value this trait should
-// have in order not to affect the constraint it appears in.
 template <class U, class V, bool D>
 struct Optional_IsConstructible : bsl::integral_constant<bool, D> {
+    // The 'bool' template parameter represents the desired value this trait
+    // should have in order not to affect the constraint it appears in.
 };
 
-// The 'bool' template parameter represents the desired value this trait should
-// have in order not to affect the constraint it appears in.
 template <class U, class V, bool D>
 struct Optional_IsAssignable : bsl::integral_constant<bool, D> {
+    // The 'bool' template parameter represents the desired value this trait
+    // should have in order not to affect the constraint it appears in.
 };
 
-// C++03 does not provide a trivially destructible trait.  Instead we use
-// 'bsl::is_trivially_copyable' which implies the type is also trivially
-// destructible.
 template <class TYPE>
 struct Optional_IsTriviallyDestructible : bsl::is_trivially_copyable<TYPE> {
+    // C++03 does not provide a trivially destructible trait.  Instead we use
+    // 'bsl::is_trivially_copyable' which implies the type is also trivially
+    // destructible.
 };
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
-// Remove CV qualifiers and references from type 'U'
 template <class TYPE>
 struct Optional_RemoveCVRef {
+    // Remove CV qualifiers and references from 'TYPE'.
     typedef typename bsl::remove_cv<
         typename bsl::remove_reference<TYPE>::type>::type type;
 };
@@ -355,7 +358,7 @@ template <class TYPE, class ANY_TYPE>
 struct Optional_PropagatesAllocator
 : bsl::integral_constant<
       bool,
-      BloombergLP::bslma::UsesBslmaAllocator<TYPE>::value &&
+      bslma::UsesBslmaAllocator<TYPE>::value &&
           bsl::is_const<TYPE>::value &&
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
 };
