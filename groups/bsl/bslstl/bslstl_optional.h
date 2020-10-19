@@ -224,17 +224,35 @@ extern const Optional_OptNoSuchType optNoSuchType;
 
 template <class U, class V, bool D>
 struct Optional_IsConstructible : std::is_constructible<U, V> {
-    // [TBD] Doc here
-
+    // Optional_IsConstructible trait is used in 'bsl::optional' as a part of
+    // the 'enable_if' constraints on methods in 'optional'.  In C++11, the
+    // trait is identical to 'std::is_constructible', while in C++03 it has
+    // the value of of the specified bool template parameter.  The bool
+    // template parameter should be set in such a way that the result of
+    // 'Optional_IsConstructible' does not affect the constraint it appears
+    // in.
 };
 
 template <class U, class V, bool D>
 struct Optional_IsAssignable : std::is_assignable<U, V> {
+    // Optional_IsAssignable trait is used in 'bsl::optional' as a part of
+    // the 'enable_if' constraints on assignment operators in 'optional'.  In
+    // C++11, the trait is identical to 'std::is_assignable', while in C++03 it
+    // has the value of of the specified bool template parameter.  The bool
+    // template parameter should be set in such a way that the result of
+    // 'Optional_IsAssignable' does not affect the constraint it appears in.
 };
 
 template <class TYPE>
 struct Optional_IsTriviallyDestructible
 : std::is_trivially_destructible<TYPE> {
+    // Optional_IsTriviallyDestructible trait is used in 'bsl::optional' to
+    // determine when to provide a user-defined destructor.  If a 'TYPE' is
+    // trivially destructible, then 'bsl::optional<TYPE>' should be trivially
+    // destructible as well.  In C++11, this traits is identical to
+    // 'std::is_trivially_destructible'.  In C++03, we use
+    // 'bsl::is_trivially_copyable' which implies the type is also trivially
+    // destructible.
 };
 
 #else
@@ -1071,7 +1089,7 @@ class optional {
     BSLMF_NESTED_TRAIT_DECLARATION_IF(optional,
                                       bsl::is_trivially_copyable,
                                       bsl::is_trivially_copyable<TYPE>::value);
-    // Workaround for C++03 'bsl::is_trivially_copyable' trait.
+        // Workaround for C++03 'bsl::is_trivially_copyable' trait.
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
     // CREATORS
