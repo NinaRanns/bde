@@ -228,9 +228,8 @@ struct Optional_IsConstructible : std::is_constructible<U, V> {
     // the 'enable_if' constraints on methods in 'optional'.  In C++11, the
     // trait is identical to 'std::is_constructible', while in C++03 it has
     // the value of of the specified bool template parameter.  The bool
-    // template parameter should be set in such a way that the result of
-    // 'Optional_IsConstructible' does not affect the constraint it appears
-    // in.
+    // template parameter represents the desired value this trait should have
+    // in order not to affect the constraint it appears in.
 };
 
 template <class U, class V, bool D>
@@ -239,8 +238,8 @@ struct Optional_IsAssignable : std::is_assignable<U, V> {
     // the 'enable_if' constraints on assignment operators in 'optional'.  In
     // C++11, the trait is identical to 'std::is_assignable', while in C++03 it
     // has the value of of the specified bool template parameter.  The bool
-    // template parameter should be set in such a way that the result of
-    // 'Optional_IsAssignable' does not affect the constraint it appears in.
+    // template parameter represents the desired value this trait should have
+    // in order not to affect the constraint it appears in.
 };
 
 template <class TYPE>
@@ -303,6 +302,8 @@ struct Optional_ConvertsFrom
           Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
           Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
           Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
+    // 'Optional_ConvertsFrom' inherits from 'bsl::true_type' if 'TYPE' can be
+    // constructed from an 'OPT_TYPE', and from 'bsl::false_type' otherwise.
 };
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 template <class TYPE, class OPT_TYPE>
@@ -313,6 +314,8 @@ struct Optional_AssignsFrom
           std::is_assignable<TYPE&, OPT_TYPE&>::value ||
           std::is_assignable<TYPE&, const OPT_TYPE>::value ||
           std::is_assignable<TYPE&, OPT_TYPE>::value> {
+    // 'Optional_AssignsFrom' inherits from 'bsl::true_type' if 'OPT_TYPE' can
+    // be assigned to 'TYPE', and from 'bsl::false_type' otherwise.
 };
 #else
 
@@ -330,8 +333,10 @@ struct Optional_ConvertsFromBslOptional
 : bsl::integral_constant<
       bool,
       Optional_ConvertsFrom<TYPE,
-                            bsl::optional<typename Optional_RemoveCVRef<
-                                ANY_TYPE>::type> >::value> {
+                            bsl::optional<ANY_TYPE> >::value> {
+    // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
+    // 'TYPE' can be  constructed from 'bsl::optional<ANY_TYPE>', and from
+    // 'bsl::false_type' otherwise.
 };
 
 template <class TYPE, class ANY_TYPE>
@@ -339,8 +344,10 @@ struct Optional_AssignsFromBslOptional
 : bsl::integral_constant<
       bool,
       Optional_AssignsFrom<TYPE,
-                           bsl::optional<typename Optional_RemoveCVRef<
-                               ANY_TYPE>::type> >::value> {
+                           bsl::optional<ANY_TYPE> >::value> {
+    // 'Optional_AssignsFromBslOptional' inherits from 'bsl::true_type' if
+    // 'bsl::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
+    // 'bsl::false_type' otherwise.
 };
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
@@ -349,8 +356,10 @@ struct Optional_ConvertsFromStdOptional
 : bsl::integral_constant<
       bool,
       Optional_ConvertsFrom<TYPE,
-                            std::optional<typename Optional_RemoveCVRef<
-                                ANY_TYPE>::type> >::value> {
+                            std::optional<ANY_TYPE> >::value> {
+    // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
+    // 'TYPE' can be  constructed from 'std::optional<ANY_TYPE>', and from
+    // 'bsl::false_type' otherwise.
 };
 
 template <class TYPE, class ANY_TYPE>
@@ -358,17 +367,25 @@ struct Optional_AssignsFromStdOptional
 : bsl::integral_constant<
       bool,
       Optional_AssignsFrom<TYPE,
-                           std::optional<typename Optional_RemoveCVRef<
-                               ANY_TYPE>::type> >::value> {
+                           std::optional<ANY_TYPE> >::value> {
+    // 'Optional_AssignsFromStdOptional' inherits from 'bsl::true_type' if
+    // 'std::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
+    // 'bsl::false_type' otherwise.
 };
 
 #else
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConvertsFromStdOptional : bsl::integral_constant<bool, false> {
+    // If 'std::optional' does not exist, 'Optional_ConvertsFromStdOptional'
+    // inherits from 'bsl::false_type' so it doesn't affect the value of the
+    // constraint it appears in.
 };
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_AssignsFromStdOptional : bsl::integral_constant<bool, false> {
+    // If 'std::optional' does not exist, 'Optional_AssignsFromStdOptional'
+    // inherits from 'bsl::false_type' so it doesn't affect the value of the
+    // constraint it appears in.
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -379,6 +396,13 @@ struct Optional_PropagatesAllocator
       bslma::UsesBslmaAllocator<TYPE>::value &&
           bsl::is_const<TYPE>::value &&
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
+
+    // 'Optional_PropagatesAllocator' inherits from 'bsl::true_type' if
+    // 'TYPE' is an allocator-aware const type, and if 'ANY_TYPE' is the
+    // same as 'TYPE', minus the cv qualification.  This trait is used to
+    // enable a constructor overload for a const qualified allocator-aware
+    // 'ValueType' taking an rvalue of optional of the non-const qualified
+    // 'ValueType'.  Such an overload needs to propagate the allocator.
 };
 
 
@@ -396,6 +420,13 @@ struct Optional_ConstructsFromType
           !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::allocator_arg_t>::value &&
           Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
+    // When 'Optional_ConstructsFromType' inherits from 'bsl::true_type', a
+    // template constructor taking a forwarding reference to 'ANY_TYPE is
+    // otherwise.  Such a constructor is disabled if 'ANY_TYPE' is a tag
+    // type so it doesn't interfere with tagged constructors.  It is also
+    // disabled if 'ANY_TYPE' and 'TYPE' are the same so it doesn't interfere
+    // with non template constructors taking a reference to 'TYPE'.  Finally,
+    // it is also disabled if 'TYPE' can not be constructed from 'ANY_TYPE'
 };
 
 // Macros to define common constraints that enable a constructor or assignment
