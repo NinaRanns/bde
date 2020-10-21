@@ -224,41 +224,35 @@ extern const Optional_OptNoSuchType optNoSuchType;
 
 template <class U, class V, bool D>
 struct Optional_IsConstructible : std::is_constructible<U, V> {
-    // Optional_IsConstructible trait is used in 'bsl::optional' as a part of
-    // the 'enable_if' constraints on methods in 'optional'.  In C++11, the
-    // trait is identical to 'std::is_constructible', while in C++03 it has
-    // the value of of the specified bool template parameter.  The bool
-    // template parameter represents the desired value this trait should have
-    // in order not to affect the constraint it appears in.
+    // This metafunction is derived from 'std::is_constructible<U, V>' in
+    // C++11 and later and from 'bsl::integral_constant<D>' in C++03 with the
+    // value of 'D' typically chosen to not affect the constraint this
+    // metafunction appears in.
 };
 
 template <class U, class V, bool D>
 struct Optional_IsAssignable : std::is_assignable<U, V> {
-    // Optional_IsAssignable trait is used in 'bsl::optional' as a part of
-    // the 'enable_if' constraints on assignment operators in 'optional'.  In
-    // C++11, the trait is identical to 'std::is_assignable', while in C++03 it
-    // has the value of of the specified bool template parameter.  The bool
-    // template parameter represents the desired value this trait should have
-    // in order not to affect the constraint it appears in.
+    // This metafunction is derived from 'std::is_assignable<U, V>' in C++11
+    // and later and from 'bsl::integral_constant<D>' in C++03 with the value
+    // of 'D' typically chosen to not affect the constraint this metafunction
+    // appears in.
 };
 
 template <class TYPE>
 struct Optional_IsTriviallyDestructible
 : std::is_trivially_destructible<TYPE> {
-    // Optional_IsTriviallyDestructible trait is used in 'bsl::optional' to
-    // determine when to provide a user-defined destructor.  If a 'TYPE' is
-    // trivially destructible, then 'bsl::optional<TYPE>' should be trivially
-    // destructible as well.  In C++11, this traits is identical to
-    // 'std::is_trivially_destructible'.  In C++03, we use
-    // 'bsl::is_trivially_copyable' which implies the type is also trivially
-    // destructible.
+    // This metafunction is derived from 'std::is_trivially_destructible<TYPE>'
+    // in C++11  and later.  In C++03, the metafunction is derived from
+    // 'bsl::is_trivially_copyable', a trait which implies the type is also
+    // trivially destructible.
 };
 
 #else
 
 template <class U, class V, bool D>
 struct Optional_IsConstructible : bsl::integral_constant<bool, D> {
-    // This metafunction is derived from 'bsl::integral_constant<bool, D>'.  See the C++11 definition above for details.
+    // This metafunction is derived from 'bsl::integral_constant<bool, D>'.
+    // See the C++11 definition above for details.
 };
 
 template <class U, class V, bool D>
@@ -283,12 +277,7 @@ struct Optional_RemoveCVRef {
         typename bsl::remove_reference<TYPE>::type>::type type;
 };
 
-// Type traits to assist in choosing the correct assignment and construction
-// overload.  If the 'value_type' converts or assigns from an
-// 'optional<other_type>', then the overload passing the function parameter to
-// the 'value_type' is preferred.  As in 'std' implementation, if the
-// 'value_type' converts or assigns from any value category, we consider it
-// convertible/assignable from optional.
+
 template <class TYPE, class OPT_TYPE>
 struct Optional_ConvertsFrom
 : bsl::integral_constant<
@@ -314,13 +303,17 @@ struct Optional_AssignsFrom
           std::is_assignable<TYPE&, const OPT_TYPE>::value ||
           std::is_assignable<TYPE&, OPT_TYPE>::value> {
     // This metafunction is derived from 'bsl::true_type' if 'OPT_TYPE' can
-    // be assigned to 'TYPE', and from 'bsl::false_type' otherwise in C++11 and later, and from 'bsl::false_type' in C++03 to not affect not affect the disjunction-form constraint this metafunction appears in.
+    // be assigned to 'TYPE', from 'bsl::false_type' otherwise in C++11 and
+    // later, and from 'bsl::false_type' in C++03 to not affect the
+    // disjunction-form constraint this metafunction appears in.
 };
 #else
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_AssignsFrom : bsl::integral_constant<bool, false> {
-    // This metafunction is derived from bsl::integral_constant<bool, false> to not affect not affect the disjunction-form constraint this metafunction appears in.  See the C++11 definition above for details.
+    // This metafunction is derived from bsl::integral_constant<bool, false> to
+    // not affect the disjunction-form constraint this metafunction appears in.
+    // See the C++11 definition above for details.
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
@@ -330,9 +323,11 @@ struct Optional_ConvertsFromBslOptional
       bool,
       Optional_ConvertsFrom<TYPE,
                             bsl::optional<ANY_TYPE> >::value> {
-    // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
-    // 'TYPE' can be  constructed from 'bsl::optional<ANY_TYPE>', and from
-    // 'bsl::false_type' otherwise.
+    //  This metafunction is derived from 'bsl::true_type' if 'TYPE' can be
+    //  constructed from 'bsl::optional<ANY_TYPE>', and from 'bsl::false_type'
+    //  otherwise.  As in 'std' implementation, if the 'TYPE' converts from any
+    //  value category of 'bsl::optional<ANY_TYPE>', we consider convertible
+    // from 'bsl::optional<ANY_TYPE>'.
 };
 
 template <class TYPE, class ANY_TYPE>
@@ -341,9 +336,12 @@ struct Optional_AssignsFromBslOptional
       bool,
       Optional_AssignsFrom<TYPE,
                            bsl::optional<ANY_TYPE> >::value> {
-    // 'Optional_AssignsFromBslOptional' inherits from 'bsl::true_type' if
-    // 'bsl::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
-    // 'bsl::false_type' otherwise.
+    //  This metafunction is derived from 'bsl::true_type' if
+    //  bsl::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
+    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
+    //  can be assigned to from any value category of
+    // 'bsl::optional<ANY_TYPE>', we consider it assignable from
+    // 'bsl::optional<ANY_TYPE>'.
 };
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
@@ -354,8 +352,10 @@ struct Optional_ConvertsFromStdOptional
       Optional_ConvertsFrom<TYPE,
                             std::optional<ANY_TYPE> >::value> {
     // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
-    // 'TYPE' can be  constructed from 'std::optional<ANY_TYPE>', and from
-    // 'bsl::false_type' otherwise.
+    // 'TYPE' can be constructed from 'std::optional<ANY_TYPE>', and from
+    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
+    // converts from any value category of 'std::optional<ANY_TYPE>', we
+    // consider convertible from 'std::optional<ANY_TYPE>'.
 };
 
 template <class TYPE, class ANY_TYPE>
@@ -366,22 +366,25 @@ struct Optional_AssignsFromStdOptional
                            std::optional<ANY_TYPE> >::value> {
     // 'Optional_AssignsFromStdOptional' inherits from 'bsl::true_type' if
     // 'std::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
-    // 'bsl::false_type' otherwise.
+    // 'bsl::false_type' otherwise. As in 'std' implementation, if the 'TYPE'
+    //  can be assigned to from any value category of
+    // 'std::optional<ANY_TYPE>', we consider it assignable from
+    // 'std::optional<ANY_TYPE>'.
 };
 
 #else
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConvertsFromStdOptional : bsl::integral_constant<bool, false> {
-    // If 'std::optional' does not exist, 'Optional_ConvertsFromStdOptional'
-    // inherits from 'bsl::false_type' so it doesn't affect the value of the
-    // constraint it appears in.
+    // This metafunction is derived from bsl::integral_constant<bool, false> to
+    // not affect the disjunction-form constraint this metafunction appears in.
+    // See the C++17 definition above for details.
 };
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_AssignsFromStdOptional : bsl::integral_constant<bool, false> {
-    // If 'std::optional' does not exist, 'Optional_AssignsFromStdOptional'
-    // inherits from 'bsl::false_type' so it doesn't affect the value of the
-    // constraint it appears in.
+    // This metafunction is derived from bsl::integral_constant<bool, false> to
+    // not affect the disjunction-form constraint this metafunction appears in.
+    // See the C++17 definition above for details.
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -393,12 +396,12 @@ struct Optional_PropagatesAllocator
           bsl::is_const<TYPE>::value &&
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
 
-    // 'Optional_PropagatesAllocator' inherits from 'bsl::true_type' if
-    // 'TYPE' is an allocator-aware const type, and if 'ANY_TYPE' is the
-    // same as 'TYPE', minus the cv qualification.  This trait is used to
-    // enable a constructor overload for a const qualified allocator-aware
-    // 'ValueType' taking an rvalue of optional of the non-const qualified
-    // 'ValueType'.  Such an overload needs to propagate the allocator.
+    // This metafunction is derived from 'bsl::true_type' if 'TYPE' is an
+    // allocator-aware const type, and if 'ANY_TYPE' is the same as 'TYPE',
+    // minus the cv qualification.  This trait is used to enable a constructor
+    // overload for a const qualified allocator-aware 'ValueType' taking an
+    // rvalue of optional of the non-const qualified 'ValueType'.
+    // Such an overload needs to propagate the allocator.
 };
 
 
@@ -416,13 +419,9 @@ struct Optional_ConstructsFromType
           !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
                         bsl::allocator_arg_t>::value &&
           Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
-    // When 'Optional_ConstructsFromType' inherits from 'bsl::true_type', a
-    // template constructor taking a forwarding reference to 'ANY_TYPE is
-    // otherwise.  Such a constructor is disabled if 'ANY_TYPE' is a tag
-    // type so it doesn't interfere with tagged constructors.  It is also
-    // disabled if 'ANY_TYPE' and 'TYPE' are the same so it doesn't interfere
-    // with non template constructors taking a reference to 'TYPE'.  Finally,
-    // it is also disabled if 'TYPE' can not be constructed from 'ANY_TYPE'
+    // This metafunction is derived from 'bsl::true_type' if 'ANY_TYPE' is not
+    // a tag type, if 'ANY_TYPE' and 'TYPE' are not a same type, and if 'TYPE'
+    // is constructible from 'ANY_TYPE'.
 };
 
 // Macros to define common constraints that enable a constructor or assignment
@@ -596,7 +595,7 @@ struct Optional_DataImp {
     typedef typename bsl::remove_const<TYPE>::type StoredType;
 
     // DATA
-    BloombergLP::bsls::ObjectBuffer<StoredType> d_buffer;
+    bsls::ObjectBuffer<StoredType> d_buffer;
         // in-place 'TYPE' object
 
     bool                                        d_hasValue;
@@ -1016,7 +1015,7 @@ struct Optional_DataImp {
 template <
     class TYPE,
     bool IS_TRIVIALLY_DESTRUCTIBLE =
-        BloombergLP::bslstl::Optional_IsTriviallyDestructible<TYPE>::value>
+        bslstl::Optional_IsTriviallyDestructible<TYPE>::value>
 struct Optional_Data : public Optional_DataImp<TYPE> {
     // This component-private 'struct' manages a 'value_type' object in
     // 'optional' by inheriting from `Optional_DataImp`.  In addition, this
@@ -5017,7 +5016,7 @@ make_optional(BSLS_COMPILERFEATURES_FORWARD_REF(TYPE) rhs);
 template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR bsl::optional<TYPE> make_optional();
     // Return an 'optional' object containing a default constructed 'TYPE'
-    // object. If TYPE uses an allocator, the default allocator will be used
+    // object.  If TYPE uses an allocator, the default allocator will be used
     // for the 'optional' object.
 
 #if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
@@ -8767,8 +8766,6 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>& optional<TYPE, USES_BSLMA_ALLOC>::operator=(
                                                            const ANY_TYPE& rhs)
 {
-    // Must be in-place inline because the use of 'enable_if' will otherwise
-    // break the MSVC 2010 compiler.
     if (this->has_value()) {
         this->value() = rhs;
     }
@@ -8784,8 +8781,6 @@ inline
 optional<TYPE, USES_BSLMA_ALLOC>& optional<TYPE, USES_BSLMA_ALLOC>::operator=(
                                   BloombergLP::bslmf::MovableRef<ANY_TYPE> rhs)
 {
-    // Must be in-place inline because the use of 'enable_if' will otherwise
-    // break the MSVC 2010 compiler.
     ANY_TYPE& lvalue = rhs;
     if (this->has_value()) {
         this->value() = MoveUtil::move(lvalue);
@@ -10874,8 +10869,6 @@ inline
 optional<TYPE, false>&
 optional<TYPE, false>::operator=(const ANY_TYPE& rhs)
 {
-    // Must be in-place inline because the use of 'enable_if' will otherwise
-    // break the MSVC 2010 compiler.
     if (this->has_value()) {
         this->value() = rhs;
     }
@@ -10891,8 +10884,6 @@ inline
 optional<TYPE, false>&
 optional<TYPE, false>::operator=(BloombergLP::bslmf::MovableRef<ANY_TYPE> rhs)
 {
-    // Must be in-place inline because the use of 'enable_if' will otherwise
-    // break the MSVC 2010 compiler.
     ANY_TYPE& lvalue = rhs;
     if (this->has_value()) {
         this->value() = MoveUtil::move(lvalue);
