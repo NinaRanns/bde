@@ -322,7 +322,8 @@ struct Optional_ConvertsFromBslOptional
 : bsl::integral_constant<
       bool,
       Optional_ConvertsFrom<TYPE,
-                            bsl::optional<ANY_TYPE> >::value> {
+                            bsl::optional<typename Optional_RemoveCVRef<
+                                ANY_TYPE>::type> >::value> {
     //  This metafunction is derived from 'bsl::true_type' if 'TYPE' can be
     //  constructed from 'bsl::optional<ANY_TYPE>', and from 'bsl::false_type'
     //  otherwise.  As in 'std' implementation, if the 'TYPE' converts from any
@@ -335,7 +336,8 @@ struct Optional_AssignsFromBslOptional
 : bsl::integral_constant<
       bool,
       Optional_AssignsFrom<TYPE,
-                           bsl::optional<ANY_TYPE> >::value> {
+                           bsl::optional<typename Optional_RemoveCVRef<
+                               ANY_TYPE>::type> >::value> {
     //  This metafunction is derived from 'bsl::true_type' if
     //  bsl::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
     // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
@@ -350,7 +352,8 @@ struct Optional_ConvertsFromStdOptional
 : bsl::integral_constant<
       bool,
       Optional_ConvertsFrom<TYPE,
-                            std::optional<ANY_TYPE> >::value> {
+                            std::optional<typename Optional_RemoveCVRef<
+                                ANY_TYPE>::type> >::value> {
     // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
     // 'TYPE' can be constructed from 'std::optional<ANY_TYPE>', and from
     // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
@@ -363,7 +366,8 @@ struct Optional_AssignsFromStdOptional
 : bsl::integral_constant<
       bool,
       Optional_AssignsFrom<TYPE,
-                           std::optional<ANY_TYPE> >::value> {
+                           std::optional<typename Optional_RemoveCVRef<
+                               ANY_TYPE>::type> >::value> {
     // 'Optional_AssignsFromStdOptional' inherits from 'bsl::true_type' if
     // 'std::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
     // 'bsl::false_type' otherwise. As in 'std' implementation, if the 'TYPE'
