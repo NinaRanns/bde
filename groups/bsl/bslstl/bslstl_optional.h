@@ -258,8 +258,7 @@ struct Optional_IsTriviallyDestructible
 
 template <class U, class V, bool D>
 struct Optional_IsConstructible : bsl::integral_constant<bool, D> {
-    // The 'bool' template parameter represents the desired value this trait
-    // should have in order not to affect the constraint it appears in.
+    // This metafunction is derived from 'bsl::integral_constant<bool, D>'.  See the C++11 definition above for details.
 };
 
 template <class U, class V, bool D>
@@ -302,8 +301,8 @@ struct Optional_ConvertsFrom
           Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
           Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
           Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
-    // 'Optional_ConvertsFrom' inherits from 'bsl::true_type' if 'TYPE' can be
-    // constructed from an 'OPT_TYPE', and from 'bsl::false_type' otherwise.
+    // This metafunction is derived from 'bsl::true_type' if 'TYPE' can be
+    // converted from an 'OPT_TYPE', and from 'bsl::false_type' otherwise.
 };
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 template <class TYPE, class OPT_TYPE>
@@ -314,17 +313,14 @@ struct Optional_AssignsFrom
           std::is_assignable<TYPE&, OPT_TYPE&>::value ||
           std::is_assignable<TYPE&, const OPT_TYPE>::value ||
           std::is_assignable<TYPE&, OPT_TYPE>::value> {
-    // 'Optional_AssignsFrom' inherits from 'bsl::true_type' if 'OPT_TYPE' can
-    // be assigned to 'TYPE', and from 'bsl::false_type' otherwise.
+    // This metafunction is derived from 'bsl::true_type' if 'OPT_TYPE' can
+    // be assigned to 'TYPE', and from 'bsl::false_type' otherwise in C++11 and later, and from 'bsl::false_type' in C++03 to not affect not affect the disjunction-form constraint this metafunction appears in.
 };
 #else
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_AssignsFrom : bsl::integral_constant<bool, false> {
-    // We only use '|| BloombergLP::bslstl::Optional_AssignsFrom' in
-    // 'bsl::optional' constraints. In order to ignore
-    // Optional_AssignsFromOptional trait in C++03, we set it to false so it
-    // never affects the trait it appears in.
+    // This metafunction is derived from bsl::integral_constant<bool, false> to not affect not affect the disjunction-form constraint this metafunction appears in.  See the C++11 definition above for details.
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
