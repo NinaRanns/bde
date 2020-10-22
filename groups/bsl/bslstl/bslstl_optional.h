@@ -8619,17 +8619,17 @@ void optional<TYPE, USES_BSLMA_ALLOC>::reset() BSLS_KEYWORD_NOEXCEPT
 template <class TYPE, bool USES_BSLMA_ALLOC>
 void optional<TYPE, USES_BSLMA_ALLOC>::swap(optional& other)
 {
-    if (has_value() && other.has_value()) {
+    if (this->has_value() && other.has_value()) {
         BloombergLP::bslalg::SwapUtil::swap(
-                                           BSLS_UTIL_ADDRESSOF(value()),
+                                           BSLS_UTIL_ADDRESSOF(this->value()),
                                            BSLS_UTIL_ADDRESSOF(other.value()));
     }
-    else if (has_value()) {
-        other.emplace(MoveUtil::move(value()));
-        reset();
+    else if (this->has_value()) {
+        other.emplace(MoveUtil::move(this->value()));
+        this->reset();
     }
     else if (other.has_value()) {
-        emplace(MoveUtil::move(other.value()));
+        this->emplace(MoveUtil::move(other.value()));
         other.reset();
     }
 }
@@ -10662,17 +10662,17 @@ void optional<TYPE, false>::reset() BSLS_KEYWORD_NOEXCEPT
 template <class TYPE>
 void optional<TYPE, false>::swap(optional& other)
 {
-    if (has_value() && other.has_value()) {
+    if (this->has_value() && other.has_value()) {
         BloombergLP::bslalg::SwapUtil::swap(
-                                           BSLS_UTIL_ADDRESSOF(value()),
+                                           BSLS_UTIL_ADDRESSOF(this->value()),
                                            BSLS_UTIL_ADDRESSOF(other.value()));
     }
-    else if (has_value()) {
-        other.emplace(MoveUtil::move(value()));
-        reset();
+    else if (this->has_value()) {
+        other.emplace(MoveUtil::move(this->value()));
+        this->reset();
     }
     else if (other.has_value()) {
-        emplace(MoveUtil::move(other.value()));
+        this->emplace(MoveUtil::move(other.value()));
         other.reset();
     }
 }
