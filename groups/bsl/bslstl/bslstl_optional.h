@@ -985,12 +985,16 @@ struct Optional_DataImp {
     TYPE&& value() &&;
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'
+        // undefined unless 'this->hasValue() == true'.  We do not assert in
+        // this function as the assert level is determined by the 'optional'
+        // method invoking 'value()'
 #else
     TYPE& value();
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'
+        // undefined unless 'this->hasValue() == true'.  We do not assert in
+        // this function as the assert level is determined by the 'optional'
+        // method invoking 'value()'
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
     // ACCESSORS
@@ -1000,15 +1004,19 @@ struct Optional_DataImp {
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
     const TYPE&  value() const &;
     const TYPE&& value() const &&;
-        // Return the 'value_type' object in 'd_buffer' with const qualification
-        // adjusted to match that of 'TYPE'.  The behavior is undefined unless
-        // 'this->hasValue() == true'.
+        // Return the 'value_type' object in 'd_buffer' with const
+        // qualification adjusted to match that of 'TYPE'.  The behavior is
+        // undefined unless 'this->hasValue() == true'.  We do not assert in
+        // this function as the assert level is determined by the 'optional'
+        // method invoking 'value()'
 
 #else
     const TYPE& value() const;
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'
+        // undefined unless 'this->hasValue() == true'.  We do not assert in
+        // this function as the assert level is determined by the 'optional'
+        // method invoking 'value()'
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 };
 
@@ -6204,8 +6212,6 @@ template <class TYPE>
 inline
 TYPE& Optional_DataImp<TYPE>::value() &
 {
-    BSLS_ASSERT(d_hasValue);
-
     return d_buffer.object();
 }
 
@@ -6213,8 +6219,6 @@ template <class TYPE>
 inline
 TYPE&& Optional_DataImp<TYPE>::value() &&
 {
-    BSLS_ASSERT(d_hasValue);
-
     return std::move(d_buffer.object());
 }
 #else
@@ -6222,8 +6226,6 @@ template <class TYPE>
 inline
 TYPE& Optional_DataImp<TYPE>::value()
 {
-    BSLS_ASSERT(d_hasValue);
-
     return d_buffer.object();
 }
 #endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
@@ -6241,8 +6243,6 @@ template <class TYPE>
 inline
 const TYPE& Optional_DataImp<TYPE>::value() const&
 {
-    BSLS_ASSERT(d_hasValue);
-
     return d_buffer.object();
 }
 
@@ -6250,8 +6250,6 @@ template <class TYPE>
 inline
 const TYPE&& Optional_DataImp<TYPE>::value() const&&
 {
-    BSLS_ASSERT(d_hasValue);
-
     return std::move(d_buffer.object());
 }
 #else
@@ -6259,8 +6257,6 @@ template <class TYPE>
 inline
 const TYPE& Optional_DataImp<TYPE>::value() const
 {
-    BSLS_ASSERT(d_hasValue);
-
     return d_buffer.object();
 }
 #endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
@@ -8921,7 +8917,9 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE *optional<TYPE, USES_BSLMA_ALLOC>::operator->()
 {
-   return BSLS_UTIL_ADDRESSOF(d_value.value());
+    BSLS_ASSERT(has_value());
+
+    return BSLS_UTIL_ADDRESSOF(d_value.value());
 }
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
@@ -8929,6 +8927,8 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() &
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return d_value.value();
 }
 
@@ -8936,7 +8936,9 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE&& optional<TYPE, USES_BSLMA_ALLOC>::operator*() &&
 {
-   return std::move(d_value.value());
+    BSLS_REVIEW_OPT(has_value());
+
+    return std::move(d_value.value());
 }
 
 #else
@@ -8944,6 +8946,8 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*()
 {
+   BSLS_REVIEW_OPT(has_value());
+
    return d_value.value();
 }
 
@@ -9077,7 +9081,9 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE *optional<TYPE, USES_BSLMA_ALLOC>::operator->() const
 {
-  return BSLS_UTIL_ADDRESSOF(d_value.value());
+    BSLS_ASSERT(has_value());
+
+    return BSLS_UTIL_ADDRESSOF(d_value.value());
 }
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
@@ -9085,13 +9091,17 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const&
 {
-   return d_value.value();
+    BSLS_REVIEW_OPT(has_value());
+
+    return d_value.value();
 }
 
 template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE&& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const&&
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return std::move(d_value.value());
 }
 
@@ -9100,6 +9110,8 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return d_value.value();
 }
 
@@ -9182,7 +9194,7 @@ optional<TYPE, false>::operator=(const optional& rhs)
 {
     if (rhs.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = *rhs;
+            this->operator*() = *rhs;
         }
         else {
             this->emplace(*rhs);
@@ -9202,7 +9214,7 @@ optional<TYPE, false>::operator=(optional&& rhs)
     optional& lvalue = rhs;
     if (lvalue.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = std::move(*lvalue);
+            this->operator*() = std::move(*lvalue);
         }
         else {
             this->emplace(std::move(*lvalue));
@@ -9222,7 +9234,7 @@ optional<TYPE, false>::operator=(const optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = *rhs;
+            this->operator*() = *rhs;
         }
         else {
             this->emplace(*rhs);
@@ -9242,7 +9254,7 @@ optional<TYPE, false>::operator=(optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = std::move(*rhs);
+            this->operator*() = std::move(*rhs);
         }
         else {
             this->emplace(std::move(*rhs));
@@ -9262,7 +9274,7 @@ optional<TYPE, false>::operator=(const std::optional<ANY_TYPE>& rhs)
 {
     if (rhs.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = *rhs;
+            this->operator*() = *rhs;
         }
         else {
             this->emplace(*rhs);
@@ -9282,7 +9294,7 @@ optional<TYPE, false>::operator=(std::optional<ANY_TYPE>&& rhs)
 {
     if (rhs.has_value()) {
         if (this->has_value()) {
-            this->d_value.value() = std::move(*rhs);
+            this->operator*() = std::move(*rhs);
         }
         else {
             this->emplace(std::move(*rhs));
@@ -9301,7 +9313,7 @@ BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)&
 optional<TYPE, false>::operator=(ANY_TYPE&& rhs)
 {
     if (this->has_value()) {
-        this->d_value.value() = std::forward<ANY_TYPE>(rhs);
+        this->operator*() = std::forward<ANY_TYPE>(rhs);
     }
     else {
         this->emplace(std::forward<ANY_TYPE>(rhs));
@@ -10923,13 +10935,17 @@ template <class TYPE>
 inline
 TYPE& optional<TYPE, false>::operator*() &
 {
-   return d_value.value();
+    BSLS_REVIEW_OPT(has_value());
+
+    return d_value.value();
 }
 
 template <class TYPE>
 inline
 TYPE&& optional<TYPE, false>::operator*() &&
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return std::move(d_value.value());
 }
 #else
@@ -10937,6 +10953,8 @@ template <class TYPE>
 inline
 TYPE& optional<TYPE, false>::operator*()
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return d_value.value();
 }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
@@ -10945,6 +10963,8 @@ template <class TYPE>
 inline
 TYPE *optional<TYPE, false>::operator->()
 {
+    BSLS_ASSERT(has_value());
+
     return BSLS_UTIL_ADDRESSOF(d_value.value());
 }
 
@@ -11035,7 +11055,9 @@ template <class TYPE>
 inline
 const TYPE *optional<TYPE, false>::operator->() const
 {
-   return BSLS_UTIL_ADDRESSOF(d_value.value());
+    BSLS_ASSERT(has_value());
+
+    return BSLS_UTIL_ADDRESSOF(d_value.value());
 }
 
 #ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
@@ -11043,6 +11065,8 @@ template <class TYPE>
 inline
 const TYPE& optional<TYPE, false>::operator*() const&
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return d_value.value();
 }
 
@@ -11050,6 +11074,8 @@ template <class TYPE>
 inline
 const TYPE&& optional<TYPE, false>::operator*() const&&
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return std::move(d_value.value());
 }
 
@@ -11058,6 +11084,8 @@ template <class TYPE>
 inline
 const TYPE& optional<TYPE, false>::operator*() const
 {
+    BSLS_REVIEW_OPT(has_value());
+
     return d_value.value();
 }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
