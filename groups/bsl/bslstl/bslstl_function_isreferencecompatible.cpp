@@ -1,13 +1,11 @@
-// bslstl_function_isreferencecompatible.cpp                           -*-C++-*-
+// bslstl_function_isreferencecompatible.cpp                          -*-C++-*-
 
 #include <bslstl_function_isreferencecompatible.h>
 
 #include <bsls_ident.h>
 BSLS_IDENT("$Id$ $CSID$")
 
-namespace BloombergLP {
-
-} // Close namespace BloombergLP
+namespace BloombergLP {}  // Close namespace BloombergLP
 
 // ----------------------------------------------------------------------------
 // Copyright 2020 Bloomberg Finance L.P.
