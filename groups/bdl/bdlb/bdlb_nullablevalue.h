@@ -454,7 +454,11 @@ class NullableValue : public bsl::optional<TYPE> {
 // }}} END GENERATED CODE
 #endif
 
-
+    TYPE& value();
+        // Return a reference providing modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined unless this object is
+        // non-null.
+        
      // ACCESSORS
     const TYPE *addressOr(const TYPE *address) const;
         // Return an address providing non-modifiable access to the underlying
@@ -506,6 +510,11 @@ class NullableValue : public bsl::optional<TYPE> {
         // negative, format the entire output on one line, suppressing all but
         // the initial indentation (as governed by 'level').  If 'stream' is
         // not valid on entry, this operation has no effect.
+
+    const TYPE& value() const;
+        // Return a reference providing non-modifiable access to the underlying
+        // object of a (template parameter) 'TYPE'.  The behavior is undefined
+        // unless this object is non-null.
 
     TYPE valueOr(const TYPE& value) const;
         // Return the value of the underlying object of a (template parameter)
@@ -738,7 +747,7 @@ template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR
 bool operator<(const NullableValue<TYPE>&,
                const NullOptType&        ) BSLS_KEYWORD_NOEXCEPT;
-    // Return 'false'.  Note that 'bdlb::nullOpt' never orders before a
+    // Return 'false'.  Note that 'bdlb::nullOpt' never orders after a
     // 'NullableValue'.
 
 template <class TYPE>
@@ -746,8 +755,8 @@ BSLS_KEYWORD_CONSTEXPR
 bool operator<(const NullOptType&         ,
                const NullableValue<TYPE>& value) BSLS_KEYWORD_NOEXCEPT;
     // Return 'true' if the specified 'value' is not null, and 'false'
-    // otherwise.  Note that 'bdlb::nullOpt' sorts before any 'NullableValue'
-    // that is not null.
+    // otherwise.  Note that 'bdlb::nullOpt' is ordered before any
+    // 'NullableValue' that is not null.
 
 template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR
@@ -1237,6 +1246,14 @@ TYPE& NullableValue<TYPE>::makeValueInplace(
 // }}} END GENERATED CODE
 #endif
 
+template <class TYPE>
+inline
+TYPE& NullableValue<TYPE>::value()
+{
+    BSLS_REVIEW_OPT(has_value());
+
+    return this->dereferenceRaw();
+}
 // ACCESSORS
 template <class TYPE>
 inline
@@ -1314,6 +1331,15 @@ bsl::ostream& NullableValue<TYPE>::print(bsl::ostream& stream,
                                      this->value(),
                                      level,
                                      spacesPerLevel);
+}
+
+template <class TYPE>
+inline
+const TYPE& NullableValue<TYPE>::value() const
+{
+    BSLS_REVIEW_OPT(has_value());
+
+    return this->dereferenceRaw();
 }
 
 template <class TYPE>
