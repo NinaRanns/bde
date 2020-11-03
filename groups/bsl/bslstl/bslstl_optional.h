@@ -242,7 +242,7 @@ template <class TYPE>
 struct Optional_IsTriviallyDestructible
 : std::is_trivially_destructible<TYPE> {
     // This metafunction is derived from 'std::is_trivially_destructible<TYPE>'
-    // in C++11  and later.  In C++03, the metafunction is derived from
+    // in C++11 and later.  In C++03, the metafunction is derived from
     // 'bsl::is_trivially_copyable', a trait which implies the type is also
     // trivially destructible.
 };
