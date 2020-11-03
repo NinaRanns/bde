@@ -985,16 +985,12 @@ struct Optional_DataImp {
     TYPE&& value() &&;
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'.  We do not assert in
-        // this function as the assert level is determined by the 'optional'
-        // method invoking 'value()'
+        // undefined unless 'this->hasValue() == true'.
 #else
     TYPE& value();
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'.  We do not assert in
-        // this function as the assert level is determined by the 'optional'
-        // method invoking 'value()'
+        // undefined unless 'this->hasValue() == true'.
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 
     // ACCESSORS
@@ -1006,17 +1002,13 @@ struct Optional_DataImp {
     const TYPE&& value() const &&;
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'.  We do not assert in
-        // this function as the assert level is determined by the 'optional'
-        // method invoking 'value()'
+        // undefined unless 'this->hasValue() == true'.
 
 #else
     const TYPE& value() const;
         // Return the 'value_type' object in 'd_buffer' with const
         // qualification adjusted to match that of 'TYPE'.  The behavior is
-        // undefined unless 'this->hasValue() == true'.  We do not assert in
-        // this function as the assert level is determined by the 'optional'
-        // method invoking 'value()'
+        // undefined unless 'this->hasValue() == true'.
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
 };
 
@@ -2986,6 +2978,28 @@ class optional {
         return UnspecifiedBoolUtil::makeValue(has_value());
     }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
+
+  protected:
+
+    // MANIPULATORS
+    TYPE& dereferenceRaw();
+        // Return a reference providing modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined if the 'optional' object
+        // is disengaged.  This method exists for the sole purpose of allowing
+        // 'NullableValue' to determine its own assert level in its
+        // overload of the 'value()' method.  Because 'NullableValue' does not
+        // have ref-qualified version of 'value()', it makes no sense to
+        // provide ref-qualified version of 'dereferenceRaw()'.
+
+    // ACCESSORS
+    const TYPE& dereferenceRaw() const;
+        // Return a reference providing non-modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined if the 'optional' object
+        // is disengaged. This method exists for the sole purpose of allowing
+        // 'NullableValue' to determine its own assert level in its
+        // overload of the 'value()' method.  Because 'NullableValue' does not
+        // have ref-qualified version of 'value()', it makes no sense to
+        // provide ref-qualified version of 'dereferenceRaw()'.
 };
 
                             // ====================
@@ -4251,6 +4265,29 @@ class optional<TYPE, false> {
         return UnspecifiedBoolUtil::makeValue(has_value());
     }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
+
+  protected:
+
+    // MANIPULATORS
+    TYPE& dereferenceRaw();
+        // Return a reference providing modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined if the 'optional' object
+        // is disengaged.  This method exists for the sole purpose of allowing
+        // 'NullableValue' to determine its own assert level in its
+        // overload of the 'value()' method.  Because 'NullableValue' does not
+        // have ref-qualified version of 'value()', it makes no sense to
+        // provide ref-qualified version of 'dereferenceRaw()'.
+
+    // ACCESSORS
+    const TYPE& dereferenceRaw() const;
+        // Return a reference providing non-modifiable access to the underlying
+        // 'TYPE' object.  The behavior is undefined if the 'optional' object
+        // is disengaged. This method exists for the sole purpose of allowing
+        // 'NullableValue' to determine its own assert level in its
+        // overload of the 'value()' method.  Because 'NullableValue' does not
+        // have ref-qualified version of 'value()', it makes no sense to
+        // provide ref-qualified version of 'dereferenceRaw()'.
+
 };
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -4365,7 +4402,7 @@ template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR bool operator<(
                              const bsl::optional<TYPE>&,
                              const bsl::nullopt_t&) BSLS_KEYWORD_NOEXCEPT;
-    // Return 'false'.  Note that 'bsl::nullopt_t' never orders before a
+    // Return 'false'.  Note that 'bsl::nullopt_t' never orders after a
     // 'bsl::optional'.
 
 
@@ -4374,7 +4411,7 @@ BSLS_KEYWORD_CONSTEXPR bool operator<(
                        const bsl::nullopt_t&,
                        const bsl::optional<TYPE>& value) BSLS_KEYWORD_NOEXCEPT;
     // Return 'true' if specified 'value' is engaged, and 'false' otherwise.
-    // Note that 'bsl::nullopt_t' sorts before any 'bsl::optional' that is
+    // Note that 'bsl::nullopt_t' is ordered before any 'bsl::optional' that is
     // engaged.
 
 template <class TYPE>
@@ -4387,7 +4424,7 @@ template <class TYPE>
 BSLS_KEYWORD_CONSTEXPR bool operator>(
                              const bsl::nullopt_t&,
                              const bsl::optional<TYPE>&) BSLS_KEYWORD_NOEXCEPT;
-    // Return 'false'.  Note that 'bsl::nullopt_t' never orders before a
+    // Return 'false'.  Note that 'bsl::nullopt_t' never orders after a
     // 'bsl::optional'.
 
 template <class TYPE>
@@ -4576,7 +4613,8 @@ bool operator<=(const std::optional<LHS_TYPE>& lhs,
     // Return 'true' if the specified 'lhs' is ordered before the specified
     // 'rhs' optional object or 'lhs' and 'rhs' have the same value, and
     // 'false' otherwise.  (See 'operator<' and 'operator=='.)  Note that this
-    // operator returns '!(rhs < lhs)'.
+    // operator returns '!(rhs < lhs)'.  Also note that this function
+    // will fail to compile if 'LHS_TYPE' and 'RHS_TYPE' are not compatible.
 
 template <class LHS_TYPE, class RHS_TYPE>
 bool operator>=(const bsl::optional<LHS_TYPE>& lhs,
@@ -6212,6 +6250,9 @@ template <class TYPE>
 inline
 TYPE& Optional_DataImp<TYPE>::value() &
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return d_buffer.object();
 }
 
@@ -6219,6 +6260,9 @@ template <class TYPE>
 inline
 TYPE&& Optional_DataImp<TYPE>::value() &&
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return std::move(d_buffer.object());
 }
 #else
@@ -6226,6 +6270,9 @@ template <class TYPE>
 inline
 TYPE& Optional_DataImp<TYPE>::value()
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return d_buffer.object();
 }
 #endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
@@ -6235,6 +6282,9 @@ template <class TYPE>
 inline
 bool Optional_DataImp<TYPE>::hasValue() const BSLS_KEYWORD_NOEXCEPT
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return d_hasValue;
 }
 
@@ -6243,6 +6293,9 @@ template <class TYPE>
 inline
 const TYPE& Optional_DataImp<TYPE>::value() const&
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return d_buffer.object();
 }
 
@@ -6250,6 +6303,9 @@ template <class TYPE>
 inline
 const TYPE&& Optional_DataImp<TYPE>::value() const&&
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return std::move(d_buffer.object());
 }
 #else
@@ -6257,6 +6313,9 @@ template <class TYPE>
 inline
 const TYPE& Optional_DataImp<TYPE>::value() const
 {
+    // We do not assert on an empty object in this function as the assert level
+    // is determined by the 'optional' method invoking 'value()'
+
     return d_buffer.object();
 }
 #endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
@@ -8927,7 +8986,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() &
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -8936,7 +8995,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE&& optional<TYPE, USES_BSLMA_ALLOC>::operator*() &&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return std::move(d_value.value());
 }
@@ -8946,7 +9005,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*()
 {
-   BSLS_REVIEW_OPT(has_value());
+   BSLS_ASSERT(has_value());
 
    return d_value.value();
 }
@@ -9091,7 +9150,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -9100,7 +9159,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE&& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const&&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return std::move(d_value.value());
 }
@@ -9110,7 +9169,7 @@ template <class TYPE, bool USES_BSLMA_ALLOC>
 inline
 const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::operator*() const
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -9124,6 +9183,31 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator bool() const BSLS_KEYWORD_NOEXCEPT
     return has_value();
 }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
+
+// PRIVATE MODIFIERS
+template <class TYPE, bool USES_BSLMA_ALLOC>
+TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw()
+{
+    // This method is provided for the purpose of allowing 'NullableValue'
+    // to determine the assert level in its value() method.  Do not assert
+    // here.
+
+    return d_value.value();
+
+}
+
+// PRIVATE ACCESORS
+template <class TYPE, bool USES_BSLMA_ALLOC>
+const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw() const
+{
+    // This method is provided for the purpose of allowing 'NullableValue'
+    // to determine the assert level in its value() method.  Do not assert
+    // here.
+
+    return d_value.value();
+
+}
+
 
                         // ===========================
                         // class optional<TYPE, false>
@@ -10935,7 +11019,7 @@ template <class TYPE>
 inline
 TYPE& optional<TYPE, false>::operator*() &
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -10944,7 +11028,7 @@ template <class TYPE>
 inline
 TYPE&& optional<TYPE, false>::operator*() &&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return std::move(d_value.value());
 }
@@ -10953,7 +11037,7 @@ template <class TYPE>
 inline
 TYPE& optional<TYPE, false>::operator*()
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -11065,7 +11149,7 @@ template <class TYPE>
 inline
 const TYPE& optional<TYPE, false>::operator*() const&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -11074,7 +11158,7 @@ template <class TYPE>
 inline
 const TYPE&& optional<TYPE, false>::operator*() const&&
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return std::move(d_value.value());
 }
@@ -11084,7 +11168,7 @@ template <class TYPE>
 inline
 const TYPE& optional<TYPE, false>::operator*() const
 {
-    BSLS_REVIEW_OPT(has_value());
+    BSLS_ASSERT(has_value());
 
     return d_value.value();
 }
@@ -11097,6 +11181,30 @@ optional<TYPE, false>::operator bool() const BSLS_KEYWORD_NOEXCEPT
     return has_value();
 }
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
+
+// PRIVATE MODIFIERS
+template <class TYPE>
+TYPE& optional<TYPE, false>::dereferenceRaw()
+{
+    // This method is provided for the purpose of allowing 'NullableValue'
+    // to determine the assert level in its value() method.  Do not assert
+    // here.
+
+    return d_value.value();
+
+}
+
+// PRIVATE ACCESORS
+template <class TYPE>
+const TYPE& optional<TYPE, false>::dereferenceRaw() const
+{
+    // This method is provided for the purpose of allowing 'NullableValue'
+    // to determine the assert level in its value() method.  Do not assert
+    // here.
+
+    return d_value.value();
+
+}
 
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
@@ -12723,7 +12831,7 @@ inline
 bool operator==(const bsl::optional<LHS_TYPE>& lhs,
                 const std::optional<RHS_TYPE>& rhs)
 {
-    if (lhs && rhs) {
+    if (lhs.khas_value() && rhs.has_value()) {
         return *lhs == *rhs;
     }
     return lhs.has_value() == rhs.has_value();
@@ -12734,7 +12842,7 @@ inline
 bool operator==(const std::optional<LHS_TYPE>& lhs,
                 const bsl::optional<RHS_TYPE>& rhs)
 {
-    if (lhs && rhs) {
+    if (lhs.has_value() && rhs.has_value()) {
         return *lhs == *rhs;
     }
     return lhs.has_value() == rhs.has_value();
@@ -12745,7 +12853,7 @@ inline
 bool operator!=(const bsl::optional<LHS_TYPE>& lhs,
                 const std::optional<RHS_TYPE>& rhs)
 {
-    if (lhs && rhs) {
+    if (lhs.has_value() && rhs.has_value()) {
         return *lhs != *rhs;
     }
 
@@ -12757,7 +12865,7 @@ inline
 bool operator!=(const std::optional<LHS_TYPE>& lhs,
                 const bsl::optional<RHS_TYPE>& rhs)
 {
-    if (lhs && rhs) {
+    if (lhs.has_value() && rhs.has_value()) {
         return *lhs != *rhs;
     }
 
@@ -12769,11 +12877,11 @@ inline
 bool operator<(const bsl::optional<LHS_TYPE>& lhs,
                const std::optional<RHS_TYPE>& rhs)
 {
-    if (!rhs) {
+    if (!rhs.has_value()) {
         return false;
     }
 
-    return !lhs || *lhs < *rhs;
+    return !lhs.has_value() || *lhs < *rhs;
 }
 
 template <class LHS_TYPE, class RHS_TYPE>
@@ -12781,11 +12889,11 @@ inline
 bool operator<(const std::optional<LHS_TYPE>& lhs,
                const bsl::optional<RHS_TYPE>& rhs)
 {
-    if (!rhs) {
+    if (!rhs.has_value()) {
         return false;
     }
 
-    return !lhs || *lhs < *rhs;
+    return !lhs.has_value() || *lhs < *rhs;
 }
 
 template <class LHS_TYPE, class RHS_TYPE>
