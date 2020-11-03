@@ -370,7 +370,7 @@ struct Optional_AssignsFromStdOptional
                                ANY_TYPE>::type> >::value> {
     // 'Optional_AssignsFromStdOptional' inherits from 'bsl::true_type' if
     // 'std::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
-    // 'bsl::false_type' otherwise. As in 'std' implementation, if the 'TYPE'
+    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
     //  can be assigned to from any value category of
     // 'std::optional<ANY_TYPE>', we consider it assignable from
     // 'std::optional<ANY_TYPE>'.
