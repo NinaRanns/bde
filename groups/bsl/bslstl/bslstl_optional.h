@@ -2988,8 +2988,9 @@ class optional {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Note that ref-qualified versions
-        // of 'value()' are not provided because 'NullableValue' does not require them.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 
     // PROTECTED ACCESSORS
     const TYPE& dereferenceRaw() const;
@@ -2997,9 +2998,9 @@ class optional {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Because 'NullableValue' does
-        // not have ref-qualified version of 'value()', it makes no sense to
-        // provide ref-qualified version of 'dereferenceRaw()'.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 #endif  // BDE_OMIT_INTERNAL_DEPRECATED
 
 };
@@ -3161,9 +3162,9 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Because 'NullableValue' does
-        // not have ref-qualified version of 'value()', it makes no sense to
-        // provide ref-qualified version of 'dereferenceRaw()'.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 
     // PROTECTED ACCESSORS
     const TYPE& dereferenceRaw() const;
@@ -3171,9 +3172,9 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Because 'NullableValue' does
-        // not have ref-qualified version of 'value()', it makes no sense to
-        // provide ref-qualified version of 'dereferenceRaw()'.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 #endif  // BDE_OMIT_INTERNAL_DEPRECATED
 };
 #else
@@ -4301,9 +4302,9 @@ class optional<TYPE, false> {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Because 'NullableValue' does
-        // not have ref-qualified version of 'value()', it makes no sense to
-        // provide ref-qualified version of 'dereferenceRaw()'.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 
     // PROTECTED ACCESSORS
     const TYPE& dereferenceRaw() const;
@@ -4311,9 +4312,9 @@ class optional<TYPE, false> {
         // 'TYPE' object.  The behavior is undefined if the 'optional' object
         // is disengaged.  Note that this function is only intended to be
         // called by 'bdlb::NullableValue::value' during transition of its
-        // implementation to use 'bsl::optional.  Because 'NullableValue' does
-        // not have ref-qualified version of 'value()', it makes no sense to
-        // provide ref-qualified version of 'dereferenceRaw()'.
+        // implementation to use 'bsl::optional.  Note that ref-qualified
+        // versions of 'value()' are not provided because 'NullableValue' does
+        // not require them.
 #endif  // BDE_OMIT_INTERNAL_DEPRECATED
 
 };
@@ -9213,7 +9214,7 @@ optional<TYPE, USES_BSLMA_ALLOC>::operator bool() const BSLS_KEYWORD_NOEXCEPT
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
 
 #ifndef BDE_OMIT_INTERNAL_DEPRECATED
-// PRIVATE MODIFIERS
+// PROTECTED MODIFIERS
 template <class TYPE, bool USES_BSLMA_ALLOC>
 TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw()
 {
@@ -9435,7 +9436,7 @@ optional<TYPE, false>::operator=(ANY_TYPE&& rhs)
 }
 
 #ifndef BDE_OMIT_INTERNAL_DEPRECATED
-// PRIVATE MODIFIERS
+// PROTECTED MODIFIERS
 template <class TYPE>
 TYPE& optional<TYPE, false>::dereferenceRaw()
 {
@@ -9447,7 +9448,7 @@ TYPE& optional<TYPE, false>::dereferenceRaw()
 
 }
 
-// PRIVATE ACCESORS
+// PROTECTED ACCESORS
 template <class TYPE>
 const TYPE& optional<TYPE, false>::dereferenceRaw() const
 {
@@ -11238,7 +11239,7 @@ optional<TYPE, false>::operator bool() const BSLS_KEYWORD_NOEXCEPT
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
 
 #ifndef BDE_OMIT_INTERNAL_DEPRECATED
-// PRIVATE MODIFIERS
+// PROTECTED MODIFIERS
 template <class TYPE>
 TYPE& optional<TYPE, false>::dereferenceRaw()
 {
@@ -11250,7 +11251,7 @@ TYPE& optional<TYPE, false>::dereferenceRaw()
 
 }
 
-// PRIVATE ACCESORS
+// PROTECTED ACCESORS
 template <class TYPE>
 const TYPE& optional<TYPE, false>::dereferenceRaw() const
 {
