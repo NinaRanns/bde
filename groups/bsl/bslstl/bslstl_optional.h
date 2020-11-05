@@ -9436,7 +9436,7 @@ optional<TYPE, false>::operator=(ANY_TYPE&& rhs)
 }
 
 #ifndef BDE_OMIT_INTERNAL_DEPRECATED
-// PROTECTED MODIFIERS
+// PROTECTED MANIPULATORS
 template <class TYPE>
 TYPE& optional<TYPE, false>::dereferenceRaw()
 {
@@ -11239,7 +11239,7 @@ optional<TYPE, false>::operator bool() const BSLS_KEYWORD_NOEXCEPT
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_OPERATOR_EXPLICIT
 
 #ifndef BDE_OMIT_INTERNAL_DEPRECATED
-// PROTECTED MODIFIERS
+// PROTECTED MANIPULATORS
 template <class TYPE>
 TYPE& optional<TYPE, false>::dereferenceRaw()
 {
