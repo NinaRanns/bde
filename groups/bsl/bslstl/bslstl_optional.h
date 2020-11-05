@@ -9226,7 +9226,7 @@ TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw()
 
 }
 
-// PRIVATE ACCESORS
+// PROTECTED ACCESORS
 template <class TYPE, bool USES_BSLMA_ALLOC>
 const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw() const
 {
