@@ -1,7 +1,7 @@
 // bslstl_optional.t.cpp                                              -*-C++-*-
+#include <bslstl_optional.h>
 
 #include <bsls_bsltestutil.h>
-#include <bslstl_optional.h>
 #include <bslstl_string.h>
 
 #include <bslalg_constructorproxy.h>
