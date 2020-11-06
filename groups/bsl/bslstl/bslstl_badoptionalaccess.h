@@ -23,6 +23,7 @@ BSLS_IDENT("$Id: $")
 
 #include <bsls_exceptionutil.h>
 #include <bsls_keyword.h>
+#include <bsls_libraryfeatures.h>
 
 #include <exception>
 
@@ -78,11 +79,11 @@ const char *bad_optional_access::what() const BSLS_EXCEPTION_WHAT_NOTHROW
 {
     return "bad_optional_access";
 }
-#endif //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+#endif // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
 }  // close namespace bsl
 
-#endif //BDE_BUILD_TARGET_EXC
+#endif // BDE_BUILD_TARGET_EXC
 #endif
 
 // ----------------------------------------------------------------------------
