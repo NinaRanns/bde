@@ -40,6 +40,7 @@ bslstl_multimap_test
 bslstl_multiset
 bslstl_multiset_test
 bslstl_optional
+bslstl_optional_cpp03
 bslstl_ostringstream
 bslstl_ownerless
 bslstl_pair
