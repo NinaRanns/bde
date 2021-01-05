@@ -561,32 +561,42 @@ struct MyClass2 {
         s_copyConstructorInvocations++;
     }
 
-    MyClass2(bslmf::MovableRef<MyClass2> other, bslma::Allocator *a = 0)
+    MyClass2(bslmf::MovableRef<MyClass2> other)
     {
         // IMPLICIT
         MyClass2& otherRef     = MoveUtil::access(other);
         d_def.d_value          = otherRef.d_def.d_value;
         otherRef.d_def.d_value = k_MOVED_FROM_VAL;
-        if (a) {
-            d_def.d_allocator_p = a;
-        }
-        else {
-            d_def.d_allocator_p = otherRef.d_def.d_allocator_p;
-        }
+        d_def.d_allocator_p = otherRef.d_def.d_allocator_p;
+        s_moveConstructorInvocations++;
+    }
+    MyClass2(bslmf::MovableRef<MyClass2> other, bslma::Allocator *a)
+    {
+        // IMPLICIT
+        MyClass2& otherRef     = MoveUtil::access(other);
+        d_def.d_value          = otherRef.d_def.d_value;
+        otherRef.d_def.d_value = k_MOVED_FROM_VAL;
+        d_def.d_allocator_p = a;
+
         s_moveConstructorInvocations++;
     }
 #ifndef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-    MyClass2(bslmf::MovableRef<const MyClass2> other, bslma::Allocator *a = 0)
+    MyClass2(bslmf::MovableRef<const MyClass2> other)
     {  // IMPLICIT
 
         const MyClass2& otherRef = MoveUtil::access(other);
         d_def.d_value            = otherRef.d_def.d_value;
-        if (a) {
-            d_def.d_allocator_p = a;
-        }
-        else {
-            d_def.d_allocator_p = otherRef.d_def.d_allocator_p;
-        }
+        d_def.d_allocator_p = otherRef.d_def.d_allocator_p;
+        // a move from a const object is a copy
+        s_copyConstructorInvocations++;
+    }
+    MyClass2(bslmf::MovableRef<const MyClass2> other, bslma::Allocator *a)
+    {  // IMPLICIT
+
+        const MyClass2& otherRef = MoveUtil::access(other);
+        d_def.d_value            = otherRef.d_def.d_value;
+        d_def.d_allocator_p = a;
+
         // a move from a const object is a copy
         s_copyConstructorInvocations++;
     }
@@ -2212,6 +2222,9 @@ class ConstructTestTypeAlloc {
         ++s_moveConstructorInvocations;
     }
 
+    // In order to distinguish between an optional allocator parameter and a
+    // non-optional 'Arg' parameter, we need to explicitly call out the type
+    // of the parameter before the optional allocator.
     explicit ConstructTestTypeAlloc(const Arg1&       a1,
                                     bslma::Allocator *allocator = 0)
     : d_ilsum(0)
