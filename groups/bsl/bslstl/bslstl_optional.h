@@ -6269,8 +6269,8 @@ template <class TYPE>
 void Optional_DataImp<TYPE>::reset() BSLS_KEYWORD_NOEXCEPT
 {
     if (d_hasValue) {
-        bslma::DestructionUtil::destroy(d_buffer.address());
-        d_hasValue = false;
+      d_hasValue = false;
+      bslma::DestructionUtil::destroy(d_buffer.address());
     }
 }
 
