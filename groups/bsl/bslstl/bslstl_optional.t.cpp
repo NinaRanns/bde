@@ -58,143 +58,139 @@ using namespace bsl;
 // type object.  In order to test this guarantee, we use test types designed to
 // count the number of instances created.
 //
-//  Internal implementation types:
-// [ 1] 'Optional_Data' class
-// [ 2] 'Optional_DataImp' class
-//
 // TYPEDEFS
-// [28] typedef TYPE ValueType;
-// [28] typename bsl::allocator<char> allocator_type;
+// [15] typedef TYPE ValueType;
+// [15] typename bsl::allocator<char> allocator_type;
 //
 // TRAITS
-// [28] bsl::is_trivially_copyable
-// [28] bsl::is_trivially_destructible
-// [28] BloombergLP::bslma::UsesBslmaAllocator
-// [28] BloombergLP::bslmf::UsesAllocatorArgT
+// [15] bsl::is_trivially_copyable
+// [15] bsl::is_trivially_destructible
+// [15] BloombergLP::bslma::UsesBslmaAllocator
+// [15] BloombergLP::bslmf::UsesAllocatorArgT
 //
 // CREATORS
-// [ 4] optional();
-// [ 4] optional(nullopt_t);
-// [19] optional(const optional&);
-// [19] optional(optional&&);
-// [21] optional(const TYPE&);
-// [21] optional(TYPE&&);
-// [19] optional(const optional<ANY_TYPE> &);
-// [19] optional(optional<ANY_TYPE>&&);
-// [19] optional(const std::optional<ANY_TYPE> &);
-// [19] optional(std::optional<ANY_TYPE>&&);
-// [21] optional(const ANY_TYPE&);
-// [21] optional(ANY_TYPE&&);
-// [25] optional(in_place_t, ARGS&&...);
-// [25] optional(in_place_t, std::initializer_list, ARGS&&...);
-// [ 5] optional(alloc_arg, alloc);
-// [ 5] optional(alloc_arg, alloc, nullopt_t);
-// [20] optional(alloc_arg, alloc, const optional&);
-// [20] optional(alloc_arg, alloc, optional&&);
-// [22] optional(alloc_arg, alloc, const TYPE&);
-// [22] optional(alloc_arg, alloc, TYPE&&);
-// [20] optional(alloc_arg, alloc, const optional<ANY_TYPE> &);
-// [20] optional(alloc_arg, alloc, optional<ANY_TYPE>&&);
-// [20] optional(alloc_arg, alloc, const std::optional<ANY_TYPE> &);
-// [20] optional(alloc_arg, alloc, std::optional<ANY_TYPE>&&);
-// [22] optional(alloc_arg, alloc, const ANY_TYPE&);
-// [22] optional(alloc_arg, alloc, ANY_TYPE&&);
-// [26] optional(alloc_arg, alloc, in_place_t, ARGS&&...);
-// [26] optional(alloc_arg, alloc, in_place_t, init_list, ARGS&&...);
-// [ 4] ~optional(nullopt_t);
+// [ 2] optional();
+// [ 2] optional(nullopt_t);
+// [ 7] optional(const optional&);
+// [ 7] optional(optional&&);
+// [ 3] optional(const TYPE&);
+// [ 3] optional(TYPE&&);
+// [ 7] optional(const optional<ANY_TYPE> &);
+// [ 7] optional(optional<ANY_TYPE>&&);
+// [ 7] optional(const std::optional<ANY_TYPE> &);
+// [ 7] optional(std::optional<ANY_TYPE>&&);
+// [ 3] optional(const ANY_TYPE&);
+// [ 3] optional(ANY_TYPE&&);
+// [ 3] optional(in_place_t, ARGS&&...);
+// [ 3] optional(in_place_t, std::initializer_list, ARGS&&...);
+// [ 2] optional(alloc_arg, alloc);
+// [ 2] optional(alloc_arg, alloc, nullopt_t);
+// [ 7] optional(alloc_arg, alloc, const optional&);
+// [ 7] optional(alloc_arg, alloc, optional&&);
+// [ 3] optional(alloc_arg, alloc, const TYPE&);
+// [ 3] optional(alloc_arg, alloc, TYPE&&);
+// [ 7] optional(alloc_arg, alloc, const optional<ANY_TYPE> &);
+// [ 7] optional(alloc_arg, alloc, optional<ANY_TYPE>&&);
+// [ 7] optional(alloc_arg, alloc, const std::optional<ANY_TYPE> &);
+// [ 7] optional(alloc_arg, alloc, std::optional<ANY_TYPE>&&);
+// [ 3] optional(alloc_arg, alloc, const ANY_TYPE&);
+// [ 3] optional(alloc_arg, alloc, ANY_TYPE&&);
+// [ 3] optional(alloc_arg, alloc, in_place_t, ARGS&&...);
+// [ 3] optional(alloc_arg, alloc, in_place_t, init_list, ARGS&&...);
+// [ 2] ~optional(nullopt_t);
 //
 // MANIPULATORS
 // [13] void emplace(ARGS&&...);
 // [13] void emplace(std::initializer_list<INIT_LIST_TYPE>, ARGS&&...);
-// [ 7] void reset();
-// [24] void swap(optional& other);
-// [ 8] TYPE&  value() &;
-// [ 8] TYPE&& value() &&;
-// [ 9] TYPE value_or(ANY_TYPE&&) &&;
-// [10] TYPE value_or(alloc_arg, alloc, ANY_TYPE&&) &&
-// [14] optional& operator=(bsl::nullopt_t);
-// [17] optional& operator=(const optional&);
-// [17] optional& operator=(optional&&);
-// [17] optional& operator=(const optional<ANY_TYPE>&);
-// [17] optional& operator=(optional<ANY_TYPE>&&);
-// [17] optional& operator=(const std::optional<ANY_TYPE>&);
-// [17] optional& operator=(std::optional<ANY_TYPE>&&);
-// [15] optional& operator=(const TYPE&);
-// [15] optional& operator=(TYPE&&);
-// [15] optional& operator=(const ANY_TYPE&);
-// [15] optional& operator=(ANY_TYPE&&);
-// [11] TYPE *operator->();
-// [12] TYPE&  operator*() &;
-// [12] TYPE&& operator*() &&;
+// [ 2] void reset();
+// [ 9] void swap(optional& other);
+// [ 4] TYPE&  value() &;
+// [ 4] TYPE&& value() &&;
+// [ 4] TYPE value_or(ANY_TYPE&&) &&;
+// [ 4] TYPE value_or(alloc_arg, alloc, ANY_TYPE&&) &&
+// [10] optional& operator=(bsl::nullopt_t);
+// [10] optional& operator=(const optional&);
+// [10] optional& operator=(optional&&);
+// [10] optional& operator=(const optional<ANY_TYPE>&);
+// [10] optional& operator=(optional<ANY_TYPE>&&);
+// [10] optional& operator=(const std::optional<ANY_TYPE>&);
+// [10] optional& operator=(std::optional<ANY_TYPE>&&);
+// [10] optional& operator=(const TYPE&);
+// [10] optional& operator=(TYPE&&);
+// [10] optional& operator=(const ANY_TYPE&);
+// [10] optional& operator=(ANY_TYPE&&);
+// [ 4] TYPE *operator->();
+// [ 4] TYPE&  operator*() &;
+// [ 4] TYPE&& operator*() &&;
 
 // ACCESSORS
-// [ 5] allocator_type get_allocator() const;
-// [ 6] bool has_value() const;
-// [ 8] const TYPE&  value() const &;
-// [ 8] const TYPE&&  value() const &&;
-// [11] const TYPE *operator->() const;
-// [12] const TYPE&  operator*() const &;
-// [12] const TYPE&&  operator*() const &&;
-// [ 9] TYPE value_or(ANY_TYPE&&) const&;
-// [10] TYPE value_or(alloc_arg, alloc, ANY_TYPE&&) const&;
-// [ 6] explicit operator bool() const;
+// [ 2] allocator_type get_allocator() const;
+// [ 4] bool has_value() const;
+// [ 4] const TYPE&  value() const &;
+// [ 4] const TYPE&&  value() const &&;
+// [ 4] const TYPE *operator->() const;
+// [ 4] const TYPE&  operator*() const &;
+// [ 4] const TYPE&&  operator*() const &&;
+// [ 4] TYPE value_or(ANY_TYPE&&) const&;
+// [ 4] TYPE value_or(alloc_arg, alloc, ANY_TYPE&&) const&;
+// [ 4] explicit operator bool() const;
 //
 // FREE OPERATORS
-// [24] void swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
-// [24] void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
-// [24] void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
-// [23] void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input);
-// [31] bool operator==(const optional<LHS>&, nullopt_t&);
-// [31] bool operator!=(const optional<LHS>&, nullopt_t&);
-// [31] bool operator< (const optional<LHS>&, nullopt_t&);
-// [31] bool operator<=(const optional<LHS>&, nullopt_t&);
-// [31] bool operator> (const optional<LHS>&, nullopt_t&);
-// [31] bool operator>=(const optional<LHS>&, nullopt_t&);
-// [31] bool operator==(const optional<LHS>&, const RHS&);
-// [31] bool operator!=(const optional<LHS>&, const RHS&);
-// [31] bool operator< (const optional<LHS>&, const RHS&);
-// [31] bool operator<=(const optional<LHS>&, const RHS&);
-// [31] bool operator> (const optional<LHS>&, const RHS&);
-// [31] bool operator>=(const optional<LHS>&, const RHS&);
-// [31] bool operator==(const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator!=(const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator< (const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator<=(const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator>=(const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator> (const optional<LHS>&, const optional<RHS>&);
-// [31] bool operator==(const nullopt_t&, const optional<RHS>&);
-// [31] bool operator!=(const nullopt_t&, const optional<RHS>&);
-// [31] bool operator< (const nullopt_t&, const optional<RHS>&);
-// [31] bool operator<=(const nullopt_t&, const optional<RHS>&);
-// [31] bool operator> (const nullopt_t&, const optional<RHS>&);
-// [31] bool operator>=(const nullopt_t&, const optional<RHS>&);
-// [31] bool operator==(const LHS&, const optional<RHS>&);
-// [31] bool operator!=(const LHS&, const optional<RHS>&);
-// [31] bool operator< (const LHS&, const optional<RHS>&);
-// [31] bool operator<=(const LHS&, const optional<RHS>&);
-// [31] bool operator> (const LHS&, const optional<RHS>&);
-// [31] bool operator>=(const LHS&, const optional<RHS>&);
-// [31] bool operator==(const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator!=(const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator< (const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator<=(const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator>=(const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator> (const std::optional<LHS>&, const optional<RHS>&);
-// [31] bool operator==(const optional<LHS>&, const std::optional<RHS>&);
-// [31] bool operator!=(const optional<LHS>&, const std::optional<RHS>&);
-// [31] bool operator< (const optional<LHS>&, const std::optional<RHS>&);
-// [31] bool operator<=(const optional<LHS>&, const std::optional<RHS>&);
-// [31] bool operator>=(const optional<LHS>&, const std::optional<RHS>&);
-// [31] bool operator> (const optional<LHS>&, const std::optional<RHS>&);
-// [30] optional make_optional(alloc_arg, const alloc&, TYPE&&);
-// [30] optional make_optional(alloc_arg, const alloc&, ARGS&&...);
-// [30] optional make_optional(alloc_arg, const alloc&, init_list, ARGS&&...);
-// [29] optional make_optional();
-// [29] optional make_optional(TYPE&&);
-// [29] optional make_optional(ARG&&, ARGS&&...);
-// [29] optional make_optional(initializer_list, ARGS&&...);
+// [ 9] void swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+// [ 9] void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+// [ 9] void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
+// [14] void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input);
+// [ 6] bool operator==(const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator!=(const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator< (const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator<=(const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator> (const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator>=(const optional<LHS>&, nullopt_t&);
+// [ 6] bool operator==(const optional<LHS>&, const RHS&);
+// [ 6] bool operator!=(const optional<LHS>&, const RHS&);
+// [ 6] bool operator< (const optional<LHS>&, const RHS&);
+// [ 6] bool operator<=(const optional<LHS>&, const RHS&);
+// [ 6] bool operator> (const optional<LHS>&, const RHS&);
+// [ 6] bool operator>=(const optional<LHS>&, const RHS&);
+// [ 6] bool operator==(const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator!=(const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator< (const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator<=(const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator>=(const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator> (const optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator==(const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator!=(const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator< (const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator<=(const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator> (const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator>=(const nullopt_t&, const optional<RHS>&);
+// [ 6] bool operator==(const LHS&, const optional<RHS>&);
+// [ 6] bool operator!=(const LHS&, const optional<RHS>&);
+// [ 6] bool operator< (const LHS&, const optional<RHS>&);
+// [ 6] bool operator<=(const LHS&, const optional<RHS>&);
+// [ 6] bool operator> (const LHS&, const optional<RHS>&);
+// [ 6] bool operator>=(const LHS&, const optional<RHS>&);
+// [ 6] bool operator==(const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator!=(const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator< (const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator<=(const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator>=(const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator> (const std::optional<LHS>&, const optional<RHS>&);
+// [ 6] bool operator==(const optional<LHS>&, const std::optional<RHS>&);
+// [ 6] bool operator!=(const optional<LHS>&, const std::optional<RHS>&);
+// [ 6] bool operator< (const optional<LHS>&, const std::optional<RHS>&);
+// [ 6] bool operator<=(const optional<LHS>&, const std::optional<RHS>&);
+// [ 6] bool operator>=(const optional<LHS>&, const std::optional<RHS>&);
+// [ 6] bool operator> (const optional<LHS>&, const std::optional<RHS>&);
+// [17] optional make_optional(alloc_arg, const alloc&, TYPE&&);
+// [17] optional make_optional(alloc_arg, const alloc&, ARGS&&...);
+// [17] optional make_optional(alloc_arg, const alloc&, init_list, ARGS&&...);
+// [16] optional make_optional();
+// [16] optional make_optional(TYPE&&);
+// [16] optional make_optional(ARG&&, ARGS&&...);
+// [16] optional make_optional(initializer_list, ARGS&&...);
 // ----------------------------------------------------------------------------
-// [ 3] BREATHING TEST
+// [ 1] BREATHING TEST
 // ============================================================================
 //                     STANDARD BSL ASSERT TEST FUNCTION
 // ----------------------------------------------------------------------------
@@ -5795,66 +5791,24 @@ class TestDriver {
 
   public:
 
-    static void testCase32();
+    static void testCase18();
         // TESTING type deduction
 
-    static void testCase30();
-    static void testCase30b();
+    static void testCase17();
+    static void testCase17b();
         // TESTING 'make_optional' ALLOCATOR EXTENDED FACILITY
 
-    static void testCase29();
-    static void testCase29b();
+    static void testCase16();
+    static void testCase16b();
         // TESTING 'make_optional' FACILITY
 
-    static void testCase28();
-    static void testCase28b();
+    static void testCase15();
+    static void testCase15b();
         // TESTING TRAITS AND TYPEDEFS
 
-    static void testCase27();
-        // TESTING 'operator=' OVERLOAD RESOLUTION
-
-    static void testCase26();
-        // TESTING 'initializer_list' 'in_place_t' CONSTRUCTOR
-
-    static void testCase25();
-        // TESTING 'in_place_t' CONSTRUCTOR
-
-    static void testCase23();
+    static void testCase14();
         // TESTING 'hashAppend'
 
-    template <class DEST_TYPE, class SRC_TYPE>
-    static void testCase22_imp();
-    static void testCase22();
-        // TESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION FROM VALUE
-
-    template <class DEST_TYPE, class SRC_TYPE>
-    static void testCase21_imp();
-    static void testCase21();
-        // TESTING COPY/MOVE CONSTRUCTION FROM VALUE
-
-    template <class DEST_TYPE, class SRC_TYPE>
-    static void testCase20_imp();
-    static void testCase20();
-        // TESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION FROM OPTIONAL
-
-    template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
-    static void testCase19_imp();
-    template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
-    static void testCase19_imp_libgccbug();
-    static void testCase19();
-        // TESTING COPY/MOVE CONSTRUCTION FROM OPTIONAL
-
-    template <class OPT_TYPE>
-    static void testCase17_imp();
-    static void testCase17();
-        // TESTING 'operator=(optional_type)' MEMBER FUNCTION
-
-    static void testCase15();
-        // TESTING 'operator=(non_optional_type)' FUNCTIONALITY
-
-    static void testCase14_imp();
-    static void testCase14();
-        // TESTING operator=(nullopt_t) MEMBER FUNCTION
 
     static void testCase13();
     static void testCase13_imp_a();
@@ -5865,63 +5819,99 @@ class TestDriver {
         // 's_moveConstructorInvocations' static variable that counts the
         // number of times copy/move constructor has been invoked.
 
-    static void testCase12();
+    static void testCase10d();
+        // TESTING 'operator=' OVERLOAD RESOLUTION
+
+    static void testCase10c();
+        // TESTING 'operator=(non_optional_type)'
+
+    template <class OPT_TYPE>
+    static void testCase10b_imp();
+    static void testCase10b();
+        // TESTING 'operator=(optional_type)'
+
+    static void testCase10a_imp();
+    static void testCase10a();
+        // TESTING operator=(nullopt_t)
+
+    template <class DEST_TYPE, class SRC_TYPE>
+    static void testCase7b_imp();
+    static void testCase7b();
+        // TESTING ALLOCATOR EXTENDED CONSTRUCTION FROM OPTIONAL
+
+    template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
+    static void testCase7a_imp();
+    template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
+    static void testCase7a_imp_libgccbug();
+    static void testCase7a();
+        // TESTING CONSTRUCTION FROM OPTIONAL
+
+    static void testCase4f();
         // TESTING 'operator*' MEMBER FUNCTION.  Note that this test can only
         // be executed with types that are constructible from an integer, have
         // a 'value()' method, and for which there exists an overload of
         // 'isConstRef'.
 
-    static void testCase11();
+    static void testCase4e();
         // TESTING 'operator->' MEMBER FUNCTION.  Note that this test can only
         // be executed with types that are constructible from an integer and
         // have a 'value()' method.
 
-    static void testCase10();
+    static void testCase4d();
         // TESTING ALLOCATOR EXTENDED 'value_or' METHOD.  Note that this test
         // can only be executed with types that are constructible from an
         // integer, have a 'value()' method, are allocator-aware and have a
         // 'get_allocator' method.
 
-    static void testCase9();
+    static void testCase4c();
         // TESTING 'value_or' METHOD.  Note that this test can only be executed
         // with types that are constructible from an integer, have a 'value()'
         // method, and, if TYPE is allocator-aware, has a 'get_allocator'
         // method
 
-    static void testCase8();
+    static void testCase4b();
         // TESTING 'value' METHOD.  Note that this test can only be executed
         // with types that are constructible from an integer, have a 'value()'
         // method, and for which there exists an overload of 'isRvalueRef' and
         // 'isConstRef'.
 
-    static void testCase7_imp();
-    static void testCase7();
+    static void testCase4a();
+        // TESTING CONVERSION TO BOOL
+
+    static void testCase3d();
+        // TESTING 'initializer_list' 'in_place_t' CONSTRUCTOR
+
+    static void testCase3c();
+        // TESTING 'in_place_t' CONSTRUCTOR
+
+    template <class DEST_TYPE, class SRC_TYPE>
+    static void testCase3b_imp();
+    static void testCase3b();
+        // TESTING ALLOCATOR EXTENDED CONSTRUCTION FROM VALUE
+
+    template <class DEST_TYPE, class SRC_TYPE>
+    static void testCase3a_imp();
+    static void testCase3a();
+        // TESTING CONSTRUCTION FROM VALUE
+
+    static void testCase2c_imp();
+    static void testCase2c();
         // TESTING 'reset' MEMBER FUNCTION.  Note that this test requires
         // <TYPE> to provide a 's_destructorInvocations' static variable which
         // counts the number of times destructor has been invoked.
 
-    static void testCase6();
-        // TESTING CONVERSION TO BOOL
-
-    static void testCase5();
+    static void testCase2b();
         // ALLOCATOR EXTENDED DISENGAGED CONSTRUCTORS.  Note that this test
         // requires 'TYPE' to be allocator-aware.
 
-    static void testCase4();
+    static void testCase2a();
         // DISENGAGED CONSTRUCTORS AND DESTRUCTOR.  Note that this test
         // requires <TYPE> to provide a 's_destructorInvocations' static
         // variable which counts the number of times destructor has been
-        //invoked.
-
-    static void testCase3();
-        // BREATHING TEST
-
-    static void testCase2();
-        // Optional_DataImp TEST.  The test requires TYPE to be default
-        // constructible.
+        // invoked.
 
     static void testCase1();
-        // Optional_Data TEST
+        // BREATHING TEST
 };
 
 template <class TYPE>
@@ -5935,7 +5925,7 @@ void bslstl_optional_optional_type_deduce(const TYPE&)
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase32()
+void TestDriver<TYPE>::testCase18()
 {
     // --------------------------------------------------------------------
     // TESTING type deduction
@@ -5968,253 +5958,8 @@ void TestDriver<TYPE>::testCase32()
     bslstl_optional_optional_type_deduce(x);
 }
 
-template <class OPT_TYPE1, class OPT_TYPE2>
-void testCase31_imp_a()
-{
-    OPT_TYPE1 X;
-    OPT_TYPE2 Y;
-
-    //comparing two disengaged optionals
-    ASSERT(X == Y);     // If bool(x) != bool(y), false;
-    ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT(!(X < Y));   // If !y, false;
-    ASSERT(!(X > Y));   // If !x, false;
-    ASSERT(X <= Y);     // If !x, true;
-    ASSERT(X >= Y);     // If !y, true;
-
-    //'rhs' disengaged, 'lhs' engaged
-    Y.emplace(3);
-    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-    ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-    ASSERT(!(X > Y));   // If !x, false;
-    ASSERT(X <= Y);     // If !x, true;
-    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-
-    //'rhs' engaged, 'lhs' disengaged
-    X.emplace(5);
-    Y.reset();
-    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-    ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-    ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
-    ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
-    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-    //both engaged, compare the values
-    X.emplace(1);
-    Y.emplace(3);
-    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-    ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
-    ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
-    ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
-    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
-}
-
-template <class OPT_TYPE, class VAL_TYPE>
-void testCase31_imp_b()
-{
-    OPT_TYPE X;
-    VAL_TYPE Y = 3;
-
-    //comparison with a disengaged optional on 'rhs'
-    ASSERT(!(X == Y));  // return bool(x) ? *x == v : false;
-    ASSERT((X != Y));   // return bool(x) ? *x != v : true;
-    ASSERT((X < Y));    // return bool(x) ? *x < v : true;
-    ASSERT(!(X > Y));   // return bool(x) ? *x > v : false;
-    ASSERT((X <= Y));   // return bool(x) ? *x <= v : true;
-    ASSERT(!(X >= Y));  // return bool(x) ? *x >= v : false;
-
-    //comparison with a disengaged optional on 'lhs'
-    ASSERT(!(Y == X));  // return bool(x) ? v == *x : false;
-    ASSERT((Y != X));   // return bool(x) ? v != *x : true;
-    ASSERT(!(Y < X));   // return bool(x) ? v < *x : false;
-    ASSERT((Y > X));    // return bool(x) ? v > *x : true;
-    ASSERT(!(Y <= X));  // return bool(x) ? v <= *x : false;
-    ASSERT((Y >= X));   // return bool(x) ? v >= *x : true;
-
-    //comparison with an engaged optional on 'rhs'
-    X.emplace(7);
-    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
-    ASSERT((X != Y));   // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
-    ASSERT((X > Y));    // If !x, false;
-    ASSERT(!(X <= Y));  // If !x, true;
-    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
-
-    //comparison with an engaged optional on 'lhs'
-    ASSERT(!(Y == X));  // If bool(x) != bool(y), false;
-    ASSERT((Y != X));   // If bool(x) != bool(y), true;
-                        // otherwise, if bool(x) == false, false;
-    ASSERT((Y < X));    // If !y, false; otherwise, if !x, true;
-    ASSERT(!(Y > X));   // If !x, false;
-    ASSERT((Y <= X));   // If !x, true;
-    ASSERT(!(Y >= X));  // If !y, true; otherwise, if !x, false;
-}
-
 template <class TYPE>
-void testCase31_imp_c()
-{
-    bsl::optional<TYPE> X;
-
-    //comparison with a disengaged optional on 'rhs'
-    ASSERT((X == bsl::nullopt));   // !x
-    ASSERT(!(X != bsl::nullopt));  // bool(x)
-    ASSERT(!(X < bsl::nullopt));   // false
-    ASSERT(!(X > bsl::nullopt));   // bool(x)
-    ASSERT((X <= bsl::nullopt));   // !x
-    ASSERT((X >= bsl::nullopt));   // true
-
-    //comparison with a disengaged optional on 'lhs'
-    ASSERT((bsl::nullopt == X));   // !x
-    ASSERT(!(bsl::nullopt != X));  // bool(x)
-    ASSERT(!(bsl::nullopt < X));   // bool(x)
-    ASSERT(!(bsl::nullopt > X));   // false
-    ASSERT((bsl::nullopt <= X));   // true
-    ASSERT((bsl::nullopt >= X));   // !x
-
-    //comparison with an engaged optional on 'rhs'
-    X.emplace(7);
-    ASSERT(!(X == bsl::nullopt));  // !x
-    ASSERT((X != bsl::nullopt));   // bool(x)
-    ASSERT(!(X < bsl::nullopt));   // false
-    ASSERT((X > bsl::nullopt));    // bool(x)
-    ASSERT(!(X <= bsl::nullopt));  // !x
-    ASSERT((X >= bsl::nullopt));   // true
-
-    //comparison with an engaged optional on'lhs'
-    ASSERT(!(bsl::nullopt == X));  // !x
-    ASSERT((bsl::nullopt != X));   // bool(x)
-    ASSERT((bsl::nullopt < X));    // bool(x)
-    ASSERT(!(bsl::nullopt > X));   // false
-    ASSERT((bsl::nullopt <= X));   // true
-    ASSERT(!(bsl::nullopt >= X));  // !x
-}
-void testCase31()
-{
-    // --------------------------------------------------------------------
-    // TESTING RELATIONAL OPERATORS
-    //
-    // Concerns:
-    //: 1 Two 'optional' objects can be compared if their 'value_type's are
-    //:   comparable.  The result depends on whether the objects are engaged
-    //:   or not.
-    //:
-    //: 2 We can compare an 'optional' object of 'value_type' V and a non
-    //:   'optional' object of type U if U and V are comparable types.  The
-    //:   result depends on whether the 'optional' object is engaged or not.
-    //:
-    //: 3 We can compare any 'optional' object with 'nulllopt_t'.  The result
-    //:   depends on whether the 'optional' object is engaged or not.
-    //
-    // Plan:
-    //: 1 For each relation operator, compare two 'optional' objects of
-    //:   comparable value types. Execute tests for a combination of engaged
-    //:   and disengaged 'optional' objects.  [C-1]
-    //:
-    //: 2 For each relation operator, compare an 'optional' object of 'TYPE',
-    //:   and an object of type comparable to TYPE.  Execute tests for an
-    //:   engaged and disengaged 'optional' object.  [C-2]
-    //:
-    //: 3 For each relation operator, compare an 'optional' object and a
-    //:   'nullopt_t' object.  Execute tests for an engaged and disengaged
-    //:   'optional' object.  [C-3]
-    //
-    // Testing:
-    //    bool operator==(const optional<LHS>&, nullopt_t&);
-    //    bool operator!=(const optional<LHS>&, nullopt_t&);
-    //    bool operator< (const optional<LHS>&, nullopt_t&);
-    //    bool operator<=(const optional<LHS>&, nullopt_t&);
-    //    bool operator> (const optional<LHS>&, nullopt_t&);
-    //    bool operator>=(const optional<LHS>&, nullopt_t&);
-    //    bool operator==(const optional<LHS>&, const RHS&);
-    //    bool operator!=(const optional<LHS>&, const RHS&);
-    //    bool operator< (const optional<LHS>&, const RHS&);
-    //    bool operator<=(const optional<LHS>&, const RHS&);
-    //    bool operator> (const optional<LHS>&, const RHS&);
-    //    bool operator>=(const optional<LHS>&, const RHS&);
-    //    bool operator==(const optional<LHS>&, const optional<RHS>&);
-    //    bool operator!=(const optional<LHS>&, const optional<RHS>&);
-    //    bool operator< (const optional<LHS>&, const optional<RHS>&);
-    //    bool operator<=(const optional<LHS>&, const optional<RHS>&);
-    //    bool operator>=(const optional<LHS>&, const optional<RHS>&);
-    //    bool operator> (const optional<LHS>&, const optional<RHS>&);
-    //    bool operator==(const nullopt_t&, const optional<RHS>&);
-    //    bool operator!=(const nullopt_t&, const optional<RHS>&);
-    //    bool operator< (const nullopt_t&, const optional<RHS>&);
-    //    bool operator<=(const nullopt_t&, const optional<RHS>&);
-    //    bool operator> (const nullopt_t&, const optional<RHS>&);
-    //    bool operator>=(const nullopt_t&, const optional<RHS>&);
-    //    bool operator==(const LHS&, const optional<RHS>&);
-    //    bool operator!=(const LHS&, const optional<RHS>&);
-    //    bool operator< (const LHS&, const optional<RHS>&);
-    //    bool operator<=(const LHS&, const optional<RHS>&);
-    //    bool operator> (const LHS&, const optional<RHS>&);
-    //    bool operator>=(const LHS&, const optional<RHS>&);
-    //    bool operator==(const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator!=(const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator< (const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator<=(const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator>=(const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator> (const std::optional<LHS>&, const optional<RHS>&);
-    //    bool operator==(const optional<LHS>&, const std::optional<RHS>&);
-    //    bool operator!=(const optional<LHS>&, const std::optional<RHS>&);
-    //    bool operator< (const optional<LHS>&, const std::optional<RHS>&);
-    //    bool operator<=(const optional<LHS>&, const std::optional<RHS>&);
-    //    bool operator>=(const optional<LHS>&, const std::optional<RHS>&);
-    //    bool operator> (const optional<LHS>&, const std::optional<RHS>&);
-
-    if (verbose)
-        printf("\nTESTING RELATIONAL OPERATORS"
-               "\n============================\n");
-    if (veryVerbose)
-        printf("\tComparison with an 'optional'.\n");
-    {
-        testCase31_imp_a<bsl::optional<int>, bsl::optional<MyClass2> >();
-
-        testCase31_imp_a<bsl::optional<MyClass2>, bsl::optional<int> >();
-
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-        testCase31_imp_a<std::optional<int>, bsl::optional<int> >();
-
-        testCase31_imp_a<bsl::optional<int>, std::optional<int> >();
-
-        testCase31_imp_a<std::optional<MyClass2>, bsl::optional<MyClass2> >();
-
-        testCase31_imp_a<bsl::optional<MyClass2>, std::optional<MyClass2> >();
-
-        testCase31_imp_a<std::optional<int>, bsl::optional<MyClass2> >();
-
-        testCase31_imp_a<bsl::optional<MyClass2>, std::optional<int> >();
-
-        testCase31_imp_a<std::optional<MyClass2>, bsl::optional<int> >();
-
-        testCase31_imp_a<bsl::optional<int>, std::optional<MyClass2> >();
-#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    }
-    if (veryVerbose)
-        printf("\tComparison with a non 'optional' .\n");
-    {
-        testCase31_imp_b<bsl::optional<int>, MyClass2>();
-
-        testCase31_imp_b<bsl::optional<MyClass2>, int>();
-    }
-    if (veryVerbose)
-        printf("\tComparison with a nullopt_t .\n");
-    {
-        testCase31_imp_c<int>();
-        testCase31_imp_c<MyClass2>();
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase30()
+void TestDriver<TYPE>::testCase17()
 {
     // --------------------------------------------------------------------
     // TESTING ALLOCATOR EXTENDED 'make_optional' FACILITY
@@ -6294,7 +6039,7 @@ void TestDriver<TYPE>::testCase30()
     }
 }
 template <class TYPE>
-void TestDriver<TYPE>::testCase30b()
+void TestDriver<TYPE>::testCase17b()
 {
     // --------------------------------------------------------------------
     // TESTING ALLOCATOR EXTENDED 'make_optional' FACILITY
@@ -6999,7 +6744,7 @@ void TestDriver<TYPE>::testCase30b()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase29()
+void TestDriver<TYPE>::testCase16()
 {
     // --------------------------------------------------------------------
     // TESTING 'make_optional' FACILITY
@@ -7074,7 +6819,7 @@ void TestDriver<TYPE>::testCase29()
     }
 }
 template <class TYPE>
-void TestDriver<TYPE>::testCase29b()
+void TestDriver<TYPE>::testCase16b()
 {
     // --------------------------------------------------------------------
     // TESTING 'make_optional' FACILITY
@@ -7637,7 +7382,7 @@ void TestDriver<TYPE>::testCase29b()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase28()
+void TestDriver<TYPE>::testCase15()
 {
     // --------------------------------------------------------------------
     // TESTING TRAITS AND TYPEDEFS
@@ -7708,7 +7453,7 @@ void TestDriver<TYPE>::testCase28()
     }
 }
 template <class TYPE>
-void TestDriver<TYPE>::testCase28b()
+void TestDriver<TYPE>::testCase15b()
 {
     // --------------------------------------------------------------------
     // TESTING TRAITS AND TYPEDEFS
@@ -7739,7 +7484,892 @@ void TestDriver<TYPE>::testCase28b()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase27()
+void TestDriver<TYPE>::testCase14()
+{
+    // ------------------------------------------------------------------------
+    // TESTING 'hashAppend'
+    //
+    // Concerns:
+    //: 1 Hashing a value with a null value is equivalent to appending 'false'
+    //:   to the hash.
+    //:
+    //: 2 Hashing a value with a nullable value is equivalent to appending
+    //:   'true' to the hash followed by the value.
+    //
+    // Plan:
+    //: 1 Create a null nullable value and verify that hashing it yields the
+    //:   same value as hashing 'false'. [C-1]
+    //:
+    //: 2 Create a non-null nullable value for a series of test values and
+    //:   verify that hashing it produces the same result as hashing 'true' and
+    //:   then the test values themselves. [C-2]
+    //
+    // Testing:
+    //   void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input);
+    // ------------------------------------------------------------------------
+
+    if (verbose)
+        printf("\nTESTING 'hashAppend'"
+               "\n====================\n");
+
+    const TestValues VALUES;
+    const int        NUM_VALUES = static_cast<int>(VALUES.size());
+
+    bslma::TestAllocator da("default", veryVeryVeryVerbose);
+    bslma::TestAllocator oa("object", veryVeryVeryVerbose);
+
+    bslma::DefaultAllocatorGuard dag(&da);
+
+    {
+        ObjWithAllocator object(&oa);
+
+        Obj&       x = object.object();
+        const Obj& X = x;
+
+        ASSERT(0 == oa.numBlocksInUse());
+        ASSERT(0 == da.numBlocksInUse());
+
+        const size_t hashValue1 = bslh::Hash<>()(X);
+        const size_t hashValue2 = bslh::Hash<>()(false);
+        ASSERTV(hashValue1, hashValue2, hashValue1 == hashValue2);
+    }
+
+    {
+        ObjWithAllocator object(&oa);
+
+        Obj&       x = object.object();
+        const Obj& X = x;
+
+        for (int i = 0; i < NUM_VALUES; ++i) {
+            ASSERT(0 == oa.numBlocksInUse());
+            ASSERT(0 == da.numBlocksInUse());
+
+            x = VALUES[i];
+
+            bslma::TestAllocatorMonitor oam(&oa);
+
+            bslh::DefaultHashAlgorithm hasher;
+
+            const size_t hashValue1 = bslh::Hash<>()(X);
+            hashAppend(hasher, true);
+            hashAppend(hasher, VALUES[i]);
+            const size_t hashValue2 =
+                static_cast<size_t>(hasher.computeHash());
+
+            ASSERTV(hashValue1, hashValue2, hashValue2 == hashValue1);
+
+            ASSERT(oam.isInUseSame());
+            ASSERT(0 == da.numBlocksInUse());
+
+            x.reset();
+        }
+        ASSERT(0 == oa.numBlocksInUse());
+        ASSERT(0 == da.numBlocksInUse());
+    }
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase13()
+{
+    TestDriver<TYPE>::testCase13_imp_a();
+    TestDriver<const TYPE>::testCase13_imp_a();
+    TestDriver<TYPE>::testCase13_imp_b();
+    TestDriver<const TYPE>::testCase13_imp_b();
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase13_imp_a()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'emplace' METHOD
+    //   This test will ensure that the 'emplace' method works as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'emplace' with no arguments creates a default constructed
+    //:   'value_type' object.
+    //:
+    //: 2 If 'value_type' is allocator-aware, 'emplace' invokes the allocator
+    //:   extended constructor using the 'optional''s allocator.
+    //:
+    //: 3 There are no unnecessary 'value_type' copies created
+    //:
+    //: 4 Variadic arguments to 'emplace' method are correctly forwarded to the
+    //:   constructor arguments.
+    //
+    // Plan:
+    //: 1 Call 'emplace' method that takes no arguments and verify the value
+    //:   type object is default constructed. [C-1]
+    //:
+    //: 2 In step 1, if the 'value_type' is allocator-aware, verify the
+    //:   allocator used for the constructed value is the allocator of the
+    //:   'optional' object. [C-2]
+    //:
+    //: 3 Invoke 'emplace' method with varying number of arguments, some of
+    //:   which are to be moved from. Verify the arguments are perfect
+    //:   forwarded to the constructor in the correct order. [C-4]
+    //:
+    //: 4 In steps 1-3, verify that no additional copies of 'value_type' have
+    //:   been created. [C-3]
+    //
+    // Testing:
+    //
+    //   void emplace(Args&&...);
+    //
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING 'emplace' METHOD"
+               "\n========================\n");
+    {
+        bslma::TestAllocator da("other", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        TEST_EMPLACE((&da), ());
+        TEST_EMPLACE((MoveUtil::move(VA1), &da), (MoveUtil::move(VA1)));
+        TEST_EMPLACE((VA1, &da), (VA1));
+        TEST_EMPLACE((MoveUtil::move(VA1), VA2, &da),
+                     (MoveUtil::move(VA1), VA2));
+        TEST_EMPLACE((VA1, MoveUtil::move(VA2), &da),
+                     (VA1, MoveUtil::move(VA2)));
+
+        TEST_EMPLACE((MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), &da),
+                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
+        TEST_EMPLACE((VA1, MoveUtil::move(VA2), VA3, &da),
+                     (VA1, MoveUtil::move(VA2), VA3));
+
+        TEST_EMPLACE(
+                    (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4, &da),
+                    (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
+        TEST_EMPLACE(
+                    (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), &da),
+                    (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5)));
+        TEST_EMPLACE(
+               (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5, &da),
+               (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6));
+        TEST_EMPLACE((VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      &da),
+                     (VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6)));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7)));
+        TEST_EMPLACE((VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      &da),
+                     (VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8));
+        TEST_EMPLACE((VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      &da),
+                     (VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8)));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9)));
+        TEST_EMPLACE((VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      &da),
+                     (VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9));
+
+        TEST_EMPLACE((MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      VA10,
+                      &da),
+                     (MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      VA10));
+        TEST_EMPLACE((VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      MoveUtil::move(VA10),
+                      &da),
+                     (VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      MoveUtil::move(VA10)));
+    }
+#ifdef BSLSTL_OPTIONAL_TEST_BAD_EMPLACE
+    {
+        CObj bad1;
+        bad1.emplace();               // this should not compile 1
+        bad1.emplace(VA1);            // this should not compile 2
+        bad1.emplace(VA1, VA2);       // this should not compile 3
+        bad1.emplace(VA1, VA2, VA3);  // this should not compile 4
+        bad1.emplace(VA1, VA2, VA3, VA4);
+        // this should not compile 5
+
+        CObjC bad2;
+        bad2.emplace();               // this should not compile 6
+        bad2.emplace(VA1);            // this should not compile 7
+        bad2.emplace(VA1, VA2);       // this should not compile 8
+        bad2.emplace(VA1, VA2, VA3);  // this should not compile 9
+        bad2.emplace(VA1, VA2, VA3, VA4);
+        // this should not compile 10
+    }
+#endif
+}
+template <class TYPE>
+void TestDriver<TYPE>::testCase13_imp_b()
+{
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+    // --------------------------------------------------------------------
+    // TESTING TESTING INITIALIZER LIST 'emplace' METHOD
+    //   This test will ensure that the initializer list 'emplace' method works
+    //   as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'emplace' with only an initializer list detects the
+    //:   initializer list.
+    //:
+    //: 2 Variadic arguments to 'emplace' method are correctly fowarded to the
+    //:   constructor arguments.
+    //:
+    //: 3 If 'value_type' is allocator-aware, 'emplace' invokes the allocator
+    //:   extended constructor using the 'optional''s allocator.
+    //:
+    //: 4 There are no unnecessary argument type and 'value_type' copies
+    //:   created
+    //
+    // Plan:
+    //: 1 Create an 'optional' object of non allocator-aware 'value_type'.
+    //:   Call 'emplace' method that takes just an initializer list, and verify
+    //:   the object was constructed using an initializer list constructor.
+    //:   [C-1]
+    //:
+    //: 2 Repeat step 1 using varying number of arguments. [C-2]
+    //:
+    //: 3 Repeat steps 1-2 with an allocator-aware 'value_type' and verify the
+    //:   value in optional was constructed using the correct allocator. [C-3]
+    //:
+    //: 4 In steps 1-3, verify no unnecessary copies of the arguments and the
+    //:   'value_type' have been created. [C-4]
+    //
+    // Testing:
+    //
+    //   void emplace(std::initializer_list<U>, Args&&...);
+    //
+    // --------------------------------------------------------------------
+    if (verbose)
+        printf("\nTESTING INITIALIZER LIST 'emplace' METHOD"
+               "\n=========================================\n");
+    {
+        bslma::TestAllocator da("other", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3}, &da), ({1, 2, 3}));
+        TEST_EMPLACE(
+              (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), &da),
+              ({1, 2, 3}, MoveUtil::move(VA1)));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3}, VA1, &da),
+                     ({1, 2, 3}, VA1));
+        TEST_EMPLACE(
+         (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), VA2, &da),
+         ({1, 2, 3}, MoveUtil::move(VA1), VA2));
+        TEST_EMPLACE(
+         (std::initializer_list<int>{1, 2, 3}, VA1, MoveUtil::move(VA2), &da),
+         ({1, 2, 3}, VA1, MoveUtil::move(VA2)));
+
+        TEST_EMPLACE(
+            (std::initializer_list<int>{1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3),
+             &da),
+            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      &da),
+                     ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3));
+
+        TEST_EMPLACE(
+            (std::initializer_list<int>{1, 2, 3},
+             MoveUtil::move(VA1),
+             VA2,
+             MoveUtil::move(VA3),
+             VA4,
+             &da),
+            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
+        TEST_EMPLACE(
+            (std::initializer_list<int>{1, 2, 3},
+             VA1,
+             MoveUtil::move(VA2),
+             VA3,
+             MoveUtil::move(VA4),
+             &da),
+            ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5)));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6)));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7)));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8)));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9)));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9));
+
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      VA10,
+                      &da),
+                     ({1, 2, 3},
+                      MoveUtil::move(VA1),
+                      VA2,
+                      MoveUtil::move(VA3),
+                      VA4,
+                      MoveUtil::move(VA5),
+                      VA6,
+                      MoveUtil::move(VA7),
+                      VA8,
+                      MoveUtil::move(VA9),
+                      VA10));
+        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      MoveUtil::move(VA10),
+                      &da),
+                     ({1, 2, 3},
+                      VA1,
+                      MoveUtil::move(VA2),
+                      VA3,
+                      MoveUtil::move(VA4),
+                      VA5,
+                      MoveUtil::move(VA6),
+                      VA7,
+                      MoveUtil::move(VA8),
+                      VA9,
+                      MoveUtil::move(VA10)));
+    }
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
+}
+
+void testCase10f()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=(optional_type)'
+    //   This test will ensure that the 'operator=(rhs)', where 'rhs' is an
+    //   optional type, member function works as expected.  These test require
+    //   compilation failures and will not run by default.
+    //
+    // Concerns:
+    //: 1 'operator=(rhs)', where 'rhs' is an 'optional' type whose
+    //:   'value_type' is not assignable to the 'value_type' of the target
+    //:    'optional', can not be called.
+    //:
+    //: 2 'operator=(rhs)', where 'rhs' is an 'optional' type whose
+    //:   'value_type' is not convertible to target 'optional''s 'value_type',
+    //:    can not be called.
+    //
+    // Plan:
+    //: 1 Create an 'optional' object of non allocator-aware 'value_type' as
+    //:   the target object.  Verify that an 'optional' object of 'value_type'
+    //:   that is convertible, but not assignable to target object 'value_type'
+    //:   can not be assigned to the target object.  Note that this test
+    //:   requires compilation errors and needs to be enabled and checked
+    //:   manually. [C-1]
+    //:
+    //: 2 Verify that an 'optional' object of 'value_type' that is assignable,
+    //:   but not convertible to target object's 'value_type' can not be
+    //:   assigned to the target object.  Note that this test requires
+    //:   compilation errors and needs to be enabled and checked manually.
+    //:   [C-2]
+    //
+    //
+    // Testing:
+    //
+    // optional& operator=(const optional&);
+    // optional& operator=(optional&&);
+    // optional& operator=(const optional<ANY_TYPE>&);
+    // optional& operator=(optional<ANY_TYPE>&&);
+    //
+    // --------------------------------------------------------------------
+
+    if (verbose)
+        printf("\nTESTING 'operator=(optional_type)'"
+               "\n==================================\n");
+#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_OPT
+
+    if (veryVerbose)
+        printf("\tUsing 'MyClass1b'.\n");
+    {
+        typedef MyClass1b                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj                     mX  = ValueType(0);
+            bsl::optional<MyClass1> mc1 = MyClass1(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass1(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass1c'.\n");
+    {
+        typedef MyClass1c                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj                     mX  = ValueType(0);
+            bsl::optional<MyClass1> mc1 = MyClass1(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass1(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass2b'.\n");
+    {
+        typedef MyClass2b                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj                     mX;
+            bsl::optional<MyClass2> mc1 = MyClass2(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass2(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass2c'.\n");
+    {
+        typedef MyClass2c                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj                     mX;
+            bsl::optional<MyClass2> mc1 = MyClass2(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass2(0);  // this should not compile
+        }
+    }
+#endif
+}
+
+void testCase10e()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=(non_optional_type)'
+    //   This test will ensure that the 'operator=(non_optional_type)' function
+    //   works as expected.
+    //
+    // Concerns:
+    //: 1 'operator=(rhs)', where 'rhs' is not an 'optional' object, can not be
+    //:    called if 'rhs' is of a type which is not assignable to
+    //:    'value_type'.
+    //:
+    //: 2  'operator=(rhs)', where 'rhs' is not an 'optional' object, can not be
+    //:    called if 'value_type' is not constructable from 'rhs'.
+    //
+    // Plan:
+    //
+    //: 1 Create an 'optional' object. Verify that lvalue and rvalue of type
+    //:   convertible, but not assignable to 'value_type' can not be assigned
+    //:   to the 'optional' object. Note that this test requires compilation
+    //:   errors and needs to be enabled and checked manually. [C-1]
+    //:
+    //: 2 Create an 'optional' object. Verify that lvalue and rvalue of type
+    //:   assignable, but not convertible to 'value_type' can not be assigned
+    //:   to the 'optional' object. Note that this test requires compilation
+    //:   errors and needs to be enabled and checked manually. [C-2]
+    //
+    //
+    // Testing:
+    //
+    // optional& operator=(const TYPE&);
+    // optional& operator=(TYPE&&);
+    // optional& operator=(const ANY_TYPE&);
+    // optional& operator=(ANY_TYPE&&);
+    //
+    // --------------------------------------------------------------------
+
+    if (verbose)
+        printf("\nTESTING 'operator=(non_optional_type)'"
+               "\n======================================"
+               "\n");
+#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_NONOPT
+
+    if (veryVerbose)
+        printf("\tUsing 'MyClass1b'.\n");
+    {
+        typedef MyClass1b                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj      mX  = ValueType(0);
+            MyClass1 mc1 = MyClass1(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass1(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass1c'.\n");
+    {
+        typedef MyClass1c                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj      mX  = ValueType(0);
+            MyClass1 mc1 = MyClass1(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass1(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass2b'.\n");
+    {
+        typedef MyClass2b                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj      mX;
+            MyClass2 mc1 = MyClass2(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass2(0);  // this should not compile
+        }
+    }
+    if (veryVerbose)
+        printf("\tUsing 'MyClass2c'.\n");
+    {
+        typedef MyClass2c                ValueType;
+        typedef bsl::optional<ValueType> Obj;
+        {
+            Obj      mX;
+            MyClass2 mc1 = MyClass2(2);
+
+            mX = mc1;          //this should not compile
+            mX = MyClass2(0);  // this should not compile
+        }
+    }
+#endif
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase10d()
 {
     // --------------------------------------------------------------------
     // TESTING 'operator=' OVERLOAD RESOLUTION
@@ -7872,7 +8502,1626 @@ void TestDriver<TYPE>::testCase27()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase26()
+void TestDriver<TYPE>::testCase10c()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=(non_optional_type)'
+    //   This test will ensure that the 'operator=(rhs)' member function, where
+    //   'rhs' is not an 'optional' type, works as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'operator=(rhs)', where 'rhs' is not of an 'optional' type,
+    //:   or an engaged 'optional' assigns 'rhs' to the 'value_type' object.
+    //:
+    //: 2 Calling 'operator=(rhs)', where 'rhs' is not of an 'optional' type,
+    //:   or a disengaged 'optional' creates a 'value_type' object initialized
+    //:   with 'rhs'.
+    //:
+    //: 3 For allocator-aware types, the assignment to a disengaged 'optional'
+    //:   uses the stored allocator.
+    //:
+    //: 4 Assignment of rvalues uses move assignment/construction where
+    //:   available.
+    //:
+    //: 5 'optional' object of const qualified 'value_type' can not be assigned
+    //:   to.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' object. Verify that assignment from
+    //:   'value_type', from 'const' qualified 'value_type', and from a type
+    //:   assignable to 'value_type' results in  an 'optional' object having
+    //:   the (possibly converted) value of 'rhs'. [C-1]
+    //:
+    //: 2 Repeat step 1 using rvalue 'rhs' and verify that 'rhs' was moved from.
+    //:   [C-4]
+    //:
+    //: 3 Create a disengaged 'optional' object. Verify that assignment from
+    //:   'value_type', from 'const' qualified 'value_type', and from type
+    //:   assignable to 'value_type' results in an 'optional' object having the
+    //:   (possibly converted) value of 'rhs'. [C-2]
+    //:
+    //: 4 Repeat step 4 using rvalue 'rhs' and verify that the 'rhs' was moved from.
+    //:   [C-4]
+    //:
+    //: 5 If 'TYPE' is allocator-aware, verify that the value of the 'optional'
+    //:   object after assignment is the allocator used at construction. [C-3]
+    //:
+    //: 6 Verify that an 'optional' object of 'const' qualified 'value_type'
+    //:   can not be assigned to. Note that this test requires compilation
+    //:   errors and needs to be enabled and checked manually. [C-5]
+    //
+    // Testing:
+    //
+    // optional& operator=(const TYPE&);
+    // optional& operator=(TYPE&&);
+    // optional& operator=(const ANY_TYPE&);
+    // optional& operator=(ANY_TYPE&&);
+    //
+    // --------------------------------------------------------------------
+
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        if (veryVeryVerbose)
+            printf("\t\tChecking assignment to an engaged "
+                   "'optional'.\n");
+        {
+            ValWithAllocator valBuffer(1, &da);
+            ValueType&       vi = valBuffer.object();
+            TEST_ASSIGN_VAL_ENGAGED(vi);
+
+            ValWithAllocator valBuffer2(2, &da);
+            ValueType&       vi2 = valBuffer2.object();
+            TEST_MOVE_ASSIGN_VAL_ENGAGED(vi2);
+            ASSERT(vi2.value() == k_MOVED_FROM_VAL);
+
+            const ValueType& cvi = valBuffer.object();
+            TEST_ASSIGN_VAL_ENGAGED(cvi);
+            TEST_ASSIGN_VAL_ENGAGED(MoveUtil::move(cvi));
+
+            int i = 3;
+            TEST_ASSIGN_VAL_ENGAGED(i);
+            TEST_MOVE_ASSIGN_VAL_ENGAGED(i);
+
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+            // C++03 MovableRef isn't const friendly which will make this test
+            // fail
+
+            const int ci = 6;
+            TEST_ASSIGN_VAL_ENGAGED(ci);
+            TEST_ASSIGN_VAL_ENGAGED(MoveUtil::move(ci));
+#endif
+        }
+        if (veryVeryVerbose)
+            printf("\t\tChecking assignment to a disengaged"
+                   " 'optional'.\n");
+        {
+            ValWithAllocator valBuffer(1, &da);
+            ValueType&       vi = valBuffer.object();
+            TEST_ASSIGN_VAL_EMPTY(vi);
+
+            ValWithAllocator valBuffer2(2, &da);
+            ValueType&       vi2 = valBuffer2.object();
+            TEST_MOVE_ASSIGN_VAL_EMPTY(vi2);
+            ASSERT(vi2.value() == k_MOVED_FROM_VAL);
+
+            const ValueType& cvi = valBuffer.object();
+            TEST_ASSIGN_VAL_EMPTY(cvi);
+            TEST_ASSIGN_VAL_EMPTY(MoveUtil::move(cvi));
+
+            int i = 3;
+            TEST_ASSIGN_VAL_EMPTY(i);
+
+            const int ci = 6;
+            TEST_ASSIGN_VAL_EMPTY(ci);
+            TEST_ASSIGN_VAL_EMPTY(MoveUtil::move(ci));
+        }
+        {
+            ObjC      mX = ValueType(0);
+            ValueType vi = ValueType(1);
+#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
+            mX = vi;  // this should not compile
+#endif                //BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
+        }
+    }
+}
+
+template <class TYPE>
+template <class OPT_TYPE>
+void TestDriver<TYPE>::testCase10b_imp()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=(optional_type)'
+    //   This test will ensure that the 'operator=(rhs)', where 'rhs' is an
+    //   'optional' type, works as expected.
+    //
+    // Concerns:
+    //: 1 That 'operator=(rhs)', where 'rhs' is a disengaged 'optional' object,
+    //:   makes the target 'optional' object disengaged.
+    //:
+    //: 2 That 'operator=(rhs)', invoked on an engaged 'optional' object and
+    //:   where 'rhs' is an engaged 'optional' object, assigns the value of the
+    //:   'rhs''optional' to the value of the target 'optional' object.
+    //:
+    //: 3 That 'operator=(rhs)', invoked on a disengaged 'optional' object and
+    //:   where 'rhs' is an engaged 'optional' object, constructs a
+    //:   'value_type' object from the value of 'rhs''optional' object.
+    //:
+    //: 4 The behaviour is the same if 'rhs' is a const-qualified 'optional',
+    //:   or an 'optional' of a const-qualified 'value_type'.
+    //:
+    //: 5 For allocator-aware types, the assignment from an 'optional' object
+    //:   does not modify the allocator.
+    //:
+    //: 6 Assignment from rvalues uses move assignment where available.
+    //:
+    //: 7 Assignment to an 'optional' of const qualified 'value_type' is not
+    //:   possible.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' of 'value_type'.  Assign a disengaged
+    //:   'optional' of the same type to it.  Verify that the destination object
+    //:   is disengaged. [C-1]
+    //:
+    //: 2 Emplace a value into the test object.  Assign an engaged 'optional'
+    //:   of the same type to it.  Verify thatthe value of the test object is the
+    //:   same as that of the object assigned to it. [C-2]
+    //:
+    //: 3 Assign a disengaged 'optional' of a 'value_type' convertible to test
+    //:   object's 'value_type'.  Verify that the destination object is
+    //:   disengaged. [C-1]
+    //:
+    //: 4 Emplace a value into the test object.  Assign an engaged 'optional'
+    //:   of a 'value_type' convertible to test object's 'value_type'.  Check
+    //:   that the value of the test object is the same as that of the object
+    //:   assigned to it. [C-2]
+    //:
+    //: 5 Repeat steps 1-4 using a const-qualified 'optional' object as 'rhs',
+    //:   and using an 'optional' of const-qualified value type. [C-4]
+    //:
+    //: 6 Repeat steps 1-5 using an rvalue as 'rhs'.  Verify the object was
+    //:   moved from if 'rhs' is a non const-qualified 'optional' of a non
+    //:   const-qualified 'value_type', and copied otherwise. [C-6]
+    //:
+    //: 7 Repeat steps 1-6 using a disengaged 'optional' as the test object
+    //:   in each step by calling 'reset' before each assignment. [C-3]
+    //:
+    //: 8 In steps 1-7, if 'value_type' is allocator-aware, verify that the test
+    //:   object's allocator has not been modified. [C-5]
+    //:
+    //: 9 Verify that a const qualified 'optional' can not be assigned to.
+    //:   Note that this test requires compilation failures and needs to be
+    //:   enabled and checked manually. [C-7]
+    //
+    // Testing:
+    //
+    // optional& operator=(const optional&);
+    // optional& operator=(optional&&);
+    // optional& operator=(const optional<ANY_TYPE>&);
+    // optional& operator=(optional<ANY_TYPE>&&);
+    // optional& operator=(const std::optional<ANY_TYPE>&);
+    // optional& operator=(std::optional<ANY_TYPE>&&);
+    // --------------------------------------------------------------------
+
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        typedef bslalg::ConstructorProxy<OPT_TYPE> SourceWithAllocator;
+        SourceWithAllocator                        X(&da);
+        OPT_TYPE&                                  source  = X.object();
+        const OPT_TYPE&                            cSource = X.object();
+
+        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(source);
+        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(source);
+        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(source));
+        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(MoveUtil::move(source));
+
+        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(cSource);
+        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(cSource);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        // C++03 MovableRef isn't const friendly which will make these tests
+        // fail
+        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(cSource));
+        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(MoveUtil::move(cSource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+
+        source.emplace(3);
+        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(source);
+        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(source);
+        TEST_MOVE_ASSIGN_OPT_EMPTY_FROM_ENGAGED(source);
+        source.emplace(3);
+        TEST_MOVE_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(source);
+        source.emplace(3);
+
+        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(cSource);
+        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(cSource);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        // C++03 MovableRef isn't const friendly which will make these tests
+        // fail
+        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(MoveUtil::move(cSource));
+        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(MoveUtil::move(cSource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+    }
+    {
+#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
+        typedef int OtherType;
+
+        ObjC      mX = ValueType(0);
+        OtherType i  = OtherType(3);
+        mX           = i;
+#endif  //BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase10b()
+{
+    testCase10b_imp<bsl::optional<TYPE> >();
+    testCase10b_imp<bsl::optional<int> >();
+    testCase10b_imp<bsl::optional<const TYPE> >();
+    testCase10b_imp<bsl::optional<const int> >();
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    testCase10b_imp<std::optional<TYPE> >();
+    testCase10b_imp<std::optional<int> >();
+    testCase10b_imp<std::optional<TYPE> >();
+    testCase10b_imp<std::optional<int> >();
+#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+}
+
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase10a_imp()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator=(nullopt_t)'
+    //   This test will ensure that the operator=(nullopt_t) member function
+    //   works as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'operator=(nullopt_t)' on a disengaged 'optional' leaves the
+    //:   'optional' disengaged.
+    //:
+    //: 2 Calling 'operator=(nullopt_t)' on an engaged 'optional' makes the
+    //:   'optional' disengaged.
+    //:
+    //: 3 For an allocator-aware 'value_type', calling 'operator=(nullopt_t)'
+    //:   does not modify the allocator.
+    //:
+    //: 4 'operator=(nullopt_t)' can be called on a non const qualified
+    //:   'optional' of a const qualified 'value_type'.
+    //
+    //
+    // Plan:
+    //: 1 Create a disengaged 'optional' of a non allocator-aware 'value_type'.
+    //:   Call operator=(nullopt_t) and verify that the 'optional' object is
+    //:   still disengaged [C-1]
+    //:
+    //: 2 Emplace a value in the 'optional'. Call operator=(nullopt_t) and
+    //:   verify that the 'optional' object has been disengaged. [C-2]
+    //:
+    //: 3 In steps 1 and 2, if 'TYPE' is allocator-aware, verify the allocator
+    //:   has not changed. [C-3]
+    //:
+    //: 4 Repeat the test using a const qualified 'TYPE'. [C-4]
+    //
+    // Testing:
+    //
+    //   operator=(nullopt_t)
+    //
+    // --------------------------------------------------------------------
+
+    {
+        Obj mX;
+        mX = bsl::nullopt;
+        ASSERT(!mX.has_value());
+
+        mX.emplace(ValueType());
+        mX = bsl::nullopt;
+        ASSERT(!mX.has_value());
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase10a()
+{
+    TestDriver<TYPE>::testCase10a_imp();
+    TestDriver<const TYPE>::testCase10a_imp();
+}
+
+template <class OPT_TYPE1, class OPT_TYPE2>
+void testCase9_imp()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'swap' METHOD
+    //
+    // Concerns:
+    //: 1 Swap of two disengaged objects is a no-op,
+    //:
+    //: 2 Swap of an engaged and a disengaged 'optional' moves the value
+    //:   from the engaged object to another without calling swap for the
+    //:   'value_type'.
+    //:
+    //: 3 Swap of two engaged objects calls swap for the 'value_type'.
+    //:
+    //: 4 Behaviour is the same for 'swap' member function, and 'swap' free
+    //:   function
+    //:
+    //: 5 Behaviour is the same for allocator-aware and non allocator-aware
+    //:   'value_type's.
+    //
+    // Plan:
+    //: 1 Call 'swap' free function with two disengaged 'optional' objects and
+    //:   verify 'value_type' 'swap' has not been called.  [C-1]
+    //:
+    //: 2 Call 'swap' free function with an engaged 'optional' object and a
+    //:   disengaged 'optional' object.  Verify the disengaged 'optional' is
+    //:   now engaged with a value from the other object, and that the other
+    //:   object is now disengaged.  Verify that the 'value_type' 'swap' has
+    //:   not been called.  [C-2]
+    //:
+    //: 3 Call swap free function with two engaged 'optional' objects and
+    //:   verify 'value_type' 'swap' has been called.  [C-3]
+    //:
+    //: 4 Repeat steps 1-3 using the 'swap' member function.  [C-4]
+    //:
+    //: 5 Invoke the test using an allocator-aware 'TYPE' and a non
+    //:   allocator-aware 'TYPE'.  [C-5]
+    //
+    //
+    // Testing:
+    //    void swap(optional& other);
+    //    void swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+    //    void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
+    //    void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
+    // --------------------------------------------------------------------
+
+    using bsl::swap;
+
+    typedef typename OPT_TYPE1::value_type VALUE_TYPE;
+
+    {
+        OPT_TYPE1 a;
+        OPT_TYPE2 b;
+
+        VALUE_TYPE::swapReset();
+        swap(a, b);
+
+        ASSERT(!VALUE_TYPE::swapCalled());
+        ASSERT(!a.has_value());
+        ASSERT(!b.has_value());
+
+        VALUE_TYPE::swapReset();
+        a.swap(b);
+
+        ASSERT(!VALUE_TYPE::swapCalled());
+        ASSERT(!a.has_value());
+        ASSERT(!b.has_value());
+    }
+    {
+        VALUE_TYPE obj1(1);
+        VALUE_TYPE obj2(2);
+
+        const VALUE_TYPE Zobj1(obj1);
+        const VALUE_TYPE Zobj2(obj2);
+
+        OPT_TYPE1 a = obj1;
+        OPT_TYPE2 b = obj2;
+        ASSERT(a.value() == Zobj1);
+        ASSERT(b.value() == Zobj2);
+
+        VALUE_TYPE::swapReset();
+        ASSERT(!VALUE_TYPE::swapCalled());
+        swap(a, b);
+        ASSERT(VALUE_TYPE::swapCalled());
+
+        ASSERT(b.value() == Zobj1);
+        ASSERT(a.value() == Zobj2);
+
+        VALUE_TYPE::swapReset();
+        ASSERT(!VALUE_TYPE::swapCalled());
+        a.swap(b);
+        ASSERT(VALUE_TYPE::swapCalled());
+
+        ASSERT(a.value() == Zobj1);
+        ASSERT(b.value() == Zobj2);
+    }
+    {
+        OPT_TYPE1 nonNullObj(VALUE_TYPE(10));
+        OPT_TYPE1 nonNullObjCopy(nonNullObj);
+        OPT_TYPE2 nullObj;
+
+        VALUE_TYPE::swapReset();
+        swap(nonNullObj, nullObj);
+
+        ASSERT(!VALUE_TYPE::swapCalled());
+        ASSERT(nonNullObjCopy == nullObj);
+        ASSERT(!nonNullObj.has_value());
+
+        VALUE_TYPE::swapReset();
+        nonNullObj.swap(nullObj);
+
+        ASSERT(!VALUE_TYPE::swapCalled());
+        ASSERT(nonNullObjCopy == nonNullObj);
+        ASSERT(!nullObj.has_value());
+    }
+}
+
+void testCase9()
+{
+
+    testCase9_imp<bsl::optional<Swappable>,
+                   bsl::optional<Swappable> >();
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    // swap between bsl::optional and std::optional works only for non-AA
+    // types
+
+    testCase9_imp<bsl::optional<Swappable>,
+                   std::optional<Swappable> >();
+
+
+    testCase9_imp<std::optional<Swappable>,
+                   bsl::optional<Swappable> >();
+#endif
+
+    testCase9_imp<bsl::optional<SwappableAA>,
+                   bsl::optional<SwappableAA> >();
+
+}
+
+
+template <class TYPE>
+template <class DEST_TYPE, class SRC_TYPE>
+void TestDriver<TYPE>::testCase7b_imp()
+{
+    // --------------------------------------------------------------------
+    // TESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION
+    //   This test will ensure that the copy construction works as expected.
+    //
+    // Concerns:
+    //: 1 Constructing an 'optional' from an engaged 'optional' of the same
+    //:    type creates an engaged 'optional' where the 'value_type' object is
+    //:   copy constructed from the 'value_type' object of the original
+    //:   'optional' object.
+    //:
+    //: 2 Constructing an 'optional' from a disengaged 'optional' of the same
+    //:    type creates a disengaged 'optional'.
+    //:
+    //: 3 The 'value_type' object in 'optional' is move constructed when
+    //:   possible.
+    //:
+    //: 4 If allocator extended version of copy constructor is used, the
+    //:   allocator passed to the constructor is the allocator of the newly
+    //:   created 'optional'.
+    //:
+    //: 5 No unnecessary copies of the 'value_type' are created.
+    //:
+    //: 6 All of the above holds if the source object is an 'std::optional'.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' of a non allocator-aware 'value_type'.
+    //:   Use the created object to copy initialize another 'optional'
+    //:   object of the same type.  Verify thatthe value of the new object and the
+    //:   value of the original object match.  [C-1]
+    //:
+    //: 2 Repeat step 1 using a disengaged 'optional' object as the source
+    //:   object.  Verify that the new 'optional' object is disengaged.  [C-2]
+    //:
+    //: 3 Repeat step 1 using an rvalue 'optional' as source object.  Check
+    //:   that the move constructor is invoked where appropriate.  [C-3]
+    //:
+    //: 4 In steps 1-3, if 'value_type' is allocator-aware, verify that the
+    //:   allocator of the newly created 'optional' object is the allocator
+    //:   provided to the copy constructor.  [C-4]
+    //:
+    //: 5 In steps 1-4, for concern 4, verify that no unnecessary copies of the
+    //:   'value_type' have been created.  [C-5]
+    //:
+    //: 6 Repeat steps 1-5 using an 'std::optional' as the source object.
+    //:   [C-6]
+    //
+    // Testing:
+    //
+    //    optional(alloc_arg, alloc, const optional&);
+    //    optional(alloc_arg, alloc, optional&&);
+    //    optional(alloc_arg, alloc, const optional<ANY_TYPE> &);
+    //    optional(alloc_arg, alloc, optional<ANY_TYPE>&&);
+    //    optional(alloc_arg, alloc, const std::optional<ANY_TYPE> &);
+    //    optional(alloc_arg, alloc, std::optional<ANY_TYPE>&&);
+    // --------------------------------------------------------------------
+
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+        bslma::TestAllocator ta("third", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        typedef bsl::optional<DEST_TYPE> DEST_OPT_TYPE;
+        {
+            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE&       source  = sourceBuffer.object();
+            const SRC_OPT_TYPE& csource = sourceBuffer.object();
+
+            TEST_EXT_COPY_FROM_EMPTY_OPT(source);
+            TEST_EXT_COPY_FROM_EMPTY_OPT(csource);
+            TEST_EXT_MOVE_FROM_EMPTY_OPT(source);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+            // C++03 MovableRef isn't const friendly which will make these
+            // tests fail
+            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+
+            source.emplace(3);
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(source);
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(csource);
+            TEST_EXT_MOVE_FROM_ENGAGED_OPT(source);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+            // we call copy macro here because a move from a 'const optional'
+            // should trigger a copy constructor
+            source.emplace(3);
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        }
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        {
+            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE&       source  = sourceBuffer.object();
+            const SRC_OPT_TYPE& csource = sourceBuffer.object();
+
+            TEST_EXT_COPY_FROM_EMPTY_OPT(source);
+            TEST_EXT_COPY_FROM_EMPTY_OPT(csource);
+            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(source));
+            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
+
+            source.emplace(3);
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(source);
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(csource);
+            TEST_EXT_MOVE_FROM_ENGAGED_OPT(source);
+            source.emplace(3);
+            // we call copy macro here because a move from a 'const optional'
+            // should trigger a copy constructor
+            TEST_EXT_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
+        }
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase7b()
+{
+    testCase7b_imp<TYPE, TYPE>();
+    testCase7b_imp<TYPE, int>();
+    testCase7b_imp<TYPE, const TYPE>();
+    testCase7b_imp<TYPE, const int>();
+    testCase7b_imp<const TYPE, TYPE>();
+    testCase7b_imp<const TYPE, int>();
+    testCase7b_imp<const TYPE, const TYPE>();
+    testCase7b_imp<const TYPE, const int>();
+}
+
+
+template <class TYPE>
+template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
+void TestDriver<TYPE>::testCase7a_imp()
+{
+    // --------------------------------------------------------------------
+    // TESTING COPY/MOVE CONSTRUCTION
+    //   This test will ensure that the copy construction works as expected.
+    //
+    // Concerns:
+    //: 1 Constructing an 'optional' from an engaged 'optional' creates an
+    //:   engaged 'optional' where the 'value_type' object is constructed
+    //:   from the 'value_type' object of the original 'optional' object.
+    //:
+    //: 2 Constructing an 'optional' from a disengaged 'optional' of the same
+    //:   type creates a disengaged 'optional'.
+    //:
+    //: 3 If 'value_type' is allocator-aware, and the source is an rvalue
+    //:   'optional' of same 'value_type', the allocator is propagated.
+    //:   Otherwise, the default allocator is used.
+    //:
+    //: 4 The 'value_type' object in 'optional' is move constructed when
+    //:   possible.
+    //:
+    //: 5 No unnecessary copies of the 'value_type' are created.
+    //:
+    //: 6 All of the above holds if the source object is an 'std::optional'.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' of 'SRC_TYPE' and use it to create an
+    //:   'optional' of 'DEST_TYPE'.  Verify that the value of the new object
+    //:   and the value of the original object match. [C-1]
+    //:
+    //: 2 Repeat step 1 using a disengaged 'optional' object as the source
+    //:   object.  Verify that the created 'optional' object is disengaged.
+    //:   [C-2]
+    //:
+    //: 3 If the 'value_type' is allocator-aware, verify that the allocator of
+    //:   the newly created 'optional' object is the default allocator. [C-3]
+    //:
+    //: 4 Repeat steps 1-3 using an rvalue for source. Verify that the move
+    //:   constructor is invoked where necessary.  Note that a part of this
+    //:   test is extracted to a separate function to account for a bug in
+    //:   older versions of cpplib. [C-4]
+    //:
+    //: 5 In step 4, if the 'value_type' is allocator-aware, verify that the
+    //:   allocator is propagated as needed. [C-3]
+    //:
+    //: 6 In steps 1-5, verify that no unnecessary copies of the 'value_type'
+    //:   have been created. [C-5]
+    //:
+    //: 8 Repeat steps 1-5 using an 'std::optional' as the source object.
+    //
+    // Testing:
+    //
+    //    optional(const optional&);
+    //    optional(optional&&);
+    //    optional(const optional<ANY_TYPE> &);
+    //    optional(optional<ANY_TYPE>&&);
+    //    optional(const std::optional<ANY_TYPE> &);
+    //    optional(std::optional<ANY_TYPE>&&);
+    // --------------------------------------------------------------------
+
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        {
+            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE&       source  = sourceBuffer.object();
+            const SRC_OPT_TYPE& csource = sourceBuffer.object();
+
+            TEST_COPY_FROM_EMPTY_OPT(source);
+            TEST_COPY_FROM_EMPTY_OPT(csource);
+            TEST_MOVE_FROM_EMPTY_OPT(source, PROPAGATE_ON_MOVE);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+            // C++03 MovableRef isn't const friendly which will make these
+            // tests fail
+            TEST_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+
+            source.emplace(3);
+            TEST_COPY_FROM_ENGAGED_OPT(source);
+            TEST_COPY_FROM_ENGAGED_OPT(csource);
+                // extracted to testCase7a_imp_libgccbug
+                // TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+            // we call copy macro here because a move from a 'const optional'
+            // should trigger a copy constructor
+            source.emplace(3);
+            TEST_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
+#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        }
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        {
+            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE&       source  = sourceBuffer.object();
+            const SRC_OPT_TYPE& csource = sourceBuffer.object();
+
+            TEST_COPY_FROM_EMPTY_OPT(source);
+            TEST_COPY_FROM_EMPTY_OPT(csource);
+            TEST_MOVE_FROM_EMPTY_OPT(source, false);
+            TEST_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
+
+            source.emplace(3);
+            TEST_COPY_FROM_ENGAGED_OPT(source);
+            TEST_COPY_FROM_ENGAGED_OPT(csource);
+                // extracted to testCase7a_imp_libgccbug
+                //TEST_MOVE_FROM_ENGAGED_OPT(source, false);
+            source.emplace(3);
+            // we call copy macro here because a move from a 'const optional'
+            // should trigger a copy constructor
+            TEST_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
+        }
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    }
+}
+template <class TYPE>
+template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
+void TestDriver<TYPE>::testCase7a_imp_libgccbug()
+{
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+        {
+            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE& source = sourceBuffer.object();
+
+            source.emplace(3);
+            TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
+        }
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        {
+            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
+            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
+            SourceWithAllocator                            sourceBuffer(&oa);
+            SRC_OPT_TYPE& source = sourceBuffer.object();
+
+            source.emplace(3);
+            TEST_MOVE_FROM_ENGAGED_OPT(source, false);
+        }
+#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    }
+}
+
+#if (BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY &&                       \
+     BSLS_LIBRARYFEATURES_STDCPP_GNU &&                                       \
+     (!defined(_GLIBCXX_RELEASE) ||                                           \
+      (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE <= 8)))
+#define STD_OPTIONAL_LIBCPP_BUG 1
+#endif
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase7a()
+{
+    testCase7a_imp<TYPE, TYPE, true>();
+    testCase7a_imp<TYPE, int, false>();
+    testCase7a_imp<TYPE, const TYPE, false>();
+    testCase7a_imp<TYPE, const int, false>();
+    testCase7a_imp<const TYPE, TYPE, true>();
+    testCase7a_imp<const TYPE, int, false>();
+    testCase7a_imp<const TYPE, const TYPE, true>();
+    testCase7a_imp<const TYPE, const int, false>();
+
+    testCase7a_imp_libgccbug<TYPE, TYPE, true>();
+    testCase7a_imp_libgccbug<TYPE, int, false>();
+    testCase7a_imp_libgccbug<TYPE, const TYPE, false>();
+    testCase7a_imp_libgccbug<TYPE, const int, false>();
+    testCase7a_imp_libgccbug<const TYPE, TYPE, true>();
+    testCase7a_imp_libgccbug<const TYPE, int, false>();
+#ifndef STD_OPTIONAL_LIBCPP_BUG
+    // In older version of CPPLIB, the constness of 'value_type' is not
+    // preserved when attempting to move construct from an 'optional' of
+    // 'const' 'value_type'.  This results in a move being invoked, despite the
+    // fact that the 'value_type' of the source 'optional' object should not be
+    // modifiable.
+    testCase7a_imp_libgccbug<const TYPE, const TYPE, true>();
+#endif
+    testCase7a_imp_libgccbug<const TYPE, const int, false>();
+}
+
+template <class OPT_TYPE1, class OPT_TYPE2>
+void testCase6_imp_a()
+{
+    OPT_TYPE1 X;
+    OPT_TYPE2 Y;
+
+    //comparing two disengaged optionals
+    ASSERT(X == Y);     // If bool(x) != bool(y), false;
+    ASSERT(!(X != Y));  // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false;
+    ASSERT(!(X > Y));   // If !x, false;
+    ASSERT(X <= Y);     // If !x, true;
+    ASSERT(X >= Y);     // If !y, true;
+
+    //'rhs' disengaged, 'lhs' engaged
+    Y.emplace(3);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(X > Y));   // If !x, false;
+    ASSERT(X <= Y);     // If !x, true;
+    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
+
+    //'rhs' engaged, 'lhs' disengaged
+    X.emplace(5);
+    Y.reset();
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
+    ASSERT((X > Y));    // If !x, false; otherwise, if !y, true;
+    ASSERT(!(X <= Y));  // If !x, true; otherwise, if !y, false;
+    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
+
+    //both engaged, compare the values
+    X.emplace(1);
+    Y.emplace(3);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((X < Y));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(X > Y));   // If !x, false; otherwise, if !y, true;
+    ASSERT((X <= Y));   // If !x, true; otherwise, if !y, false;
+    ASSERT(!(X >= Y));  // If !y, true; otherwise, if !x, false;
+}
+
+template <class OPT_TYPE, class VAL_TYPE>
+void testCase6_imp_b()
+{
+    OPT_TYPE X;
+    VAL_TYPE Y = 3;
+
+    //comparison with a disengaged optional on 'rhs'
+    ASSERT(!(X == Y));  // return bool(x) ? *x == v : false;
+    ASSERT((X != Y));   // return bool(x) ? *x != v : true;
+    ASSERT((X < Y));    // return bool(x) ? *x < v : true;
+    ASSERT(!(X > Y));   // return bool(x) ? *x > v : false;
+    ASSERT((X <= Y));   // return bool(x) ? *x <= v : true;
+    ASSERT(!(X >= Y));  // return bool(x) ? *x >= v : false;
+
+    //comparison with a disengaged optional on 'lhs'
+    ASSERT(!(Y == X));  // return bool(x) ? v == *x : false;
+    ASSERT((Y != X));   // return bool(x) ? v != *x : true;
+    ASSERT(!(Y < X));   // return bool(x) ? v < *x : false;
+    ASSERT((Y > X));    // return bool(x) ? v > *x : true;
+    ASSERT(!(Y <= X));  // return bool(x) ? v <= *x : false;
+    ASSERT((Y >= X));   // return bool(x) ? v >= *x : true;
+
+    //comparison with an engaged optional on 'rhs'
+    X.emplace(7);
+    ASSERT(!(X == Y));  // If bool(x) != bool(y), false;
+    ASSERT((X != Y));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT(!(X < Y));   // If !y, false; otherwise, if !x, true;
+    ASSERT((X > Y));    // If !x, false;
+    ASSERT(!(X <= Y));  // If !x, true;
+    ASSERT((X >= Y));   // If !y, true; otherwise, if !x, false;
+
+    //comparison with an engaged optional on 'lhs'
+    ASSERT(!(Y == X));  // If bool(x) != bool(y), false;
+    ASSERT((Y != X));   // If bool(x) != bool(y), true;
+                        // otherwise, if bool(x) == false, false;
+    ASSERT((Y < X));    // If !y, false; otherwise, if !x, true;
+    ASSERT(!(Y > X));   // If !x, false;
+    ASSERT((Y <= X));   // If !x, true;
+    ASSERT(!(Y >= X));  // If !y, true; otherwise, if !x, false;
+}
+
+template <class TYPE>
+void testCase6_imp_c()
+{
+    bsl::optional<TYPE> X;
+
+    //comparison with a disengaged optional on 'rhs'
+    ASSERT((X == bsl::nullopt));   // !x
+    ASSERT(!(X != bsl::nullopt));  // bool(x)
+    ASSERT(!(X < bsl::nullopt));   // false
+    ASSERT(!(X > bsl::nullopt));   // bool(x)
+    ASSERT((X <= bsl::nullopt));   // !x
+    ASSERT((X >= bsl::nullopt));   // true
+
+    //comparison with a disengaged optional on 'lhs'
+    ASSERT((bsl::nullopt == X));   // !x
+    ASSERT(!(bsl::nullopt != X));  // bool(x)
+    ASSERT(!(bsl::nullopt < X));   // bool(x)
+    ASSERT(!(bsl::nullopt > X));   // false
+    ASSERT((bsl::nullopt <= X));   // true
+    ASSERT((bsl::nullopt >= X));   // !x
+
+    //comparison with an engaged optional on 'rhs'
+    X.emplace(7);
+    ASSERT(!(X == bsl::nullopt));  // !x
+    ASSERT((X != bsl::nullopt));   // bool(x)
+    ASSERT(!(X < bsl::nullopt));   // false
+    ASSERT((X > bsl::nullopt));    // bool(x)
+    ASSERT(!(X <= bsl::nullopt));  // !x
+    ASSERT((X >= bsl::nullopt));   // true
+
+    //comparison with an engaged optional on'lhs'
+    ASSERT(!(bsl::nullopt == X));  // !x
+    ASSERT((bsl::nullopt != X));   // bool(x)
+    ASSERT((bsl::nullopt < X));    // bool(x)
+    ASSERT(!(bsl::nullopt > X));   // false
+    ASSERT((bsl::nullopt <= X));   // true
+    ASSERT(!(bsl::nullopt >= X));  // !x
+}
+void testCase6()
+{
+    // --------------------------------------------------------------------
+    // TESTING RELATIONAL OPERATORS
+    //
+    // Concerns:
+    //: 1 Two 'optional' objects can be compared if their 'value_type's are
+    //:   comparable.  The result depends on whether the objects are engaged
+    //:   or not.
+    //:
+    //: 2 We can compare an 'optional' object of 'value_type' V and a non
+    //:   'optional' object of type U if U and V are comparable types.  The
+    //:   result depends on whether the 'optional' object is engaged or not.
+    //:
+    //: 3 We can compare any 'optional' object with 'nulllopt_t'.  The result
+    //:   depends on whether the 'optional' object is engaged or not.
+    //
+    // Plan:
+    //: 1 For each relation operator, compare two 'optional' objects of
+    //:   comparable value types. Execute tests for a combination of engaged
+    //:   and disengaged 'optional' objects.  [C-1]
+    //:
+    //: 2 For each relation operator, compare an 'optional' object of 'TYPE',
+    //:   and an object of type comparable to TYPE.  Execute tests for an
+    //:   engaged and disengaged 'optional' object.  [C-2]
+    //:
+    //: 3 For each relation operator, compare an 'optional' object and a
+    //:   'nullopt_t' object.  Execute tests for an engaged and disengaged
+    //:   'optional' object.  [C-3]
+    //
+    // Testing:
+    //    bool operator==(const optional<LHS>&, nullopt_t&);
+    //    bool operator!=(const optional<LHS>&, nullopt_t&);
+    //    bool operator< (const optional<LHS>&, nullopt_t&);
+    //    bool operator<=(const optional<LHS>&, nullopt_t&);
+    //    bool operator> (const optional<LHS>&, nullopt_t&);
+    //    bool operator>=(const optional<LHS>&, nullopt_t&);
+    //    bool operator==(const optional<LHS>&, const RHS&);
+    //    bool operator!=(const optional<LHS>&, const RHS&);
+    //    bool operator< (const optional<LHS>&, const RHS&);
+    //    bool operator<=(const optional<LHS>&, const RHS&);
+    //    bool operator> (const optional<LHS>&, const RHS&);
+    //    bool operator>=(const optional<LHS>&, const RHS&);
+    //    bool operator==(const optional<LHS>&, const optional<RHS>&);
+    //    bool operator!=(const optional<LHS>&, const optional<RHS>&);
+    //    bool operator< (const optional<LHS>&, const optional<RHS>&);
+    //    bool operator<=(const optional<LHS>&, const optional<RHS>&);
+    //    bool operator>=(const optional<LHS>&, const optional<RHS>&);
+    //    bool operator> (const optional<LHS>&, const optional<RHS>&);
+    //    bool operator==(const nullopt_t&, const optional<RHS>&);
+    //    bool operator!=(const nullopt_t&, const optional<RHS>&);
+    //    bool operator< (const nullopt_t&, const optional<RHS>&);
+    //    bool operator<=(const nullopt_t&, const optional<RHS>&);
+    //    bool operator> (const nullopt_t&, const optional<RHS>&);
+    //    bool operator>=(const nullopt_t&, const optional<RHS>&);
+    //    bool operator==(const LHS&, const optional<RHS>&);
+    //    bool operator!=(const LHS&, const optional<RHS>&);
+    //    bool operator< (const LHS&, const optional<RHS>&);
+    //    bool operator<=(const LHS&, const optional<RHS>&);
+    //    bool operator> (const LHS&, const optional<RHS>&);
+    //    bool operator>=(const LHS&, const optional<RHS>&);
+    //    bool operator==(const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator!=(const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator< (const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator<=(const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator>=(const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator> (const std::optional<LHS>&, const optional<RHS>&);
+    //    bool operator==(const optional<LHS>&, const std::optional<RHS>&);
+    //    bool operator!=(const optional<LHS>&, const std::optional<RHS>&);
+    //    bool operator< (const optional<LHS>&, const std::optional<RHS>&);
+    //    bool operator<=(const optional<LHS>&, const std::optional<RHS>&);
+    //    bool operator>=(const optional<LHS>&, const std::optional<RHS>&);
+    //    bool operator> (const optional<LHS>&, const std::optional<RHS>&);
+
+    if (veryVerbose)
+        printf("\tComparison with an 'optional'.\n");
+    {
+        testCase6_imp_a<bsl::optional<int>, bsl::optional<MyClass2> >();
+
+        testCase6_imp_a<bsl::optional<MyClass2>, bsl::optional<int> >();
+
+#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+        testCase6_imp_a<std::optional<int>, bsl::optional<int> >();
+
+        testCase6_imp_a<bsl::optional<int>, std::optional<int> >();
+
+        testCase6_imp_a<std::optional<MyClass2>, bsl::optional<MyClass2> >();
+
+        testCase6_imp_a<bsl::optional<MyClass2>, std::optional<MyClass2> >();
+
+        testCase6_imp_a<std::optional<int>, bsl::optional<MyClass2> >();
+
+        testCase6_imp_a<bsl::optional<MyClass2>, std::optional<int> >();
+
+        testCase6_imp_a<std::optional<MyClass2>, bsl::optional<int> >();
+
+        testCase6_imp_a<bsl::optional<int>, std::optional<MyClass2> >();
+#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
+    }
+    if (veryVerbose)
+        printf("\tComparison with a non 'optional' .\n");
+    {
+        testCase6_imp_b<bsl::optional<int>, MyClass2>();
+
+        testCase6_imp_b<bsl::optional<MyClass2>, int>();
+    }
+    if (veryVerbose)
+        printf("\tComparison with a nullopt_t .\n");
+    {
+        testCase6_imp_c<int>();
+        testCase6_imp_c<MyClass2>();
+    }
+}
+
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4f()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator*'
+    //   This test will ensure that the 'operator*' works as expected.
+    //
+    //   MSVC-2015 has a bug which removes constness from temporaries in
+    //   certain situations. For example :
+    //
+    //       bsl::string = CObj("s").value();
+    //
+    //   invokes non const qualified overload of 'value', despite the fact the
+    //   temporary is of a const qualified 'bsl::optional'. In the following
+    //   example, the constness is preserved:
+    //
+    //       Cobj temp = Cobj("s");
+    //       bsl::string = MoveUtil::move(temp).value();
+    //
+    //    The tests have been written to take this issue into account.
+    //
+    //
+    // Concerns:
+    //: 1 Calling 'operator* 'on an engaged 'optional' returns a reference to
+    //:   the contained value.
+    //:
+    //: 2 Returned reference is 'const' qualified if the 'optional' object
+    //:   is 'const' qualified, or if the 'value_type' is 'const' qualified.
+    //:
+    //: 3 All of the above concerns apply whether or not the 'value_type' is
+    //:   allocator-aware.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' object.  Using 'operator*', verify that the
+    //:   returned value of 'optional' object. [C-1]
+    //:
+    //: 2 Modify the value of the object obtained using 'operator*'. Verify thatthe
+    //:   value of the 'optional' has been modified. [C-1]
+    //:
+    //: 3 Verify that the pointer returned from 'operator*' is not 'const'
+    //:   qualified if neither the 'optional' object, nor the 'value_type' are
+    //:   'const' qualified. [C-2]
+    //:
+    //: 4 Verify that the pointer returned from 'operator*' is 'const' qualified
+    //:   if the 'optional' object is 'const' qualified. [C-2]
+    //:
+    //: 5 Verify that the pointer returned from 'operator*' is 'const' qualified
+    //:   if the 'value_type' is 'const' qualified. [C-2]
+    //:
+    //: 6 Execute the test with allocator-aware and non allocator-aware 'TYPE'.
+    //:   [C-3]
+    //
+    //
+    // Testing:
+    //   const T* operator->() const;
+    //   T* operator->();
+    //
+    // --------------------------------------------------------------------
+
+    {
+        Obj   mX(ValueType(4));
+        CObj  cObjX(ValueType(8));
+        ObjC  objcX(ValueType(9));
+        CObjC cObjcX(ValueType(10));
+
+        ASSERT((*mX).value() == 4);
+        ASSERT((*cObjX).value() == 8);
+        ASSERT((*objcX).value() == 9);
+        ASSERT((*cObjcX).value() == 10);
+
+        *mX = 6;
+        ASSERT((*mX).value() == 6);
+
+        ASSERT(!isConstRef(mX. operator*()));
+        ASSERT(isConstRef(cObjX. operator*()));
+        ASSERT(isConstRef(objcX. operator*()));
+    }
+    {
+        CObj cObjX(ValueType(8));
+        ObjC objcX(ValueType(9));
+
+        ASSERT((*(Obj(ValueType(4)))).value() == 4);
+        ASSERT((*(CObj(ValueType(8)))).value() == 8);
+        ASSERT((*(ObjC(ValueType(9)))).value() == 9);
+        ASSERT((*(CObjC(ValueType(10)))).value() == 10);
+
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
+        ASSERT(!isConstRef(Obj(ValueType(4)). operator*()));
+        ASSERT(isConstRef((std::move(cObjX)). operator*()));
+        ASSERT(isConstRef((std::move(objcX)). operator*()));
+#endif
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4e()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'operator->'
+    //   This test will ensure that the 'operator->' works as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'operator->' on an engaged 'optional' object returns a
+    //:   pointer to the contained value object.
+    //:
+    //: 2 Returned pointer is 'const' qualified if the 'optional' object
+    //:   is 'const' qualified, or if the 'value_type' is 'const' qualified.
+    //:
+    //: 3 All of the above concerns apply whether or not the 'value_type' is
+    //:   allocator-aware.
+    //
+    // Plan:
+    //: 1 Create an engaged 'optional' object.  Using 'operator->', verify that the
+    //:   returned value matches the value in the 'optional' object. [C-1]
+    //:
+    //: 2 Assign a value to the 'optional' object through a call to
+    //:   'operator->'.  Verify thatthe value of the 'optional' object is as
+    //:   expected. [C-1]
+    //:
+    //: 3 Verify that the pointer returned from 'operator->' is not 'const'
+    //:   qualified if neither the 'optional' object, nor the 'value_type' are
+    //:   'const' qualified. [C-2]
+    //:
+    //: 4 Verify that the pointer returned from 'operator->' is 'const'
+    //:   qualified if the 'optional' object is 'const' qualified. [C-2]
+    //:
+    //: 5 Verify that the pointer returned from 'operator->' is 'const'
+    //:   qualified if the 'value_type' is 'const' qualified. [C-2]
+    //:
+    //: 6 Run the test using both allocator-aware and non allocator-aware
+    //:   'TYPE' [C-3]
+    //
+    // Testing:
+    //   const T* operator->() const;
+    //   T* operator->();
+    //
+    // --------------------------------------------------------------------
+
+    {
+        Obj   mX(2);
+        CObj  cObjX(5);
+        ObjC  objcX(ValueType(9));
+        CObjC cObjcX(ValueType(10));
+
+        ASSERT(mX->value() == 2);
+        ASSERT(cObjX->value() == 5);
+        ASSERT(objcX->value() == 9);
+        ASSERT(cObjcX->value() == 10);
+
+        *(mX. operator->()) = 6;
+        ASSERT(mX->value() == 6);
+
+        ASSERT(!isConstPtr(mX. operator->()));
+        ASSERT(isConstPtr(cObjX. operator->()));
+        ASSERT(isConstPtr(objcX. operator->()));
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4d()
+{
+    // --------------------------------------------------------------------
+    // TESTING ALLOCATOR EXTENDED 'value_or' METHOD
+    //   This test will ensure that the allocator extended 'value_or' method
+    //   works as expected. We will also verify that single argument 'value_or'
+    //   method with an optional created using an allocator extended
+    //   constructor.
+    //
+    // Concerns:
+    //: 1 Calling 'value_or' on a disengaged 'optional' object returns the
+    //:   argument value converted to the 'value_type' of the 'optional'
+    //:   object.
+    //:
+    //: 2 Calling 'value_or' on an engaged 'optional' object returns the value
+    //:   in the 'optional' object.
+    //:
+    //: 3 In C++11, when calling 'value_or' on an engaged 'optional' rvalue, the
+    //:   returned object is created by moving from the 'value_type' object in
+    //:   'optional'.
+    //:
+    //: 4 It is possible to call 'value_or' on a constant 'optional' object.
+    //:
+    //: 5 The allocator of the object returned from the allocator extended
+    //:   'value_or' method is the allocator specified in the call to
+    //:   'value_or'.
+    //
+    // Plan:
+    //
+    //: 1 Create a disengaged 'optional' object.  Call 'value_or' and check
+    //:   that the return object matches the argument given to 'value_or'.
+    //:   [C-1]
+    //:
+    //: 2 Emplace a value in the 'optional' object. Call 'value_or' and check
+    //:   that the returned value matches the value in the 'optional' object.
+    //:   [C-2]
+    //:
+    //: 3 If ref qualifieres are supported, call 'value_or' on an engaged
+    //:   'optional' rvalue. Verify the resulting objects has been created by
+    //:   move construction. [C-3]
+    //:
+    //: 4 Repeat step 1 using a 'const' reference to the 'optional' object.
+    //:   [C-4]
+    //:
+    //: 5 In steps 1-4 verify that the allocator of the returned object is the
+    //:   one specified in the call to 'value_or'. [C-5]
+    //
+    // Testing:
+    //  TYPE value_or(alloc_arg, alloc, ANY_TYPE&& ) const;
+    //
+    // --------------------------------------------------------------------
+
+    {
+        bslma::TestAllocator da("default", veryVeryVeryVerbose);
+        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+        bslma::TestAllocator ta("third", veryVeryVeryVerbose);
+
+        bslma::DefaultAllocatorGuard dag(&da);
+
+#ifdef BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
+        if (veryVerbose)
+            printf("\tallocator tests of allocator extended "
+                   "value_or'.\n");
+        {
+            Obj        mX(bsl::allocator_arg, &oa);
+            const Obj& X = mX;
+
+            bsls::ObjectBuffer<TYPE> valBuffer;
+            bslma::ConstructionUtil::construct(
+                valBuffer.address(), &da, 5);
+            const TYPE& val = valBuffer.object();
+
+            const ValueType& i1 = X.value_or(bsl::allocator_arg, &ta, val);
+            ASSERT(i1.value() == 5);
+            ASSERT(i1.get_allocator() == &ta);
+
+            mX.emplace(8);
+            const ValueType& i2 = mX.value_or(bsl::allocator_arg, &ta, val);
+            ASSERT(i2.value() == 8);
+            ASSERT(i2.get_allocator() == &ta);
+
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
+            Obj              source(4);
+            const ValueType& i3 =
+                MoveUtil::move(source).value_or(bsl::allocator_arg, &ta, val);
+            ASSERT(i3 == 4);
+            ASSERT(source.value() == k_MOVED_FROM_VAL);
+            ASSERT(i3.get_allocator() == &ta);
+#endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
+        }
+#endif  //BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
+    }
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4c()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'value_or' METHOD
+    //   This test will ensure that the 'value_or' method works as expected.
+    //
+    // Concerns:
+    //: 1 Calling 'value_or' on a disengaged 'optional' object returns the
+    //:   argument value converted to the 'value_type' of the 'optional'
+    //:   object.
+    //:
+    //: 2 Calling 'value_or' on an engaged 'optional' object returns the value
+    //:   in the 'optional' object.
+    //:
+    //: 3 In C++11, when calling 'value_or' on an engaged 'optional' rvalue, the
+    //:   returned object is created by moving from the 'value_type' object in
+    //:   'optional'.
+    //:
+    //: 4 It is possible to call 'value_or' on a constant 'optional' object.
+    //:
+    //: 5 If 'value_type' is allocator-aware, the allocator of the object
+    //:   returned from a single argument 'value_or' method is determined by
+    //:   the copy/move/conversion constructor of the 'value_type'.
+    //
+    // Plan:
+    //
+    //: 1 Create a disengaged 'optional' object.  Call 'value_or' and check
+    //:   that the return object matches the argument given to 'value_or'.
+    //:   [C-1]
+    //:
+    //: 2 Emplace a value in the 'optional' object. Call 'value_or' and check
+    //:   that the returned value matches the value in the 'optional' object.
+    //:   [C-2]
+    //:
+    //: 3 If ref qualifieres are supported, call 'value_or' on an engaged
+    //:   'optional' rvalue. Verify the resulting objects has been created by
+    //:   move construction. [C-3]
+    //:
+    //: 4 Repeat step 1 using a 'const' reference to the 'optional' object.
+    //:   [C-4]
+    //:
+    //: 5 If the 'value_type' is allocator-aware, verify that the allocator of
+    //:   the returned object is correct. [C-5]
+    //
+    // Testing:
+    //  TYPE value_or(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)) const;
+    //
+    // --------------------------------------------------------------------
+
+    bslma::TestAllocator da("default", veryVeryVeryVerbose);
+    bslma::TestAllocator oa("other", veryVeryVeryVerbose);
+    bslma::TestAllocator ta("third", veryVeryVeryVerbose);
+
+    bslma::DefaultAllocatorGuard dag(&da);
+    if (veryVerbose)
+        printf("\tlvalue disengaged optional and lvalue\n");
+    {
+        ObjWithAllocator objBuf(&ta);
+        Obj&             obj = objBuf.object();
+        const Obj&       X   = obj;
+        ValWithAllocator valBuffer(5, &oa);
+        const ValueType& val      = valBuffer.object();
+        ValueType        expected = val;
+        const ValueType& dest     = X.value_or(val);
+        ASSERT(dest == val);
+        ASSERT(hasSameAllocator(dest, expected));
+    }
+    if (veryVerbose)
+        printf("\tlvalue disengaged optional and rvalue\n");
+    {
+        ObjWithAllocator objBuf(&ta);
+        Obj&             obj = objBuf.object();
+        ValWithAllocator valBuffer(5, &oa);
+        ValueType&       val  = valBuffer.object();
+        const ValueType& dest = obj.value_or(MoveUtil::move(val));
+        ValWithAllocator valCopyBuffer(5, &oa);
+        ValueType&       valCopy  = valCopyBuffer.object();
+        ValueType        expected(MoveUtil::move(valCopy));
+        ASSERT(val.value() == k_MOVED_FROM_VAL);
+        ASSERT(dest == expected);
+        ASSERT(hasSameAllocator(dest, expected));
+    }
+    if (veryVerbose)
+        printf("\tlvalue engaged optional\n");
+    {
+        ObjWithAllocator objBuf(4, &ta);
+        Obj&             obj = objBuf.object();
+        ValWithAllocator valBuffer(5, &oa);
+        const ValueType& val      = valBuffer.object();
+        const ValueType& dest     = obj.value_or(val);
+        ValueType        expected = obj.value();
+        ASSERT(dest == expected);
+        ASSERT(hasSameAllocator(dest, expected));
+    }
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
+    if (veryVerbose)
+        printf("\trvalue disengaged optional and lvalue\n");
+    {
+        ObjWithAllocator objBuf(&ta);
+        Obj&             obj = objBuf.object();
+        ValWithAllocator valBuffer(5, &oa);
+        ValueType&       val = valBuffer.object();
+        const ValueType& dest =
+            MoveUtil::move(obj).value_or(MoveUtil::move(val));
+        ValWithAllocator valCopyBuffer(5, &oa);
+        ValueType&       valCopy  = valCopyBuffer.object();
+        ValueType        expected(MoveUtil::move(valCopy));
+        ASSERT(dest == expected);
+        ASSERT(val.value() == k_MOVED_FROM_VAL);
+        ASSERT(hasSameAllocator(dest, expected));
+    }
+    if (veryVerbose)
+        printf("\trvalue engaged optional\n");
+    {
+        ObjWithAllocator objBuf(4, &ta);
+        Obj&             obj  = objBuf.object();
+        const ValueType& dest = MoveUtil::move(obj).value_or(77);
+        obj.emplace(4);
+        ValueType expected = (MoveUtil::move(obj.value()));
+        ASSERT(dest == expected);
+        ASSERT(obj.value().value() == k_MOVED_FROM_VAL);
+        ASSERT(hasSameAllocator(dest, expected));
+    }
+#endif  // defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4b()
+{
+    // --------------------------------------------------------------------
+    // TESTING 'value' METHOD
+    //   This test will ensure that the 'value' method works as expected.
+    //   The test relies on constructors and 'emplace' method.
+    //
+    //   MSVC-2015 has a bug which removes constness from temporaries in
+    //   certain situations. For example :
+    //
+    //       bsl::string = CObj("s").value();
+    //
+    //   invokes non const qualified overload of 'value', despite the fact the
+    //   temporary is of a const qualified 'bsl::optional'. In the following
+    //   example, the constness is preserved:
+    //
+    //       Cobj temp = Cobj("s");
+    //       bsl::string = MoveUtil::move(temp).value();
+    //
+    //    The tests have been written to take this issue into account.
+    //
+    // Concerns:
+    //: 1 Calling 'value()' on a disengaged 'optional' throws
+    //:   'bad_optional_access' exception.
+    //:
+    //: 2 Calling 'value()' on a engaged 'optional' returns the reference
+    //:   to the 'value_type' object.
+    //:
+    //: 3 The reference returned from 'value()' is 'const' qualified if the
+    //:   'optional' object is 'const' qualified, or if the 'value_type' is
+    //:   'const' qualified.
+    //:
+    //: 4 In C++11 and onwards, the returned reference is an rvalue reference
+    //:   if the 'optional' object is an rvalue.
+    //:
+    //: 5 It is possible to modify non constant 'optional' of non constant
+    //:   'value_type' through the reference returned by 'value' method.
+    //:
+    //: 6 That 'value' method behaves the same for allocator-aware types and
+    //:   non allocator-aware types.
+    //
+    // Plan:
+    //: 1 Create a disengaged 'optional' object. Call the 'value' method and
+    //:   verify that the 'bad_optional_access' exception is thrown. [C-1]
+    //:
+    //: 2 Emplace a value in the 'optional' object. Call the 'value' method
+    //:   and verify that the returned object has the expected value. [C-2]
+    //:
+    //: 3 Using 'isConstRef' verify the 'const' qualification of a reference
+    //:   returned from 'value' on a non 'const' 'optional' of non 'const'
+    //:   'value_type', 'const' 'optional' of non 'const' 'value_type', and
+    //:   'const' 'optional' of 'const' 'value_type'. [C-3]
+    //:
+    //: 4 If ref qualifiers are supported using 'isRvalueRef' verify that the
+    //:   reference returned from 'value' is an rvalue reference if the
+    //:   'optional' object is an rvalue. [C-4]
+    //:
+    //: 5 Modify the value of the 'optional' object through the reference
+    //:   returned from the 'value' method. Call 'value' method and verify that
+    //:   the value of the 'optional' object has been modified. [C-5]
+    //:
+    //: 6 Call 'reset' on the 'optional' object. Call 'value' method and check
+    //:   that the 'bad_optional_access' exception is thrown. [C-1]
+    //:
+    //: 7 In steps 1-6, verify that no unexpected exception is thrown. [C-1]
+    //:
+    //: 8 Run the test with an an allocator-aware TYPE and a non
+    //:   allocator-aware type. [C-6]
+    //
+    // Testing:
+    //   TYPE& value() &;
+    //   const TYPE& value() & const;
+    //   TYPE&& value() &&;
+    //   const TYPE&& value() && const;
+    //
+    // --------------------------------------------------------------------
+
+    bool unexpected_exception_thrown = false;
+    try {
+        Obj        mX;
+        const Obj& X = mX;
+
+        bool bad_optional_exception_caught = false;
+        try {
+            mX.value();
+        }
+        catch (const bsl::bad_optional_access&) {
+            bad_optional_exception_caught = true;
+        }
+        ASSERT(bad_optional_exception_caught);
+        bad_optional_exception_caught = false;
+
+        mX.emplace(3);
+        ASSERT(mX.value().value() == 3);
+
+        TYPE& ri         = mX.value();
+        ri.d_def.d_value = 7;
+        ASSERT(mX.value().value() == 7);
+
+        ObjC cmX(3);
+        ASSERT(!isConstRef(mX.value()));
+        ASSERT(isConstRef(X.value()));
+        ASSERT(isConstRef(cmX.value()));
+#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
+        ASSERT(!isRvalueRef(mX.value()));
+        ASSERT(isRvalueRef(Obj(3).value()));
+        ASSERT(isRvalueRef(ObjC(4).value()));
+#endif  // defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
+
+        mX.reset();
+        try {
+            mX.value();
+        }
+        catch (bsl::bad_optional_access&) {
+            bad_optional_exception_caught = true;
+        }
+        ASSERT(bad_optional_exception_caught);
+        bad_optional_exception_caught = false;
+    }
+    catch (...) {
+        unexpected_exception_thrown = true;
+    }
+    ASSERT(unexpected_exception_thrown == false);
+    unexpected_exception_thrown = false;
+}
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase4a()
+{
+    // --------------------------------------------------------------------
+    // TESTING CONVERSION TO BOOL
+    //   This test will ensure that the conversion to 'bool' works as expected.
+    //   The test relies on reset and emplace member functions, as well as
+    //   construction from a 'value_type'.
+    //
+    // Concerns:
+    //: 1 A disengaged 'optional' when converted to 'bool' evaluates to 'false'
+    //:   and returns 'false' from its 'has_value' method.
+    //:
+    //: 2 An engaged 'optional' when converted to 'bool' evaluates to 'true'
+    //:   and returns 'true' from its 'has_value' method.
+    //:
+    //: 3 Both conversion to 'bool' and 'has_value' method can be performed/
+    //:   invoked on a 'const' qualified 'optional' object.
+    //
+    // Plan:
+    //: 1 Create a disengaged 'optional' and verify that it evaluates to
+    //:   'false' when converted to 'bool' and that 'has_value'
+    //:   method returns 'false'. [C-1]
+    //:
+    //: 2 Emplace a value in the 'optional' object and verify that it evaluates
+    //:   to 'true' when converted to 'bool' and that the 'has_value' method
+    //:   returns 'true'. [C-2]
+    //:
+    //: 3 Call 'reset' method and verify that the 'optional' object evaluates
+    //:   to 'false' when converted to 'bool' and that 'has_value' method
+    //:   returns 'false'. [C-1]
+    //:
+    //: 4 Create an engaged 'optional' and verify that it evaluates to 'true'
+    //:   when converted to 'bool' and that 'has_value' method returns 'true'.
+    //:   [C-2]
+    //:
+    //: 5 Repeat step 1 using a 'const' qualified reference to test conversion
+    //:  to 'bool' and to invoke the 'has_value' method. [C-3]
+    //
+    // Testing:
+    //   operator bool() const;
+    //   bool has_value() const;
+    //
+    // --------------------------------------------------------------------
+
+    {
+        Obj        mX;
+        const Obj& X = mX;
+        ASSERT(!X);
+        ASSERT(false == X.has_value());
+
+        mX.emplace(ValueType());
+        ASSERT(mX);
+        ASSERT(true == mX.has_value());
+
+        mX.reset();
+        ASSERT(!mX);
+        ASSERT(false == mX.has_value());
+    }
+    {
+        Obj mX(bsl::in_place);
+        ASSERT(mX);
+        ASSERT(true == mX.has_value());
+    }
+}
+
+
+template <class TYPE>
+void TestDriver<TYPE>::testCase3d()
 {
     // --------------------------------------------------------------------
     // TESTING ALLOCATOR EXTENDED 'in_place_t' CONSTRUCTOR
@@ -7927,10 +10176,6 @@ void TestDriver<TYPE>::testCase26()
     //   void optional(alloc_arg, alloc, in_place_t, Args&&...);
     //   void optional(alloc_arg, alloc, in_place_t, init_list, Args&&...);
     // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING ALLOCATOR EXTENDED 'in_place_t' CONSTRUCTOR "
-               "\n===================================================\n");
 
     bslma::TestAllocator da("default", veryVeryVeryVerbose);
     bslma::TestAllocator oa("other", veryVeryVeryVerbose);
@@ -8651,7 +10896,7 @@ void TestDriver<TYPE>::testCase26()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase25()
+void TestDriver<TYPE>::testCase3c()
 {
     // --------------------------------------------------------------------
     // TESTING 'in_place_t' CONSTRUCTOR
@@ -8707,10 +10952,6 @@ void TestDriver<TYPE>::testCase25()
     //    optional(in_place_t, std::initializer_list, ARGS&&...);
     //
     // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'in_place_t' CONSTRUCTOR "
-               "\n================================\n");
 
     bslma::TestAllocator da("default", veryVeryVeryVerbose);
     bslma::TestAllocator oa("other", veryVeryVeryVerbose);
@@ -9336,242 +11577,12 @@ void TestDriver<TYPE>::testCase25()
 #endif  //BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 }
 
-template <class OPT_TYPE1, class OPT_TYPE2>
-void testCase24_imp()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'swap' METHOD
-    //
-    // Concerns:
-    //: 1 Swap of two disengaged objects is a no-op,
-    //:
-    //: 2 Swap of an engaged and a disengaged 'optional' moves the value
-    //:   from the engaged object to another without calling swap for the
-    //:   'value_type'.
-    //:
-    //: 3 Swap of two engaged objects calls swap for the 'value_type'.
-    //:
-    //: 4 Behaviour is the same for 'swap' member function, and 'swap' free
-    //:   function
-    //:
-    //: 5 Behaviour is the same for allocator-aware and non allocator-aware
-    //:   'value_type's.
-    //
-    // Plan:
-    //: 1 Call 'swap' free function with two disengaged 'optional' objects and
-    //:   verify 'value_type' 'swap' has not been called.  [C-1]
-    //:
-    //: 2 Call 'swap' free function with an engaged 'optional' object and a
-    //:   disengaged 'optional' object.  Verify the disengaged 'optional' is
-    //:   now engaged with a value from the other object, and that the other
-    //:   object is now disengaged.  Verify that the 'value_type' 'swap' has
-    //:   not been called.  [C-2]
-    //:
-    //: 3 Call swap free function with two engaged 'optional' objects and
-    //:   verify 'value_type' 'swap' has been called.  [C-3]
-    //:
-    //: 4 Repeat steps 1-3 using the 'swap' member function.  [C-4]
-    //:
-    //: 5 Invoke the test using an allocator-aware 'TYPE' and a non
-    //:   allocator-aware 'TYPE'.  [C-5]
-    //
-    //
-    // Testing:
-    //    void swap(optional& other);
-    //    void swap(bsl::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
-    //    void swap(std::optional<TYPE>& lhs, bsl::optional<TYPE>& rhs);
-    //    void swap(bsl::optional<TYPE>& lhs, std::optional<TYPE>& rhs);
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'swap' METHOD"
-               "\n=====================\n");
-
-    using bsl::swap;
-
-    typedef typename OPT_TYPE1::value_type VALUE_TYPE;
-
-    {
-        OPT_TYPE1 a;
-        OPT_TYPE2 b;
-
-        VALUE_TYPE::swapReset();
-        swap(a, b);
-
-        ASSERT(!VALUE_TYPE::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-
-        VALUE_TYPE::swapReset();
-        a.swap(b);
-
-        ASSERT(!VALUE_TYPE::swapCalled());
-        ASSERT(!a.has_value());
-        ASSERT(!b.has_value());
-    }
-    {
-        VALUE_TYPE obj1(1);
-        VALUE_TYPE obj2(2);
-
-        const VALUE_TYPE Zobj1(obj1);
-        const VALUE_TYPE Zobj2(obj2);
-
-        OPT_TYPE1 a = obj1;
-        OPT_TYPE2 b = obj2;
-        ASSERT(a.value() == Zobj1);
-        ASSERT(b.value() == Zobj2);
-
-        VALUE_TYPE::swapReset();
-        ASSERT(!VALUE_TYPE::swapCalled());
-        swap(a, b);
-        ASSERT(VALUE_TYPE::swapCalled());
-
-        ASSERT(b.value() == Zobj1);
-        ASSERT(a.value() == Zobj2);
-
-        VALUE_TYPE::swapReset();
-        ASSERT(!VALUE_TYPE::swapCalled());
-        a.swap(b);
-        ASSERT(VALUE_TYPE::swapCalled());
-
-        ASSERT(a.value() == Zobj1);
-        ASSERT(b.value() == Zobj2);
-    }
-    {
-        OPT_TYPE1 nonNullObj(VALUE_TYPE(10));
-        OPT_TYPE1 nonNullObjCopy(nonNullObj);
-        OPT_TYPE2 nullObj;
-
-        VALUE_TYPE::swapReset();
-        swap(nonNullObj, nullObj);
-
-        ASSERT(!VALUE_TYPE::swapCalled());
-        ASSERT(nonNullObjCopy == nullObj);
-        ASSERT(!nonNullObj.has_value());
-
-        VALUE_TYPE::swapReset();
-        nonNullObj.swap(nullObj);
-
-        ASSERT(!VALUE_TYPE::swapCalled());
-        ASSERT(nonNullObjCopy == nonNullObj);
-        ASSERT(!nullObj.has_value());
-    }
-}
-
-void testCase24()
-{
-
-    testCase24_imp<bsl::optional<Swappable>,
-                   bsl::optional<Swappable> >();
-
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    // swap between bsl::optional and std::optional works only for non-AA
-    // types
-
-    testCase24_imp<bsl::optional<Swappable>,
-                   std::optional<Swappable> >();
-
-
-    testCase24_imp<std::optional<Swappable>,
-                   bsl::optional<Swappable> >();
-#endif
-
-    testCase24_imp<bsl::optional<SwappableAA>,
-                   bsl::optional<SwappableAA> >();
-
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase23()
-{
-    // ------------------------------------------------------------------------
-    // TESTING 'hashAppend'
-    //
-    // Concerns:
-    //: 1 Hashing a value with a null value is equivalent to appending 'false'
-    //:   to the hash.
-    //:
-    //: 2 Hashing a value with a nullable value is equivalent to appending
-    //:   'true' to the hash followed by the value.
-    //
-    // Plan:
-    //: 1 Create a null nullable value and verify that hashing it yields the
-    //:   same value as hashing 'false'. [C-1]
-    //:
-    //: 2 Create a non-null nullable value for a series of test values and
-    //:   verify that hashing it produces the same result as hashing 'true' and
-    //:   then the test values themselves. [C-2]
-    //
-    // Testing:
-    //   void hashAppend(HASHALG& hashAlg, const optional<TYPE>& input);
-    // ------------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'hashAppend'"
-               "\n====================\n");
-
-    const TestValues VALUES;
-    const int        NUM_VALUES = static_cast<int>(VALUES.size());
-
-    bslma::TestAllocator da("default", veryVeryVeryVerbose);
-    bslma::TestAllocator oa("object", veryVeryVeryVerbose);
-
-    bslma::DefaultAllocatorGuard dag(&da);
-
-    {
-        ObjWithAllocator object(&oa);
-
-        Obj&       x = object.object();
-        const Obj& X = x;
-
-        ASSERT(0 == oa.numBlocksInUse());
-        ASSERT(0 == da.numBlocksInUse());
-
-        const size_t hashValue1 = bslh::Hash<>()(X);
-        const size_t hashValue2 = bslh::Hash<>()(false);
-        ASSERTV(hashValue1, hashValue2, hashValue1 == hashValue2);
-    }
-
-    {
-        ObjWithAllocator object(&oa);
-
-        Obj&       x = object.object();
-        const Obj& X = x;
-
-        for (int i = 0; i < NUM_VALUES; ++i) {
-            ASSERT(0 == oa.numBlocksInUse());
-            ASSERT(0 == da.numBlocksInUse());
-
-            x = VALUES[i];
-
-            bslma::TestAllocatorMonitor oam(&oa);
-
-            bslh::DefaultHashAlgorithm hasher;
-
-            const size_t hashValue1 = bslh::Hash<>()(X);
-            hashAppend(hasher, true);
-            hashAppend(hasher, VALUES[i]);
-            const size_t hashValue2 =
-                static_cast<size_t>(hasher.computeHash());
-
-            ASSERTV(hashValue1, hashValue2, hashValue2 == hashValue1);
-
-            ASSERT(oam.isInUseSame());
-            ASSERT(0 == da.numBlocksInUse());
-
-            x.reset();
-        }
-        ASSERT(0 == oa.numBlocksInUse());
-        ASSERT(0 == da.numBlocksInUse());
-    }
-}
-
 template <class TYPE>
 template <class DEST_TYPE, class SRC_TYPE>
-void TestDriver<TYPE>::testCase22_imp()
+void TestDriver<TYPE>::testCase3b_imp()
 {
     // --------------------------------------------------------------------
-    // TESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION FROM A VALUE
+    // TESTING ALLOCATOR EXTENDED CONSTRUCTION FROM A VALUE
     //   This test will ensure that the allocator extended construction from
     //   a value works as expected.
     //
@@ -9616,12 +11627,6 @@ void TestDriver<TYPE>::testCase22_imp()
     //   optional(allocator_arg_t, allocator_type, ANY_TYPE&&);
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf(
-            "\nTESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION FROM A VALUE"
-            "\n=============================================================="
-            "\n");
-
     {
         bslma::TestAllocator da("default", veryVeryVeryVerbose);
         bslma::TestAllocator oa("other", veryVeryVeryVerbose);
@@ -9648,20 +11653,21 @@ void TestDriver<TYPE>::testCase22_imp()
     }
 }
 template <class TYPE>
-void TestDriver<TYPE>::testCase22()
+void TestDriver<TYPE>::testCase3b()
 {
-    testCase22_imp<TYPE, TYPE>();
-    testCase22_imp<TYPE, int>();
-    testCase22_imp<const TYPE, TYPE>();
-    testCase22_imp<const TYPE, int>();
+    testCase3b_imp<TYPE, TYPE>();
+    testCase3b_imp<TYPE, int>();
+    testCase3b_imp<const TYPE, TYPE>();
+    testCase3b_imp<const TYPE, int>();
 }
+
 
 template <class TYPE>
 template <class DEST_TYPE, class SRC_TYPE>
-void TestDriver<TYPE>::testCase21_imp()
+void TestDriver<TYPE>::testCase3a_imp()
 {
     // --------------------------------------------------------------------
-    // TESTING COPY/MOVE CONSTRUCTION FROM A VALUE
+    // TESTING CONSTRUCTION FROM A VALUE
     //   This test will ensure that the copy construction from a value
     //   works as expected.
     //
@@ -9704,10 +11710,6 @@ void TestDriver<TYPE>::testCase21_imp()
     //    optional(ANY_TYPE&&);
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf("\nTESTING COPY/MOVE CONSTRUCTION FROM A VALUE "
-               "\n===========================================\n");
-
     {
         bslma::TestAllocator da("default", veryVeryVeryVerbose);
         bslma::TestAllocator oa("other", veryVeryVeryVerbose);
@@ -9733,2022 +11735,16 @@ void TestDriver<TYPE>::testCase21_imp()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase21()
+void TestDriver<TYPE>::testCase3a()
 {
-    testCase21_imp<TYPE, TYPE>();
-    testCase21_imp<TYPE, int>();
-    testCase21_imp<const TYPE, TYPE>();
-    testCase21_imp<const TYPE, int>();
+    testCase3a_imp<TYPE, TYPE>();
+    testCase3a_imp<TYPE, int>();
+    testCase3a_imp<const TYPE, TYPE>();
+    testCase3a_imp<const TYPE, int>();
 }
 
 template <class TYPE>
-template <class DEST_TYPE, class SRC_TYPE>
-void TestDriver<TYPE>::testCase20_imp()
-{
-    // --------------------------------------------------------------------
-    // TESTING ALLOCATOR EXTENDED COPY CONSTRUCTION
-    //   This test will ensure that the copy construction works as expected.
-    //
-    // Concerns:
-    //: 1 Constructing an 'optional' from an engaged 'optional' of the same
-    //:    type creates an engaged 'optional' where the 'value_type' object is
-    //:   copy constructed from the 'value_type' object of the original
-    //:   'optional' object.
-    //:
-    //: 2 Constructing an 'optional' from a disengaged 'optional' of the same
-    //:    type creates a disengaged 'optional'.
-    //:
-    //: 3 The 'value_type' object in 'optional' is move constructed when
-    //:   possible.
-    //:
-    //: 4 If allocator extended version of copy constructor is used, the
-    //:   allocator passed to the constructor is the allocator of the newly
-    //:   created 'optional'.
-    //:
-    //: 5 No unnecessary copies of the 'value_type' are created.
-    //:
-    //: 6 All of the above holds if the source object is an 'std::optional'.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' of a non allocator-aware 'value_type'.
-    //:   Use the created object to copy initialize another 'optional'
-    //:   object of the same type.  Verify thatthe value of the new object and the
-    //:   value of the original object match.  [C-1]
-    //:
-    //: 2 Repeat step 1 using a disengaged 'optional' object as the source
-    //:   object.  Verify that the new 'optional' object is disengaged.  [C-2]
-    //:
-    //: 3 Repeat step 1 using an rvalue 'optional' as source object.  Check
-    //:   that the move constructor is invoked where appropriate.  [C-3]
-    //:
-    //: 4 In steps 1-3, if 'value_type' is allocator-aware, verify that the
-    //:   allocator of the newly created 'optional' object is the allocator
-    //:   provided to the copy constructor.  [C-4]
-    //:
-    //: 5 In steps 1-4, for concern 4, verify that no unnecessary copies of the
-    //:   'value_type' have been created.  [C-5]
-    //:
-    //: 6 Repeat steps 1-5 using an 'std::optional' as the source object.
-    //:   [C-6]
-    //
-    // Testing:
-    //
-    //    optional(alloc_arg, alloc, const optional&);
-    //    optional(alloc_arg, alloc, optional&&);
-    //    optional(alloc_arg, alloc, const optional<ANY_TYPE> &);
-    //    optional(alloc_arg, alloc, optional<ANY_TYPE>&&);
-    //    optional(alloc_arg, alloc, const std::optional<ANY_TYPE> &);
-    //    optional(alloc_arg, alloc, std::optional<ANY_TYPE>&&);
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING ALLOCATOR EXTENDED COPY CONSTRUCTION"
-               "\n============================================\n");
-
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-        bslma::TestAllocator ta("third", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        typedef bsl::optional<DEST_TYPE> DEST_OPT_TYPE;
-        {
-            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
-            const SRC_OPT_TYPE& csource = sourceBuffer.object();
-
-            TEST_EXT_COPY_FROM_EMPTY_OPT(source);
-            TEST_EXT_COPY_FROM_EMPTY_OPT(csource);
-            TEST_EXT_MOVE_FROM_EMPTY_OPT(source);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // C++03 MovableRef isn't const friendly which will make these
-            // tests fail
-            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-
-            source.emplace(3);
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(source);
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(csource);
-            TEST_EXT_MOVE_FROM_ENGAGED_OPT(source);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // we call copy macro here because a move from a 'const optional'
-            // should trigger a copy constructor
-            source.emplace(3);
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        }
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-        {
-            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
-            const SRC_OPT_TYPE& csource = sourceBuffer.object();
-
-            TEST_EXT_COPY_FROM_EMPTY_OPT(source);
-            TEST_EXT_COPY_FROM_EMPTY_OPT(csource);
-            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(source));
-            TEST_EXT_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
-
-            source.emplace(3);
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(source);
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(csource);
-            TEST_EXT_MOVE_FROM_ENGAGED_OPT(source);
-            source.emplace(3);
-            // we call copy macro here because a move from a 'const optional'
-            // should trigger a copy constructor
-            TEST_EXT_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
-        }
-#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase20()
-{
-    testCase20_imp<TYPE, TYPE>();
-    testCase20_imp<TYPE, int>();
-    testCase20_imp<TYPE, const TYPE>();
-    testCase20_imp<TYPE, const int>();
-    testCase20_imp<const TYPE, TYPE>();
-    testCase20_imp<const TYPE, int>();
-    testCase20_imp<const TYPE, const TYPE>();
-    testCase20_imp<const TYPE, const int>();
-}
-
-template <class TYPE>
-template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
-void TestDriver<TYPE>::testCase19_imp()
-{
-    // --------------------------------------------------------------------
-    // TESTING COPY CONSTRUCTION
-    //   This test will ensure that the copy construction works as expected.
-    //
-    // Concerns:
-    //: 1 Constructing an 'optional' from an engaged 'optional' creates an
-    //:   engaged 'optional' where the 'value_type' object is constructed
-    //:   from the 'value_type' object of the original 'optional' object.
-    //:
-    //: 2 Constructing an 'optional' from a disengaged 'optional' of the same
-    //:   type creates a disengaged 'optional'.
-    //:
-    //: 3 If 'value_type' is allocator-aware, and the source is an rvalue
-    //:   'optional' of same 'value_type', the allocator is propagated.
-    //:   Otherwise, the default allocator is used.
-    //:
-    //: 4 The 'value_type' object in 'optional' is move constructed when
-    //:   possible.
-    //:
-    //: 5 No unnecessary copies of the 'value_type' are created.
-    //:
-    //: 6 All of the above holds if the source object is an 'std::optional'.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' of 'SRC_TYPE' and use it to create an
-    //:   'optional' of 'DEST_TYPE'.  Verify that the value of the new object
-    //:   and the value of the original object match. [C-1]
-    //:
-    //: 2 Repeat step 1 using a disengaged 'optional' object as the source
-    //:   object.  Verify that the created 'optional' object is disengaged.
-    //:   [C-2]
-    //:
-    //: 3 If the 'value_type' is allocator-aware, verify that the allocator of
-    //:   the newly created 'optional' object is the default allocator. [C-3]
-    //:
-    //: 4 Repeat steps 1-3 using an rvalue for source. Verify that the move
-    //:   constructor is invoked where necessary.  Note that a part of this
-    //:   test is extracted to a separate function to account for a bug in
-    //:   older versions of cpplib. [C-4]
-    //:
-    //: 5 In step 4, if the 'value_type' is allocator-aware, verify that the
-    //:   allocator is propagated as needed. [C-3]
-    //:
-    //: 6 In steps 1-5, verify that no unnecessary copies of the 'value_type'
-    //:   have been created. [C-5]
-    //:
-    //: 8 Repeat steps 1-5 using an 'std::optional' as the source object.
-    //
-    // Testing:
-    //
-    //    optional(const optional&);
-    //    optional(optional&&);
-    //    optional(const optional<ANY_TYPE> &);
-    //    optional(optional<ANY_TYPE>&&);
-    //    optional(const std::optional<ANY_TYPE> &);
-    //    optional(std::optional<ANY_TYPE>&&);
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING COPY CONSTRUCTION "
-               "\n=========================\n");
-
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        {
-            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
-            const SRC_OPT_TYPE& csource = sourceBuffer.object();
-
-            TEST_COPY_FROM_EMPTY_OPT(source);
-            TEST_COPY_FROM_EMPTY_OPT(csource);
-            TEST_MOVE_FROM_EMPTY_OPT(source, PROPAGATE_ON_MOVE);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // C++03 MovableRef isn't const friendly which will make these
-            // tests fail
-            TEST_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-
-            source.emplace(3);
-            TEST_COPY_FROM_ENGAGED_OPT(source);
-            TEST_COPY_FROM_ENGAGED_OPT(csource);
-                // extracted to testCase19_imp_libgccbug
-                // TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // we call copy macro here because a move from a 'const optional'
-            // should trigger a copy constructor
-            source.emplace(3);
-            TEST_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        }
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-        {
-            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE&       source  = sourceBuffer.object();
-            const SRC_OPT_TYPE& csource = sourceBuffer.object();
-
-            TEST_COPY_FROM_EMPTY_OPT(source);
-            TEST_COPY_FROM_EMPTY_OPT(csource);
-            TEST_MOVE_FROM_EMPTY_OPT(source, false);
-            TEST_COPY_FROM_EMPTY_OPT(MoveUtil::move(csource));
-
-            source.emplace(3);
-            TEST_COPY_FROM_ENGAGED_OPT(source);
-            TEST_COPY_FROM_ENGAGED_OPT(csource);
-                // extracted to testCase19_imp_libgccbug
-                //TEST_MOVE_FROM_ENGAGED_OPT(source, false);
-            source.emplace(3);
-            // we call copy macro here because a move from a 'const optional'
-            // should trigger a copy constructor
-            TEST_COPY_FROM_ENGAGED_OPT(MoveUtil::move(csource));
-        }
-#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    }
-}
-template <class TYPE>
-template <class DEST_TYPE, class SRC_TYPE, bool PROPAGATE_ON_MOVE>
-void TestDriver<TYPE>::testCase19_imp_libgccbug()
-{
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        {
-            typedef bsl::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE& source = sourceBuffer.object();
-
-            source.emplace(3);
-            TEST_MOVE_FROM_ENGAGED_OPT(source, PROPAGATE_ON_MOVE);
-        }
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-        {
-            typedef std::optional<SRC_TYPE>                SRC_OPT_TYPE;
-            typedef bslalg::ConstructorProxy<SRC_OPT_TYPE> SourceWithAllocator;
-            SourceWithAllocator                            sourceBuffer(&oa);
-            SRC_OPT_TYPE& source = sourceBuffer.object();
-
-            source.emplace(3);
-            TEST_MOVE_FROM_ENGAGED_OPT(source, false);
-        }
-#endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    }
-}
-
-#if (BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY &&                       \
-     BSLS_LIBRARYFEATURES_STDCPP_GNU &&                                       \
-     (!defined(_GLIBCXX_RELEASE) ||                                           \
-      (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE <= 8)))
-#define STD_OPTIONAL_LIBCPP_BUG 1
-#endif
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase19()
-{
-    testCase19_imp<TYPE, TYPE, true>();
-    testCase19_imp<TYPE, int, false>();
-    testCase19_imp<TYPE, const TYPE, false>();
-    testCase19_imp<TYPE, const int, false>();
-    testCase19_imp<const TYPE, TYPE, true>();
-    testCase19_imp<const TYPE, int, false>();
-    testCase19_imp<const TYPE, const TYPE, true>();
-    testCase19_imp<const TYPE, const int, false>();
-
-    testCase19_imp_libgccbug<TYPE, TYPE, true>();
-    testCase19_imp_libgccbug<TYPE, int, false>();
-    testCase19_imp_libgccbug<TYPE, const TYPE, false>();
-    testCase19_imp_libgccbug<TYPE, const int, false>();
-    testCase19_imp_libgccbug<const TYPE, TYPE, true>();
-    testCase19_imp_libgccbug<const TYPE, int, false>();
-#ifndef STD_OPTIONAL_LIBCPP_BUG
-    // In older version of CPPLIB, the constness of 'value_type' is not
-    // preserved when attempting to move construct from an 'optional' of
-    // 'const' 'value_type'.  This results in a move being invoked, despite the
-    // fact that the 'value_type' of the source 'optional' object should not be
-    // modifiable.
-    testCase19_imp_libgccbug<const TYPE, const TYPE, true>();
-#endif
-    testCase19_imp_libgccbug<const TYPE, const int, false>();
-}
-
-void testCase18()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=(optional_type)' MEMBER FUNCTION
-    //   This test will ensure that the 'operator=(rhs)', where 'rhs' is an
-    //   optional type, member function works as expected.  These test require
-    //   compilation failures and will not run by default.
-    //
-    // Concerns:
-    //: 1 'operator=(rhs)', where 'rhs' is an 'optional' type whose
-    //:   'value_type' is not assignable to the 'value_type' of the target
-    //:    'optional', can not be called.
-    //:
-    //: 2 'operator=(rhs)', where 'rhs' is an 'optional' type whose
-    //:   'value_type' is not convertible to target 'optional''s 'value_type',
-    //:    can not be called.
-    //
-    // Plan:
-    //: 1 Create an 'optional' object of non allocator-aware 'value_type' as
-    //:   the target object.  Verify that an 'optional' object of 'value_type'
-    //:   that is convertible, but not assignable to target object 'value_type'
-    //:   can not be assigned to the target object.  Note that this test
-    //:   requires compilation errors and needs to be enabled and checked
-    //:   manually. [C-1]
-    //:
-    //: 2 Verify that an 'optional' object of 'value_type' that is assignable,
-    //:   but not convertible to target object's 'value_type' can not be
-    //:   assigned to the target object.  Note that this test requires
-    //:   compilation errors and needs to be enabled and checked manually.
-    //:   [C-2]
-    //
-    //
-    // Testing:
-    //
-    // optional& operator=(const optional&); optional& operator=(optional&&);
-    // optional& operator=(const optional<ANY_TYPE>&); optional&
-    // operator=(optional<ANY_TYPE>&&);
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=(optional_type)' MEMBER FUNCTION"
-               "\n==================================================\n");
-#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_OPT
-
-    if (veryVerbose)
-        printf("\tUsing 'MyClass1b'.\n");
-    {
-        typedef MyClass1b                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj                     mX  = ValueType(0);
-            bsl::optional<MyClass1> mc1 = MyClass1(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass1(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass1c'.\n");
-    {
-        typedef MyClass1c                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj                     mX  = ValueType(0);
-            bsl::optional<MyClass1> mc1 = MyClass1(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass1(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass2b'.\n");
-    {
-        typedef MyClass2b                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj                     mX;
-            bsl::optional<MyClass2> mc1 = MyClass2(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass2(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass2c'.\n");
-    {
-        typedef MyClass2c                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj                     mX;
-            bsl::optional<MyClass2> mc1 = MyClass2(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass2(0);  // this should not compile
-        }
-    }
-#endif
-}
-
-template <class TYPE>
-template <class OPT_TYPE>
-void TestDriver<TYPE>::testCase17_imp()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=(optional_type)' MEMBER FUNCTION
-    //   This test will ensure that the 'operator=(rhs)', where 'rhs' is an
-    //   'optional' type, works as expected.
-    //
-    // Concerns:
-    //: 1 That 'operator=(rhs)', where 'rhs' is a disengaged 'optional' object,
-    //:   makes the target 'optional' object disengaged.
-    //:
-    //: 2 That 'operator=(rhs)', invoked on an engaged 'optional' object and
-    //:   where 'rhs' is an engaged 'optional' object, assigns the value of the
-    //:   'rhs''optional' to the value of the target 'optional' object.
-    //:
-    //: 3 That 'operator=(rhs)', invoked on a disengaged 'optional' object and
-    //:   where 'rhs' is an engaged 'optional' object, constructs a
-    //:   'value_type' object from the value of 'rhs''optional' object.
-    //:
-    //: 4 The behaviour is the same if 'rhs' is a const-qualified 'optional',
-    //:   or an 'optional' of a const-qualified 'value_type'.
-    //:
-    //: 5 For allocator-aware types, the assignment from an 'optional' object
-    //:   does not modify the allocator.
-    //:
-    //: 6 Assignment from rvalues uses move assignment where available.
-    //:
-    //: 7 Assignment to an 'optional' of const qualified 'value_type' is not
-    //:   possible.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' of 'value_type'.  Assign a disengaged
-    //:   'optional' of the same type to it.  Verify that the destination object
-    //:   is disengaged. [C-1]
-    //:
-    //: 2 Emplace a value into the test object.  Assign an engaged 'optional'
-    //:   of the same type to it.  Verify thatthe value of the test object is the
-    //:   same as that of the object assigned to it. [C-2]
-    //:
-    //: 3 Assign a disengaged 'optional' of a 'value_type' convertible to test
-    //:   object's 'value_type'.  Verify that the destination object is
-    //:   disengaged. [C-1]
-    //:
-    //: 4 Emplace a value into the test object.  Assign an engaged 'optional'
-    //:   of a 'value_type' convertible to test object's 'value_type'.  Check
-    //:   that the value of the test object is the same as that of the object
-    //:   assigned to it. [C-2]
-    //:
-    //: 5 Repeat steps 1-4 using a const-qualified 'optional' object as 'rhs',
-    //:   and using an 'optional' of const-qualified value type. [C-4]
-    //:
-    //: 6 Repeat steps 1-5 using an rvalue as 'rhs'.  Verify the object was
-    //:   moved from if 'rhs' is a non const-qualified 'optional' of a non
-    //:   const-qualified 'value_type', and copied otherwise. [C-6]
-    //:
-    //: 7 Repeat steps 1-6 using a disengaged 'optional' as the test object
-    //:   in each step by calling 'reset' before each assignment. [C-3]
-    //:
-    //: 8 In steps 1-7, if 'value_type' is allocator-aware, verify that the test
-    //:   object's allocator has not been modified. [C-5]
-    //:
-    //: 9 Verify that a const qualified 'optional' can not be assigned to.
-    //:   Note that this test requires compilation failures and needs to be
-    //:   enabled and checked manually. [C-7]
-    //
-    // Testing:
-    //
-    // optional& operator=(const optional&);
-    // optional& operator=(optional&&);
-    // optional& operator=(const optional<ANY_TYPE>&);
-    // optional& operator=(optional<ANY_TYPE>&&);
-    // optional& operator=(const std::optional<ANY_TYPE>&);
-    // optional& operator=(std::optional<ANY_TYPE>&&);
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=(optional_type)' MEMBER FUNCTION"
-               "\n==================================================\n");
-
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        typedef bslalg::ConstructorProxy<OPT_TYPE> SourceWithAllocator;
-        SourceWithAllocator                        X(&da);
-        OPT_TYPE&                                  source  = X.object();
-        const OPT_TYPE&                            cSource = X.object();
-
-        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(source);
-        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(source);
-        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(source));
-        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(MoveUtil::move(source));
-
-        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(cSource);
-        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(cSource);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        // C++03 MovableRef isn't const friendly which will make these tests
-        // fail
-        TEST_ASSIGN_OPT_EMPTY_FROM_EMPTY(MoveUtil::move(cSource));
-        TEST_ASSIGN_OPT_ENGAGED_FROM_EMPTY(MoveUtil::move(cSource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-
-        source.emplace(3);
-        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(source);
-        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(source);
-        TEST_MOVE_ASSIGN_OPT_EMPTY_FROM_ENGAGED(source);
-        source.emplace(3);
-        TEST_MOVE_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(source);
-        source.emplace(3);
-
-        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(cSource);
-        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(cSource);
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        // C++03 MovableRef isn't const friendly which will make these tests
-        // fail
-        TEST_ASSIGN_OPT_EMPTY_FROM_ENGAGED(MoveUtil::move(cSource));
-        TEST_ASSIGN_OPT_ENGAGED_FROM_ENGAGED(MoveUtil::move(cSource));
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-    }
-    {
-#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
-        typedef int OtherType;
-
-        ObjC      mX = ValueType(0);
-        OtherType i  = OtherType(3);
-        mX           = i;
-#endif  //BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase17()
-{
-    testCase17_imp<bsl::optional<TYPE> >();
-    testCase17_imp<bsl::optional<int> >();
-    testCase17_imp<bsl::optional<const TYPE> >();
-    testCase17_imp<bsl::optional<const int> >();
-
-#ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-    testCase17_imp<std::optional<TYPE> >();
-    testCase17_imp<std::optional<int> >();
-    testCase17_imp<std::optional<TYPE> >();
-    testCase17_imp<std::optional<int> >();
-#endif  //BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-}
-void testCase16()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=(non_optional_type)' MEMBER FUNCTION
-    //   This test will ensure that the 'operator=(non_optional_type)' function
-    //   works as expected.
-    //
-    // Concerns:
-    //: 1 'operator=(rhs)', where 'rhs' is not an 'optional' object, can not be
-    //:    called if 'rhs' is of a type which is not assignable to
-    //:    'value_type'.
-    //:
-    //: 2  'operator=(rhs)', where 'rhs' is not an 'optional' object, can not be
-    //:    called if 'value_type' is not constructable from 'rhs'.
-    //
-    // Plan:
-    //
-    //: 1 Create an 'optional' object. Verify that lvalue and rvalue of type
-    //:   convertible, but not assignable to 'value_type' can not be assigned
-    //:   to the 'optional' object. Note that this test requires compilation
-    //:   errors and needs to be enabled and checked manually. [C-1]
-    //:
-    //: 2 Create an 'optional' object. Verify that lvalue and rvalue of type
-    //:   assignable, but not convertible to 'value_type' can not be assigned
-    //:   to the 'optional' object. Note that this test requires compilation
-    //:   errors and needs to be enabled and checked manually. [C-2]
-    //
-    //
-    // Testing:
-    //
-    // optional& operator=(const TYPE&);
-    // optional& operator=(TYPE&&);
-    // optional& operator=(const ANY_TYPE&);
-    // optional& operator=(ANY_TYPE&&);
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=(non_optional_type)' MEMBER FUNCTION"
-               "\n======================================================"
-               "\n");
-#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_NONOPT
-
-    if (veryVerbose)
-        printf("\tUsing 'MyClass1b'.\n");
-    {
-        typedef MyClass1b                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj      mX  = ValueType(0);
-            MyClass1 mc1 = MyClass1(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass1(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass1c'.\n");
-    {
-        typedef MyClass1c                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj      mX  = ValueType(0);
-            MyClass1 mc1 = MyClass1(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass1(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass2b'.\n");
-    {
-        typedef MyClass2b                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj      mX;
-            MyClass2 mc1 = MyClass2(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass2(0);  // this should not compile
-        }
-    }
-    if (veryVerbose)
-        printf("\tUsing 'MyClass2c'.\n");
-    {
-        typedef MyClass2c                ValueType;
-        typedef bsl::optional<ValueType> Obj;
-        {
-            Obj      mX;
-            MyClass2 mc1 = MyClass2(2);
-
-            mX = mc1;          //this should not compile
-            mX = MyClass2(0);  // this should not compile
-        }
-    }
-#endif
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase15()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=(non_optional_type)' FUNCTIONALITY
-    //   This test will ensure that the 'operator=(rhs)' member function, where
-    //   'rhs' is not an 'optional' type, works as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'operator=(rhs)', where 'rhs' is not of an 'optional' type,
-    //:   or an engaged 'optional' assigns 'rhs' to the 'value_type' object.
-    //:
-    //: 2 Calling 'operator=(rhs)', where 'rhs' is not of an 'optional' type,
-    //:   or a disengaged 'optional' creates a 'value_type' object initialized
-    //:   with 'rhs'.
-    //:
-    //: 3 For allocator-aware types, the assignment to a disengaged 'optional'
-    //:   uses the stored allocator.
-    //:
-    //: 4 Assignment of rvalues uses move assignment/construction where
-    //:   available.
-    //:
-    //: 5 'optional' object of const qualified 'value_type' can not be assigned
-    //:   to.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' object. Verify that assignment from
-    //:   'value_type', from 'const' qualified 'value_type', and from a type
-    //:   assignable to 'value_type' results in  an 'optional' object having
-    //:   the (possibly converted) value of 'rhs'. [C-1]
-    //:
-    //: 2 Repeat step 1 using rvalue 'rhs' and verify that 'rhs' was moved from.
-    //:   [C-4]
-    //:
-    //: 3 Create a disengaged 'optional' object. Verify that assignment from
-    //:   'value_type', from 'const' qualified 'value_type', and from type
-    //:   assignable to 'value_type' results in an 'optional' object having the
-    //:   (possibly converted) value of 'rhs'. [C-2]
-    //:
-    //: 4 Repeat step 4 using rvalue 'rhs' and verify that the 'rhs' was moved from.
-    //:   [C-4]
-    //:
-    //: 5 If 'TYPE' is allocator-aware, verify that the value of the 'optional'
-    //:   object after assignment is the allocator used at construction. [C-3]
-    //:
-    //: 6 Verify that an 'optional' object of 'const' qualified 'value_type'
-    //:   can not be assigned to. Note that this test requires compilation
-    //:   errors and needs to be enabled and checked manually. [C-5]
-    //
-    // Testing:
-    //
-    // optional& operator=(const TYPE&);
-    // optional& operator=(TYPE&&);
-    // optional& operator=(const ANY_TYPE&);
-    // optional& operator=(ANY_TYPE&&);
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=(non_optional_type)' FUNCTIONALITY"
-               "\n===================================================="
-               "\n");
-
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-        if (veryVeryVerbose)
-            printf("\t\tChecking assignment to an engaged "
-                   "'optional'.\n");
-        {
-            ValWithAllocator valBuffer(1, &da);
-            ValueType&       vi = valBuffer.object();
-            TEST_ASSIGN_VAL_ENGAGED(vi);
-
-            ValWithAllocator valBuffer2(2, &da);
-            ValueType&       vi2 = valBuffer2.object();
-            TEST_MOVE_ASSIGN_VAL_ENGAGED(vi2);
-            ASSERT(vi2.value() == k_MOVED_FROM_VAL);
-
-            const ValueType& cvi = valBuffer.object();
-            TEST_ASSIGN_VAL_ENGAGED(cvi);
-            TEST_ASSIGN_VAL_ENGAGED(MoveUtil::move(cvi));
-
-            int i = 3;
-            TEST_ASSIGN_VAL_ENGAGED(i);
-            TEST_MOVE_ASSIGN_VAL_ENGAGED(i);
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-            // C++03 MovableRef isn't const friendly which will make this test
-            // fail
-
-            const int ci = 6;
-            TEST_ASSIGN_VAL_ENGAGED(ci);
-            TEST_ASSIGN_VAL_ENGAGED(MoveUtil::move(ci));
-#endif
-        }
-        if (veryVeryVerbose)
-            printf("\t\tChecking assignment to a disengaged"
-                   " 'optional'.\n");
-        {
-            ValWithAllocator valBuffer(1, &da);
-            ValueType&       vi = valBuffer.object();
-            TEST_ASSIGN_VAL_EMPTY(vi);
-
-            ValWithAllocator valBuffer2(2, &da);
-            ValueType&       vi2 = valBuffer2.object();
-            TEST_MOVE_ASSIGN_VAL_EMPTY(vi2);
-            ASSERT(vi2.value() == k_MOVED_FROM_VAL);
-
-            const ValueType& cvi = valBuffer.object();
-            TEST_ASSIGN_VAL_EMPTY(cvi);
-            TEST_ASSIGN_VAL_EMPTY(MoveUtil::move(cvi));
-
-            int i = 3;
-            TEST_ASSIGN_VAL_EMPTY(i);
-
-            const int ci = 6;
-            TEST_ASSIGN_VAL_EMPTY(ci);
-            TEST_ASSIGN_VAL_EMPTY(MoveUtil::move(ci));
-        }
-        {
-            ObjC      mX = ValueType(0);
-            ValueType vi = ValueType(1);
-#ifdef BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
-            mX = vi;  // this should not compile
-#endif                //BSLSTL_OPTIONAL_TEST_BAD_EQUAL_CONST
-        }
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase14_imp()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator=(nullopt_t)' MEMBER FUNCTION
-    //   This test will ensure that the operator=(nullopt_t) member function
-    //   works as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'operator=(nullopt_t)' on a disengaged 'optional' leaves the
-    //:   'optional' disengaged.
-    //:
-    //: 2 Calling 'operator=(nullopt_t)' on an engaged 'optional' makes the
-    //:   'optional' disengaged.
-    //:
-    //: 3 For an allocator-aware 'value_type', calling 'operator=(nullopt_t)'
-    //:   does not modify the allocator.
-    //:
-    //: 4 'operator=(nullopt_t)' can be called on a non const qualified
-    //:   'optional' of a const qualified 'value_type'.
-    //
-    //
-    // Plan:
-    //: 1 Create a disengaged 'optional' of a non allocator-aware 'value_type'.
-    //:   Call operator=(nullopt_t) and verify that the 'optional' object is
-    //:   still disengaged [C-1]
-    //:
-    //: 2 Emplace a value in the 'optional'. Call operator=(nullopt_t) and
-    //:   verify that the 'optional' object has been disengaged. [C-2]
-    //:
-    //: 3 In steps 1 and 2, if 'TYPE' is allocator-aware, verify the allocator
-    //:   has not changed. [C-3]
-    //:
-    //: 4 Repeat the test using a const qualified 'TYPE'. [C-4]
-    //
-    // Testing:
-    //
-    //   operator=(nullopt_t)
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator=(nullopt_t)' MEMBER FUNCTION "
-               "\n==============================================\n");
-
-    {
-        Obj mX;
-        mX = bsl::nullopt;
-        ASSERT(!mX.has_value());
-
-        mX.emplace(ValueType());
-        mX = bsl::nullopt;
-        ASSERT(!mX.has_value());
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase14()
-{
-    TestDriver<TYPE>::testCase14_imp();
-    TestDriver<const TYPE>::testCase14_imp();
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase13()
-{
-    TestDriver<TYPE>::testCase13_imp_a();
-    TestDriver<const TYPE>::testCase13_imp_a();
-    TestDriver<TYPE>::testCase13_imp_b();
-    TestDriver<const TYPE>::testCase13_imp_b();
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase13_imp_a()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'emplace' METHOD
-    //   This test will ensure that the 'emplace' method works as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'emplace' with no arguments creates a default constructed
-    //:   'value_type' object.
-    //:
-    //: 2 If 'value_type' is allocator-aware, 'emplace' invokes the allocator
-    //:   extended constructor using the 'optional''s allocator.
-    //:
-    //: 3 There are no unnecessary 'value_type' copies created
-    //:
-    //: 4 Variadic arguments to 'emplace' method are correctly forwarded to the
-    //:   constructor arguments.
-    //
-    // Plan:
-    //: 1 Call 'emplace' method that takes no arguments and verify the value
-    //:   type object is default constructed. [C-1]
-    //:
-    //: 2 In step 1, if the 'value_type' is allocator-aware, verify the
-    //:   allocator used for the constructed value is the allocator of the
-    //:   'optional' object. [C-2]
-    //:
-    //: 3 Invoke 'emplace' method with varying number of arguments, some of
-    //:   which are to be moved from. Verify the arguments are perfect
-    //:   forwarded to the constructor in the correct order. [C-4]
-    //:
-    //: 4 In steps 1-3, verify that no additional copies of 'value_type' have
-    //:   been created. [C-3]
-    //
-    // Testing:
-    //
-    //   void emplace(Args&&...);
-    //
-    // --------------------------------------------------------------------
-    if (verbose)
-        printf("\nTESTING 'emplace' METHOD"
-               "\n========================\n");
-    {
-        bslma::TestAllocator da("other", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        TEST_EMPLACE((&da), ());
-        TEST_EMPLACE((MoveUtil::move(VA1), &da), (MoveUtil::move(VA1)));
-        TEST_EMPLACE((VA1, &da), (VA1));
-        TEST_EMPLACE((MoveUtil::move(VA1), VA2, &da),
-                     (MoveUtil::move(VA1), VA2));
-        TEST_EMPLACE((VA1, MoveUtil::move(VA2), &da),
-                     (VA1, MoveUtil::move(VA2)));
-
-        TEST_EMPLACE((MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), &da),
-                     (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
-        TEST_EMPLACE((VA1, MoveUtil::move(VA2), VA3, &da),
-                     (VA1, MoveUtil::move(VA2), VA3));
-
-        TEST_EMPLACE(
-                    (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4, &da),
-                    (MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
-        TEST_EMPLACE(
-                    (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), &da),
-                    (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5)));
-        TEST_EMPLACE(
-               (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5, &da),
-               (VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4), VA5));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6));
-        TEST_EMPLACE((VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      &da),
-                     (VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6)));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7)));
-        TEST_EMPLACE((VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      &da),
-                     (VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8));
-        TEST_EMPLACE((VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      &da),
-                     (VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8)));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9)));
-        TEST_EMPLACE((VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      &da),
-                     (VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9));
-
-        TEST_EMPLACE((MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      VA10,
-                      &da),
-                     (MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      VA10));
-        TEST_EMPLACE((VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      MoveUtil::move(VA10),
-                      &da),
-                     (VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      MoveUtil::move(VA10)));
-    }
-#ifdef BSLSTL_OPTIONAL_TEST_BAD_EMPLACE
-    {
-        CObj bad1;
-        bad1.emplace();               // this should not compile 1
-        bad1.emplace(VA1);            // this should not compile 2
-        bad1.emplace(VA1, VA2);       // this should not compile 3
-        bad1.emplace(VA1, VA2, VA3);  // this should not compile 4
-        bad1.emplace(VA1, VA2, VA3, VA4);
-        // this should not compile 5
-
-        CObjC bad2;
-        bad2.emplace();               // this should not compile 6
-        bad2.emplace(VA1);            // this should not compile 7
-        bad2.emplace(VA1, VA2);       // this should not compile 8
-        bad2.emplace(VA1, VA2, VA3);  // this should not compile 9
-        bad2.emplace(VA1, VA2, VA3, VA4);
-        // this should not compile 10
-    }
-#endif
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase13_imp_b()
-{
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-    // --------------------------------------------------------------------
-    // TESTING TESTING INITIALIZER LIST 'emplace' METHOD
-    //   This test will ensure that the initializer list 'emplace' method works
-    //   as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'emplace' with only an initializer list detects the
-    //:   initializer list.
-    //:
-    //: 2 Variadic arguments to 'emplace' method are correctly fowarded to the
-    //:   constructor arguments.
-    //:
-    //: 3 If 'value_type' is allocator-aware, 'emplace' invokes the allocator
-    //:   extended constructor using the 'optional''s allocator.
-    //:
-    //: 4 There are no unnecessary argument type and 'value_type' copies
-    //:   created
-    //
-    // Plan:
-    //: 1 Create an 'optional' object of non allocator-aware 'value_type'.
-    //:   Call 'emplace' method that takes just an initializer list, and verify
-    //:   the object was constructed using an initializer list constructor.
-    //:   [C-1]
-    //:
-    //: 2 Repeat step 1 using varying number of arguments. [C-2]
-    //:
-    //: 3 Repeat steps 1-2 with an allocator-aware 'value_type' and verify the
-    //:   value in optional was constructed using the correct allocator. [C-3]
-    //:
-    //: 4 In steps 1-3, verify no unnecessary copies of the arguments and the
-    //:   'value_type' have been created. [C-4]
-    //
-    // Testing:
-    //
-    //   void emplace(std::initializer_list<U>, Args&&...);
-    //
-    // --------------------------------------------------------------------
-    if (verbose)
-        printf("\nTESTING INITIALIZER LIST 'emplace' METHOD"
-               "\n=========================================\n");
-    {
-        bslma::TestAllocator da("other", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3}, &da), ({1, 2, 3}));
-        TEST_EMPLACE(
-              (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), &da),
-              ({1, 2, 3}, MoveUtil::move(VA1)));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3}, VA1, &da),
-                     ({1, 2, 3}, VA1));
-        TEST_EMPLACE(
-         (std::initializer_list<int>{1, 2, 3}, MoveUtil::move(VA1), VA2, &da),
-         ({1, 2, 3}, MoveUtil::move(VA1), VA2));
-        TEST_EMPLACE(
-         (std::initializer_list<int>{1, 2, 3}, VA1, MoveUtil::move(VA2), &da),
-         ({1, 2, 3}, VA1, MoveUtil::move(VA2)));
-
-        TEST_EMPLACE(
-            (std::initializer_list<int>{1, 2, 3},
-             MoveUtil::move(VA1),
-             VA2,
-             MoveUtil::move(VA3),
-             &da),
-            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3)));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      &da),
-                     ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3));
-
-        TEST_EMPLACE(
-            (std::initializer_list<int>{1, 2, 3},
-             MoveUtil::move(VA1),
-             VA2,
-             MoveUtil::move(VA3),
-             VA4,
-             &da),
-            ({1, 2, 3}, MoveUtil::move(VA1), VA2, MoveUtil::move(VA3), VA4));
-        TEST_EMPLACE(
-            (std::initializer_list<int>{1, 2, 3},
-             VA1,
-             MoveUtil::move(VA2),
-             VA3,
-             MoveUtil::move(VA4),
-             &da),
-            ({1, 2, 3}, VA1, MoveUtil::move(VA2), VA3, MoveUtil::move(VA4)));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5)));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6)));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7)));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8)));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9)));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9));
-
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      VA10,
-                      &da),
-                     ({1, 2, 3},
-                      MoveUtil::move(VA1),
-                      VA2,
-                      MoveUtil::move(VA3),
-                      VA4,
-                      MoveUtil::move(VA5),
-                      VA6,
-                      MoveUtil::move(VA7),
-                      VA8,
-                      MoveUtil::move(VA9),
-                      VA10));
-        TEST_EMPLACE((std::initializer_list<int>{1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      MoveUtil::move(VA10),
-                      &da),
-                     ({1, 2, 3},
-                      VA1,
-                      MoveUtil::move(VA2),
-                      VA3,
-                      MoveUtil::move(VA4),
-                      VA5,
-                      MoveUtil::move(VA6),
-                      VA7,
-                      MoveUtil::move(VA8),
-                      VA9,
-                      MoveUtil::move(VA10)));
-    }
-#endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase12()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator*' FUNCTIONALITY
-    //   This test will ensure that the 'operator*' works as expected.
-    //
-    //   MSVC-2015 has a bug which removes constness from temporaries in
-    //   certain situations. For example :
-    //
-    //       bsl::string = CObj("s").value();
-    //
-    //   invokes non const qualified overload of 'value', despite the fact the
-    //   temporary is of a const qualified 'bsl::optional'. In the following
-    //   example, the constness is preserved:
-    //
-    //       Cobj temp = Cobj("s");
-    //       bsl::string = MoveUtil::move(temp).value();
-    //
-    //    The tests have been written to take this issue into account.
-    //
-    //
-    // Concerns:
-    //: 1 Calling 'operator* 'on an engaged 'optional' returns a reference to
-    //:   the contained value.
-    //:
-    //: 2 Returned reference is 'const' qualified if the 'optional' object
-    //:   is 'const' qualified, or if the 'value_type' is 'const' qualified.
-    //:
-    //: 3 All of the above concerns apply whether or not the 'value_type' is
-    //:   allocator-aware.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' object.  Using 'operator*', verify that the
-    //:   returned value of 'optional' object. [C-1]
-    //:
-    //: 2 Modify the value of the object obtained using 'operator*'. Verify thatthe
-    //:   value of the 'optional' has been modified. [C-1]
-    //:
-    //: 3 Verify that the pointer returned from 'operator*' is not 'const'
-    //:   qualified if neither the 'optional' object, nor the 'value_type' are
-    //:   'const' qualified. [C-2]
-    //:
-    //: 4 Verify that the pointer returned from 'operator*' is 'const' qualified
-    //:   if the 'optional' object is 'const' qualified. [C-2]
-    //:
-    //: 5 Verify that the pointer returned from 'operator*' is 'const' qualified
-    //:   if the 'value_type' is 'const' qualified. [C-2]
-    //:
-    //: 6 Execute the test with allocator-aware and non allocator-aware 'TYPE'.
-    //:   [C-3]
-    //
-    //
-    // Testing:
-    //   const T* operator->() const;
-    //   T* operator->();
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING operator* FUNCTIONALITY "
-               "\n===============================\n");
-
-    {
-        Obj   mX(ValueType(4));
-        CObj  cObjX(ValueType(8));
-        ObjC  objcX(ValueType(9));
-        CObjC cObjcX(ValueType(10));
-
-        ASSERT((*mX).value() == 4);
-        ASSERT((*cObjX).value() == 8);
-        ASSERT((*objcX).value() == 9);
-        ASSERT((*cObjcX).value() == 10);
-
-        *mX = 6;
-        ASSERT((*mX).value() == 6);
-
-        ASSERT(!isConstRef(mX. operator*()));
-        ASSERT(isConstRef(cObjX. operator*()));
-        ASSERT(isConstRef(objcX. operator*()));
-    }
-    {
-        CObj cObjX(ValueType(8));
-        ObjC objcX(ValueType(9));
-
-        ASSERT((*(Obj(ValueType(4)))).value() == 4);
-        ASSERT((*(CObj(ValueType(8)))).value() == 8);
-        ASSERT((*(ObjC(ValueType(9)))).value() == 9);
-        ASSERT((*(CObjC(ValueType(10)))).value() == 10);
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_RVALUE_REFERENCES
-        ASSERT(!isConstRef(Obj(ValueType(4)). operator*()));
-        ASSERT(isConstRef((std::move(cObjX)). operator*()));
-        ASSERT(isConstRef((std::move(objcX)). operator*()));
-#endif
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase11()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'operator->' MEMBER FUNCTION
-    //   This test will ensure that the 'operator->' works as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'operator->' on an engaged 'optional' object returns a
-    //:   pointer to the contained value object.
-    //:
-    //: 2 Returned pointer is 'const' qualified if the 'optional' object
-    //:   is 'const' qualified, or if the 'value_type' is 'const' qualified.
-    //:
-    //: 3 All of the above concerns apply whether or not the 'value_type' is
-    //:   allocator-aware.
-    //
-    // Plan:
-    //: 1 Create an engaged 'optional' object.  Using 'operator->', verify that the
-    //:   returned value matches the value in the 'optional' object. [C-1]
-    //:
-    //: 2 Assign a value to the 'optional' object through a call to
-    //:   'operator->'.  Verify thatthe value of the 'optional' object is as
-    //:   expected. [C-1]
-    //:
-    //: 3 Verify that the pointer returned from 'operator->' is not 'const'
-    //:   qualified if neither the 'optional' object, nor the 'value_type' are
-    //:   'const' qualified. [C-2]
-    //:
-    //: 4 Verify that the pointer returned from 'operator->' is 'const'
-    //:   qualified if the 'optional' object is 'const' qualified. [C-2]
-    //:
-    //: 5 Verify that the pointer returned from 'operator->' is 'const'
-    //:   qualified if the 'value_type' is 'const' qualified. [C-2]
-    //:
-    //: 6 Run the test using both allocator-aware and non allocator-aware
-    //:   'TYPE' [C-3]
-    //
-    // Testing:
-    //   const T* operator->() const;
-    //   T* operator->();
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'operator->' MEMBER FUNCTION"
-               "\n====================================\n");
-
-    {
-        Obj   mX(2);
-        CObj  cObjX(5);
-        ObjC  objcX(ValueType(9));
-        CObjC cObjcX(ValueType(10));
-
-        ASSERT(mX->value() == 2);
-        ASSERT(cObjX->value() == 5);
-        ASSERT(objcX->value() == 9);
-        ASSERT(cObjcX->value() == 10);
-
-        *(mX. operator->()) = 6;
-        ASSERT(mX->value() == 6);
-
-        ASSERT(!isConstPtr(mX. operator->()));
-        ASSERT(isConstPtr(cObjX. operator->()));
-        ASSERT(isConstPtr(objcX. operator->()));
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase10()
-{
-    // --------------------------------------------------------------------
-    // TESTING ALLOCATOR EXTENDED 'value_or' METHOD
-    //   This test will ensure that the allocator extended 'value_or' method
-    //   works as expected. We will also verify that single argument 'value_or'
-    //   method with an optional created using an allocator extended
-    //   constructor.
-    //
-    // Concerns:
-    //: 1 Calling 'value_or' on a disengaged 'optional' object returns the
-    //:   argument value converted to the 'value_type' of the 'optional'
-    //:   object.
-    //:
-    //: 2 Calling 'value_or' on an engaged 'optional' object returns the value
-    //:   in the 'optional' object.
-    //:
-    //: 3 In C++11, when calling 'value_or' on an engaged 'optional' rvalue, the
-    //:   returned object is created by moving from the 'value_type' object in
-    //:   'optional'.
-    //:
-    //: 4 It is possible to call 'value_or' on a constant 'optional' object.
-    //:
-    //: 5 The allocator of the object returned from the allocator extended
-    //:   'value_or' method is the allocator specified in the call to
-    //:   'value_or'.
-    //
-    // Plan:
-    //
-    //: 1 Create a disengaged 'optional' object.  Call 'value_or' and check
-    //:   that the return object matches the argument given to 'value_or'.
-    //:   [C-1]
-    //:
-    //: 2 Emplace a value in the 'optional' object. Call 'value_or' and check
-    //:   that the returned value matches the value in the 'optional' object.
-    //:   [C-2]
-    //:
-    //: 3 If ref qualifieres are supported, call 'value_or' on an engaged
-    //:   'optional' rvalue. Verify the resulting objects has been created by
-    //:   move construction. [C-3]
-    //:
-    //: 4 Repeat step 1 using a 'const' reference to the 'optional' object.
-    //:   [C-4]
-    //:
-    //: 5 In steps 1-4 verify that the allocator of the returned object is the
-    //:   one specified in the call to 'value_or'. [C-5]
-    //
-    // Testing:
-    //  TYPE value_or(alloc_arg, alloc, ANY_TYPE&& ) const;
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING ALLOCATOR EXTENDED 'value_or' METHOD"
-               "\n============================================\n");
-
-    {
-        bslma::TestAllocator da("default", veryVeryVeryVerbose);
-        bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-        bslma::TestAllocator ta("third", veryVeryVeryVerbose);
-
-        bslma::DefaultAllocatorGuard dag(&da);
-
-#ifdef BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
-        if (veryVerbose)
-            printf("\tallocator tests of allocator extended "
-                   "value_or'.\n");
-        {
-            Obj        mX(bsl::allocator_arg, &oa);
-            const Obj& X = mX;
-
-            bsls::ObjectBuffer<TYPE> valBuffer;
-            bslma::ConstructionUtil::construct(
-                valBuffer.address(), &da, 5);
-            const TYPE& val = valBuffer.object();
-
-            const ValueType& i1 = X.value_or(bsl::allocator_arg, &ta, val);
-            ASSERT(i1.value() == 5);
-            ASSERT(i1.get_allocator() == &ta);
-
-            mX.emplace(8);
-            const ValueType& i2 = mX.value_or(bsl::allocator_arg, &ta, val);
-            ASSERT(i2.value() == 8);
-            ASSERT(i2.get_allocator() == &ta);
-
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-            Obj              source(4);
-            const ValueType& i3 =
-                MoveUtil::move(source).value_or(bsl::allocator_arg, &ta, val);
-            ASSERT(i3 == 4);
-            ASSERT(source.value() == k_MOVED_FROM_VAL);
-            ASSERT(i3.get_allocator() == &ta);
-#endif  //defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
-        }
-#endif  //BSL_COMPILERFEATURES_GUARANTEED_COPY_ELISION
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase9()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'value_or' METHOD
-    //   This test will ensure that the 'value_or' method works as expected.
-    //
-    // Concerns:
-    //: 1 Calling 'value_or' on a disengaged 'optional' object returns the
-    //:   argument value converted to the 'value_type' of the 'optional'
-    //:   object.
-    //:
-    //: 2 Calling 'value_or' on an engaged 'optional' object returns the value
-    //:   in the 'optional' object.
-    //:
-    //: 3 In C++11, when calling 'value_or' on an engaged 'optional' rvalue, the
-    //:   returned object is created by moving from the 'value_type' object in
-    //:   'optional'.
-    //:
-    //: 4 It is possible to call 'value_or' on a constant 'optional' object.
-    //:
-    //: 5 If 'value_type' is allocator-aware, the allocator of the object
-    //:   returned from a single argument 'value_or' method is determined by
-    //:   the copy/move/conversion constructor of the 'value_type'.
-    //
-    // Plan:
-    //
-    //: 1 Create a disengaged 'optional' object.  Call 'value_or' and check
-    //:   that the return object matches the argument given to 'value_or'.
-    //:   [C-1]
-    //:
-    //: 2 Emplace a value in the 'optional' object. Call 'value_or' and check
-    //:   that the returned value matches the value in the 'optional' object.
-    //:   [C-2]
-    //:
-    //: 3 If ref qualifieres are supported, call 'value_or' on an engaged
-    //:   'optional' rvalue. Verify the resulting objects has been created by
-    //:   move construction. [C-3]
-    //:
-    //: 4 Repeat step 1 using a 'const' reference to the 'optional' object.
-    //:   [C-4]
-    //:
-    //: 5 If the 'value_type' is allocator-aware, verify that the allocator of
-    //:   the returned object is correct. [C-5]
-    //
-    // Testing:
-    //  TYPE value_or(BSLS_COMPILERFEATURES_FORWARD_REF(ANY_TYPE)) const;
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'value_or' METHOD"
-               "\n=========================\n");
-
-    bslma::TestAllocator da("default", veryVeryVeryVerbose);
-    bslma::TestAllocator oa("other", veryVeryVeryVerbose);
-    bslma::TestAllocator ta("third", veryVeryVeryVerbose);
-
-    bslma::DefaultAllocatorGuard dag(&da);
-    if (veryVerbose)
-        printf("\tlvalue disengaged optional and lvalue\n");
-    {
-        ObjWithAllocator objBuf(&ta);
-        Obj&             obj = objBuf.object();
-        const Obj&       X   = obj;
-        ValWithAllocator valBuffer(5, &oa);
-        const ValueType& val      = valBuffer.object();
-        ValueType        expected = val;
-        const ValueType& dest     = X.value_or(val);
-        ASSERT(dest == val);
-        ASSERT(hasSameAllocator(dest, expected));
-    }
-    if (veryVerbose)
-        printf("\tlvalue disengaged optional and rvalue\n");
-    {
-        ObjWithAllocator objBuf(&ta);
-        Obj&             obj = objBuf.object();
-        ValWithAllocator valBuffer(5, &oa);
-        ValueType&       val  = valBuffer.object();
-        const ValueType& dest = obj.value_or(MoveUtil::move(val));
-        ValWithAllocator valCopyBuffer(5, &oa);
-        ValueType&       valCopy  = valCopyBuffer.object();
-        ValueType        expected(MoveUtil::move(valCopy));
-        ASSERT(val.value() == k_MOVED_FROM_VAL);
-        ASSERT(dest == expected);
-        ASSERT(hasSameAllocator(dest, expected));
-    }
-    if (veryVerbose)
-        printf("\tlvalue engaged optional\n");
-    {
-        ObjWithAllocator objBuf(4, &ta);
-        Obj&             obj = objBuf.object();
-        ValWithAllocator valBuffer(5, &oa);
-        const ValueType& val      = valBuffer.object();
-        const ValueType& dest     = obj.value_or(val);
-        ValueType        expected = obj.value();
-        ASSERT(dest == expected);
-        ASSERT(hasSameAllocator(dest, expected));
-    }
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-    if (veryVerbose)
-        printf("\trvalue disengaged optional and lvalue\n");
-    {
-        ObjWithAllocator objBuf(&ta);
-        Obj&             obj = objBuf.object();
-        ValWithAllocator valBuffer(5, &oa);
-        ValueType&       val = valBuffer.object();
-        const ValueType& dest =
-            MoveUtil::move(obj).value_or(MoveUtil::move(val));
-        ValWithAllocator valCopyBuffer(5, &oa);
-        ValueType&       valCopy  = valCopyBuffer.object();
-        ValueType        expected(MoveUtil::move(valCopy));
-        ASSERT(dest == expected);
-        ASSERT(val.value() == k_MOVED_FROM_VAL);
-        ASSERT(hasSameAllocator(dest, expected));
-    }
-    if (veryVerbose)
-        printf("\trvalue engaged optional\n");
-    {
-        ObjWithAllocator objBuf(4, &ta);
-        Obj&             obj  = objBuf.object();
-        const ValueType& dest = MoveUtil::move(obj).value_or(77);
-        obj.emplace(4);
-        ValueType expected = (MoveUtil::move(obj.value()));
-        ASSERT(dest == expected);
-        ASSERT(obj.value().value() == k_MOVED_FROM_VAL);
-        ASSERT(hasSameAllocator(dest, expected));
-    }
-#endif  // defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase8()
-{
-    // --------------------------------------------------------------------
-    // TESTING 'value' METHOD
-    //   This test will ensure that the 'value' method works as expected.
-    //   The test relies on constructors and 'emplace' method.
-    //
-    //   MSVC-2015 has a bug which removes constness from temporaries in
-    //   certain situations. For example :
-    //
-    //       bsl::string = CObj("s").value();
-    //
-    //   invokes non const qualified overload of 'value', despite the fact the
-    //   temporary is of a const qualified 'bsl::optional'. In the following
-    //   example, the constness is preserved:
-    //
-    //       Cobj temp = Cobj("s");
-    //       bsl::string = MoveUtil::move(temp).value();
-    //
-    //    The tests have been written to take this issue into account.
-    //
-    // Concerns:
-    //: 1 Calling 'value()' on a disengaged 'optional' throws
-    //:   'bad_optional_access' exception.
-    //:
-    //: 2 Calling 'value()' on a engaged 'optional' returns the reference
-    //:   to the 'value_type' object.
-    //:
-    //: 3 The reference returned from 'value()' is 'const' qualified if the
-    //:   'optional' object is 'const' qualified, or if the 'value_type' is
-    //:   'const' qualified.
-    //:
-    //: 4 In C++11 and onwards, the returned reference is an rvalue reference
-    //:   if the 'optional' object is an rvalue.
-    //:
-    //: 5 It is possible to modify non constant 'optional' of non constant
-    //:   'value_type' through the reference returned by 'value' method.
-    //:
-    //: 6 That 'value' method behaves the same for allocator-aware types and
-    //:   non allocator-aware types.
-    //
-    // Plan:
-    //: 1 Create a disengaged 'optional' object. Call the 'value' method and
-    //:   verify that the 'bad_optional_access' exception is thrown. [C-1]
-    //:
-    //: 2 Emplace a value in the 'optional' object. Call the 'value' method
-    //:   and verify that the returned object has the expected value. [C-2]
-    //:
-    //: 3 Using 'isConstRef' verify the 'const' qualification of a reference
-    //:   returned from 'value' on a non 'const' 'optional' of non 'const'
-    //:   'value_type', 'const' 'optional' of non 'const' 'value_type', and
-    //:   'const' 'optional' of 'const' 'value_type'. [C-3]
-    //:
-    //: 4 If ref qualifiers are supported using 'isRvalueRef' verify that the
-    //:   reference returned from 'value' is an rvalue reference if the
-    //:   'optional' object is an rvalue. [C-4]
-    //:
-    //: 5 Modify the value of the 'optional' object through the reference
-    //:   returned from the 'value' method. Call 'value' method and verify that
-    //:   the value of the 'optional' object has been modified. [C-5]
-    //:
-    //: 6 Call 'reset' on the 'optional' object. Call 'value' method and check
-    //:   that the 'bad_optional_access' exception is thrown. [C-1]
-    //:
-    //: 7 In steps 1-6, verify that no unexpected exception is thrown. [C-1]
-    //:
-    //: 8 Run the test with an an allocator-aware TYPE and a non
-    //:   allocator-aware type. [C-6]
-    //
-    // Testing:
-    //   TYPE& value() &;
-    //   const TYPE& value() & const;
-    //   TYPE&& value() &&;
-    //   const TYPE&& value() && const;
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING 'value' METHOD"
-               "\n======================\n");
-
-    bool unexpected_exception_thrown = false;
-    try {
-        Obj        mX;
-        const Obj& X = mX;
-
-        bool bad_optional_exception_caught = false;
-        try {
-            mX.value();
-        }
-        catch (const bsl::bad_optional_access&) {
-            bad_optional_exception_caught = true;
-        }
-        ASSERT(bad_optional_exception_caught);
-        bad_optional_exception_caught = false;
-
-        mX.emplace(3);
-        ASSERT(mX.value().value() == 3);
-
-        TYPE& ri         = mX.value();
-        ri.d_def.d_value = 7;
-        ASSERT(mX.value().value() == 7);
-
-        ObjC cmX(3);
-        ASSERT(!isConstRef(mX.value()));
-        ASSERT(isConstRef(X.value()));
-        ASSERT(isConstRef(cmX.value()));
-#ifdef BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS
-        ASSERT(!isRvalueRef(mX.value()));
-        ASSERT(isRvalueRef(Obj(3).value()));
-        ASSERT(isRvalueRef(ObjC(4).value()));
-#endif  // defined(BSLS_COMPILERFEATURES_SUPPORT_REF_QUALIFIERS)
-
-        mX.reset();
-        try {
-            mX.value();
-        }
-        catch (bsl::bad_optional_access&) {
-            bad_optional_exception_caught = true;
-        }
-        ASSERT(bad_optional_exception_caught);
-        bad_optional_exception_caught = false;
-    }
-    catch (...) {
-        unexpected_exception_thrown = true;
-    }
-    ASSERT(unexpected_exception_thrown == false);
-    unexpected_exception_thrown = false;
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase7_imp()
+void TestDriver<TYPE>::testCase2c_imp()
 {
     // --------------------------------------------------------------------
     // TESTING 'reset' MEMBER FUNCTION
@@ -11791,10 +11787,6 @@ void TestDriver<TYPE>::testCase7_imp()
     //
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf("\nTESTING 'reset' MEMBER FUNCTION "
-               "\n===============================\n");
-
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard dag(&da);
 
@@ -11821,84 +11813,14 @@ void TestDriver<TYPE>::testCase7_imp()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase7()
+void TestDriver<TYPE>::testCase2c()
 {
-    TestDriver<TYPE>::testCase7_imp();
-    TestDriver<const TYPE>::testCase7_imp();
+    TestDriver<TYPE>::testCase2c_imp();
+    TestDriver<const TYPE>::testCase2c_imp();
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase6()
-{
-    // --------------------------------------------------------------------
-    // TESTING CONVERSION TO BOOL
-    //   This test will ensure that the conversion to 'bool' works as expected.
-    //   The test relies on reset and emplace member functions, as well as
-    //   construction from a 'value_type'.
-    //
-    // Concerns:
-    //: 1 A disengaged 'optional' when converted to 'bool' evaluates to 'false'
-    //:   and returns 'false' from its 'has_value' method.
-    //:
-    //: 2 An engaged 'optional' when converted to 'bool' evaluates to 'true'
-    //:   and returns 'true' from its 'has_value' method.
-    //:
-    //: 3 Both conversion to 'bool' and 'has_value' method can be performed/
-    //:   invoked on a 'const' qualified 'optional' object.
-    //
-    // Plan:
-    //: 1 Create a disengaged 'optional' and verify that it evaluates to
-    //:   'false' when converted to 'bool' and that 'has_value'
-    //:   method returns 'false'. [C-1]
-    //:
-    //: 2 Emplace a value in the 'optional' object and verify that it evaluates
-    //:   to 'true' when converted to 'bool' and that the 'has_value' method
-    //:   returns 'true'. [C-2]
-    //:
-    //: 3 Call 'reset' method and verify that the 'optional' object evaluates
-    //:   to 'false' when converted to 'bool' and that 'has_value' method
-    //:   returns 'false'. [C-1]
-    //:
-    //: 4 Create an engaged 'optional' and verify that it evaluates to 'true'
-    //:   when converted to 'bool' and that 'has_value' method returns 'true'.
-    //:   [C-2]
-    //:
-    //: 5 Repeat step 1 using a 'const' qualified reference to test conversion
-    //:  to 'bool' and to invoke the 'has_value' method. [C-3]
-    //
-    // Testing:
-    //   operator bool() const;
-    //   bool has_value() const;
-    //
-    // --------------------------------------------------------------------
-
-    if (verbose)
-        printf("\nTESTING CONVERSION TO BOOL"
-               "\n==========================\n");
-
-    {
-        Obj        mX;
-        const Obj& X = mX;
-        ASSERT(!X);
-        ASSERT(false == X.has_value());
-
-        mX.emplace(ValueType());
-        ASSERT(mX);
-        ASSERT(true == mX.has_value());
-
-        mX.reset();
-        ASSERT(!mX);
-        ASSERT(false == mX.has_value());
-    }
-    {
-        Obj mX(bsl::in_place);
-        ASSERT(mX);
-        ASSERT(true == mX.has_value());
-    }
-}
-
-template <class TYPE>
-void TestDriver<TYPE>::testCase5()
+void TestDriver<TYPE>::testCase2b()
 {
     // --------------------------------------------------------------------
     //  ALLOCATOR EXTENDED DISENGAGED CONSTRUCTORS
@@ -11938,10 +11860,6 @@ void TestDriver<TYPE>::testCase5()
     //   allocator_type get_allocator() const;
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf("\nALLOCATOR EXTENDED DISENGAGED CONSTRUCTORS"
-               "\n==========================================\n");
-
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
     bslma::TestAllocator         oa("other", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard dag(&da);
@@ -11970,7 +11888,7 @@ void TestDriver<TYPE>::testCase5()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase4()
+void TestDriver<TYPE>::testCase2a()
 {
     // --------------------------------------------------------------------
     // DISENGAGED CONSTRUCTORS AND DESTRUCTOR
@@ -12020,11 +11938,6 @@ void TestDriver<TYPE>::testCase4()
     //   ~optional();
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf("\nDISENGAGED CONSTRUCTORS AND DESTRUCTOR"
-               "\n======================================"
-               "\n");
-
     {
         bslma::TestAllocator         da("default", veryVeryVeryVerbose);
         bslma::DefaultAllocatorGuard dag(&da);
@@ -12065,7 +11978,7 @@ void TestDriver<TYPE>::testCase4()
 }
 
 template <class TYPE>
-void TestDriver<TYPE>::testCase3()
+void TestDriver<TYPE>::testCase1()
 {
     // --------------------------------------------------------------------
     // BREATHING TEST
@@ -12099,9 +12012,6 @@ void TestDriver<TYPE>::testCase3()
     //   BREATHING TEST
     // --------------------------------------------------------------------
 
-    if (verbose)
-        printf("\nBREATHING TEST"
-               "\n==============\n");
     bslma::TestAllocator         da("default", veryVeryVeryVerbose);
     bslma::DefaultAllocatorGuard dag(&da);
 
@@ -12144,151 +12054,268 @@ int main(int argc, char **argv)
 
     switch (test) {
       case 0:
-      case 32:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase32,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-        break;
-      case 31:
-        testCase31();
-        break;
-      case 30:
-        RUN_EACH_TYPE(TestDriver, testCase30, MyClass2, MyClass2a);
-        RUN_EACH_TYPE(TestDriver,
-                      testCase30b,
-                      ConstructTestTypeAlloc,
-                      ConstructTestTypeAllocArgT);
-        break;
-      case 29:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase29,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
-        RUN_EACH_TYPE(TestDriver,
-                      testCase29b,
-                      BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
-        break;
-      case 28:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase28,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-        RUN_EACH_TYPE(TestDriver, testCase28b, MyClass2, MyClass2a);
-        break;
-      case 27:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase27,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-        break;
-      case 26:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase26,
-                      ConstructTestTypeAlloc,
-                      ConstructTestTypeAllocArgT);
-        break;
-      case 25:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase25,
-                      BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
-        break;
-      case 24:
-
-        testCase24();
-
-        break;
-      case 23:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase23,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_PRIMITIVE);
-        break;
-      case 22:
-        RUN_EACH_TYPE(TestDriver, testCase22, MyClass2, MyClass2a);
-        break;
-      case 21:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase21,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
-        break;
-      case 20:
-        RUN_EACH_TYPE(TestDriver, testCase20, MyClass2, MyClass2a);
-        break;
-      case 19:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase19,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
-        break;
       case 18:
-        testCase18();
-        break;
-      case 17:
         RUN_EACH_TYPE(TestDriver,
-                      testCase17,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+                      testCase18,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        break;
+
+      case 17:
+        RUN_EACH_TYPE(TestDriver, testCase17, MyClass2, MyClass2a);
+        RUN_EACH_TYPE(TestDriver,
+                      testCase17b,
+                      ConstructTestTypeAlloc,
+                      ConstructTestTypeAllocArgT);
         break;
       case 16:
-        testCase16();
+        RUN_EACH_TYPE(TestDriver,
+                      testCase16,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+        RUN_EACH_TYPE(TestDriver,
+                      testCase16b,
+                      BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
         break;
       case 15:
         RUN_EACH_TYPE(TestDriver,
                       testCase15,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        RUN_EACH_TYPE(TestDriver, testCase15b, MyClass2, MyClass2a);
         break;
       case 14:
         RUN_EACH_TYPE(TestDriver,
                       testCase14,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_PRIMITIVE);
         break;
       case 13:
         RUN_EACH_TYPE(TestDriver,
                       testCase13,
                       BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
         break;
-      case 12:
-        RUN_EACH_TYPE(TestDriver, testCase12, MyClass1, MyClass2);
-        break;
+      case 12: {
+        // --------------------------------------------------------------------
+        // BSLX STREAMING
+        //   Ensure that we can serialize the value of any object of the class,
+        //   and then deserialize that value back into any object of the class.
+        //
+        // Concerns:
+        //   N/A
+        //
+        // Plan:
+        //   N/A
+        //
+        // Testing:
+        //   Reserved for 'bslx' streaming.
+        // --------------------------------------------------------------------
+
+        if (verbose)
+            printf("\nBSLX STREAMING"
+                   "\n==============\n");
+
+        if (verbose)
+            printf("Not implemented.\n");
+
+      } break;
+
       case 11:
-        RUN_EACH_TYPE(TestDriver, testCase11, MyClass1, MyClass2, MyClass2a);
-        break;
       case 10:
-        RUN_EACH_TYPE(TestDriver, testCase10, MyClass2, MyClass2a);
+
+        if (verbose)
+            printf("\nTESTING 'operator=(nullopt_t)'"
+                   "\n==============================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase10a,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+
+
+        if (verbose)
+            printf("\nTESTING 'operator=(optional_type)'"
+                   "\n==================================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase10b,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        if (verbose)
+            printf("\nTESTING 'operator=(non_optional_type)'"
+                   "\n======================================"
+                   "\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase10c,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase10d,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+
+        testCase10e();
+        testCase10f();
         break;
+
       case 9:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase9,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+        if (verbose)
+            printf("\nTESTING 'swap' METHOD"
+                   "\n=====================\n");
+        testCase9();
+
         break;
+
       case 8:
-        RUN_EACH_TYPE(TestDriver, testCase8, MyClass1, MyClass2);
-        break;
       case 7:
+
+        if (verbose)
+            printf("\nTESTING COPY/MOVE CONSTRUCTION "
+                   "\n==============================\n");
         RUN_EACH_TYPE(TestDriver,
-                      testCase7,
+                      testCase7a,
                       BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        if (verbose)
+            printf("\nTESTING ALLOCATOR EXTENDED COPY/MOVE CONSTRUCTION"
+                   "\n=================================================\n");
+        RUN_EACH_TYPE(TestDriver, testCase7b, MyClass2, MyClass2a);
         break;
       case 6:
-        RUN_EACH_TYPE(TestDriver,
-                      testCase6,
-                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
-
-        RUN_EACH_TYPE(TestDriver,
-                      testCase6,
-                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+        if (verbose)
+            printf("\nTESTING RELATIONAL OPERATORS"
+                   "\n============================\n");
+        testCase6();
         break;
+      case 5: {
+        // --------------------------------------------------------------------
+        // PRINT AND OUTPUT OPERATOR
+        //   Ensure that the value of the object can be formatted appropriately
+        //   on an 'ostream' in some standard, human-readable form.
+        //
+        // Concerns:
+        //   N/A
+        //
+        // Plan:
+        //   N/A
+        //
+        // Testing:
+        //   Reserved for 'bslx' streaming.
+        // --------------------------------------------------------------------
 
-      case 5:
-        RUN_EACH_TYPE(TestDriver, testCase5, MyClass2, MyClass2a);
-        break;
+        if (verbose)
+            printf("\nPRINT AND OUTPUT OPERATOR"
+                   "\n=========================\n");
+
+        if (verbose)
+            printf("Not implemented.\n");
+
+      } break;
       case 4:
+        if (verbose)
+            printf("\nTESTING CONVERSION TO BOOL"
+                   "\n==========================\n");
         RUN_EACH_TYPE(TestDriver,
-                      testCase4,
+                      testCase4a,
+                      BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
+        RUN_EACH_TYPE(TestDriver,
+                      testCase4a,
                       BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        if (verbose)
+            printf("\nTESTING 'value' METHOD"
+                   "\n======================\n");
+        RUN_EACH_TYPE(TestDriver, testCase4b, MyClass1, MyClass2);
+
+        if (verbose)
+            printf("\nTESTING 'value_or' METHOD"
+                   "\n=========================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase4c,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        if (verbose)
+            printf("\nTESTING ALLOCATOR EXTENDED 'value_or' METHOD"
+                   "\n============================================\n");
+        RUN_EACH_TYPE(TestDriver, testCase4d, MyClass2, MyClass2a);
+
+
+        if (verbose)
+            printf("\nTESTING 'operator->'"
+                   "\n====================\n");
+        RUN_EACH_TYPE(TestDriver, testCase4e, MyClass1, MyClass2, MyClass2a)
+
+        if (verbose)
+            printf("\nTESTING 'operator*'"
+                   "\n===================\n");
+        RUN_EACH_TYPE(TestDriver, testCase4f, MyClass1, MyClass2);
+
         break;
+
       case 3:
+        if (verbose)
+            printf("\nTESTING CONSTRUCTION FROM A VALUE"
+                   "\n=================================\n");
 
         RUN_EACH_TYPE(TestDriver,
-                      testCase3,
+                      testCase3a,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        if (verbose)
+            printf(
+                "\nTESTING ALLOCATOR EXTENDED CONSTRUCTION FROM A VALUE"
+                "\n===================================================="
+                "\n");
+        RUN_EACH_TYPE(TestDriver, testCase3b, MyClass2, MyClass2a);
+
+
+        if (verbose)
+            printf("\nTESTING 'in_place_t' CONSTRUCTOR "
+                   "\n================================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase3c,
+                      BSLSTL_OPTIONAL_TEST_TYPES_VARIADIC_ARGS);
+
+
+        if (verbose)
+            printf("\nTESTING ALLOCATOR EXTENDED 'in_place_t' CONSTRUCTOR "
+                   "\n===================================================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase3d,
+                      ConstructTestTypeAlloc,
+                      ConstructTestTypeAllocArgT);
+
+        break;
+      case 2:
+        if (verbose)
+            printf("\nDISENGAGED CONSTRUCTORS AND DESTRUCTOR"
+                   "\n======================================"
+                   "\n");
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase2a,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+
+        if (verbose)
+            printf("\nALLOCATOR EXTENDED DISENGAGED CONSTRUCTORS"
+                   "\n==========================================\n");
+
+        RUN_EACH_TYPE(TestDriver, testCase2b, MyClass2, MyClass2a);
+
+
+        if (verbose)
+            printf("\nTESTING 'reset' MEMBER FUNCTION "
+                   "\n===============================\n");
+        RUN_EACH_TYPE(TestDriver,
+                      testCase2c,
+                      BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
+
+        break;
+      case 1:
+
+        if (verbose)
+            printf("\nBREATHING TEST"
+                   "\n==============\n");
+
+        RUN_EACH_TYPE(TestDriver,
+                      testCase1,
                       BSLTF_TEMPLATETESTFACILITY_TEST_TYPES_REGULAR);
 
         RUN_EACH_TYPE(TestDriver,
-                      testCase3,
+                      testCase1,
                       BSLSTL_OPTIONAL_TEST_TYPES_INSTANCE_COUNTING);
         break;
 
