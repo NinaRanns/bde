@@ -251,7 +251,8 @@ struct Optional_IsTriviallyDestructible
 // This metafunction is derived from 'bsl::integral_constant<bool, D>'.  See
 // the C++11 definition above for details.
 
-#define OPTIONAL_IS_ASSIGNABLE bsl::integral_constant<bool, DEFAULT>
+#define OPTIONAL_IS_ASSIGNABLE(U, V, DEFAULT)                              \
+    bsl::integral_constant<bool, DEFAULT>
 // The 'bool' template parameter represents the desired value this trait should
 // have in order not to affect the constraint it appears in.
 
@@ -2978,19 +2979,88 @@ class optional<TYPE, false> : public std::optional<TYPE> {
     // PRIVATE TYPES
     typedef std::optional<TYPE> OptionalBase;
 
-    using OptionalBase::OptionalBase;
-
   public:
     // CREATORS
-    optional(const optional& original) = default;  // IMPLICIT
+    optional();
+        // Create a disengaged 'optional' object.
+
+    optional(bsl::nullopt_t);  // IMPLICIT
+        // Create a disengaged 'optional' object.
+
+    optional(const optional& original) = default;
         // Create an 'optional' object having the value of the specified
         // 'original' object.
 
-    optional(optional&& original) = default;  // IMPLICIT
+    optional(optional&& original) = default;
         // Create an 'optional' object having the same value as the specified
         // 'original' object by moving the contents of 'original' to the
         // newly-created object.  'original' is left in a valid, but
         // unspecified state.
+
+    template <class ANY_TYPE = TYPE>
+    optional(
+       ANY_TYPE&&                                                        value,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create an 'optional' object having the same value as the specified
+        // 'value' object by forwarding the contents of 'value' to the
+        // newly-created object.
+
+    template <class ANY_TYPE = TYPE>
+    explicit optional(
+           ANY_TYPE&&                                                    value,
+           BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create an 'optional' object having the same value as the specified
+        // 'value' object by forwarding the contents of 'value' to the
+        // newly-created object.
+
+    template <class ANY_TYPE>
+    optional(
+       const optional<ANY_TYPE>& original,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+           TYPE,
+           const ANY_TYPE&),
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
+                                                         const ANY_TYPE&));
+       // Create a disengaged 'optional' object if the specified 'original'
+       // object is disengaged, and an 'optional' object with the value of
+       // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+
+    template <class ANY_TYPE>
+    explicit optional(
+       const optional<ANY_TYPE>& original,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+           TYPE,
+           const ANY_TYPE&),
+       BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&));
+       // Create a disengaged 'optional' object if the specified 'original'
+       // object is disengaged, and an 'optional' object with the value of
+       // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+
+    template <class ANY_TYPE>
+    optional(optional<ANY_TYPE>&& original,
+             BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
+                                                               ANY_TYPE));
+        // Create a disengaged 'optional' object if the specified 'original'
+        // object is disengaged, and an 'optional' object with the value of
+        // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+        // 'original' is left in a valid but unspecified state.
+
+    template <class ANY_TYPE>
+    explicit optional(
+        optional<ANY_TYPE>&& original,
+        BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create a disengaged 'optional' object if the specified 'original'
+        // object is disengaged, and an 'optional' object with the value of
+        // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+        // 'original' is left in a valid but unspecified state.
 
     template <class ANY_TYPE = TYPE>
     optional(const std::optional<ANY_TYPE>& original,
@@ -3035,6 +3105,15 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
         // 'original' is left in a valid but unspecified state.
+
+    template <class... ARGS>
+    explicit optional(bsl::in_place_t,
+                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
+
+    template <class INIT_LIST_TYPE, class... ARGS>
+    explicit optional(bsl::in_place_t,
+                      std::initializer_list<INIT_LIST_TYPE>,
+                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
 
     // MANIPULATORS
     optional& operator=(bsl::nullopt_t) BSLS_KEYWORD_NOEXCEPT;
@@ -9205,6 +9284,117 @@ const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw() const
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 // CREATORS
+template <class TYPE>
+inline
+optional<TYPE, false>::optional()
+{
+}
+
+template <class TYPE>
+inline
+optional<TYPE, false>::optional(bsl::nullopt_t)
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    ANY_TYPE&& value,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+: OptionalBase(std::forward<ANY_TYPE>(value))
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    ANY_TYPE&& value,
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+: OptionalBase(std::forward<ANY_TYPE>(value))
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    const optional<ANY_TYPE>& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
+{
+    if (original.has_value()) {
+        this->emplace(original.value());
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    const optional<ANY_TYPE>& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
+{
+    if (original.has_value()) {
+        this->emplace(original.value());
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+{
+    if (original.has_value()) {
+        this->emplace(std::move(original.value()));
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+{
+    if (original.has_value()) {
+        this->emplace(std::move(original.value()));
+    }
+}
+
+template <class TYPE>
+template <class... ARGS>
+inline
+optional<TYPE, false>::optional(
+    bsl::in_place_t,
+    ARGS&&... args)
+: OptionalBase(bsl::in_place, std::forward<ARGS>(args)...)
+{
+}
+
+template <class TYPE>
+template <class INIT_LIST_TYPE, class... ARGS>
+inline
+optional<TYPE, false>::optional(
+    bsl::in_place_t,
+    std::initializer_list<INIT_LIST_TYPE>      il,
+    BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
+: OptionalBase(bsl::in_place, il, std::forward<ARGS>(args)...)
+{
+}
+
 template <class TYPE>
 template <class ANY_TYPE>
 inline
