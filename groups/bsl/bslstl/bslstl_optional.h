@@ -323,8 +323,8 @@ struct Optional_RemoveCVRef {
             ANY_TYPE>::type>)
 #else
 
-// The value of these macros is chosen to not affect the disjunction-form
-// constraint these macros appears in.
+// The value of these macros is chosen to not affect the constraints these
+// macros appears in.
 #define BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) false
 #define BSLSTL_OPTIONAL_ASSIGNS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) false
 
