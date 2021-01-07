@@ -217,8 +217,8 @@ BSLS_KEYWORD_INLINE_CONSTEXPR Optional_OptNoSuchType optNoSuchType =
 #else
 extern const Optional_OptNoSuchType optNoSuchType;
 #endif
-// Value of type 'Optional_OptNoSuchType' used as the default argument in
-// functions that are constrained using a function argument.
+    // Value of type 'Optional_OptNoSuchType' used as the default argument in
+    // functions that are constrained using a function argument.
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
@@ -291,9 +291,8 @@ struct Optional_RemoveCVRef {
      std::is_assignable<TYPE&, OPT_TYPE>::value)
 
 #else
-// The value of this macro is chosen to not affect the disjunction-form
-// constraint this macro appears in when 'std::is_assignable' trait isn't
-// available
+// The value of this macro is chosen so it does not affect the disjunction-form
+// constraint this macro appears in.
 #define BSLSTL_OPTIONAL_ASSIGNS_FROM(TYPE, OPT_TYPE) false
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
