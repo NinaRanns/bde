@@ -217,21 +217,20 @@ BSLS_KEYWORD_INLINE_CONSTEXPR Optional_OptNoSuchType optNoSuchType =
 #else
 extern const Optional_OptNoSuchType optNoSuchType;
 #endif
-// Value of type 'Optional_OptNoSuchType' used as the default argument in
-// functions that are constrained using a function argument.
+    // Value of type 'Optional_OptNoSuchType' used as the default argument in
+    // functions that are constrained using a function argument.
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
-// This macro is defined as 'std::is_constructible<U, V>' in C++11 and later,
-// and as 'bsl::integral_constant<DEFAULT>' in C++03 with the value of
-// 'DEFAULT' typically chosen to not affect the constraint this macro appears
-// in.
+// This macro is defined as 'std::is_constructible<U, V>::value' in C++11 and
+// later, and as 'DEFAULT' in C++03 with the value of 'DEFAULT' typically
+// chosen to not affect the constraint this macro appears in.
 #define BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE_V(U, V, DEFAULT)                     \
     std::is_constructible<U, V>::value
 
-// This macro is defined as 'std::is_assignable<U, V>' in C++11 and later, and
-// as 'bsl::integral_constant<DEFAULT>' in C++03 with the value of 'DEFAULT'
-// typically chosen to not affect the constraint this macro appears in.
+// This macro is defined as 'std::is_assignable<U, V>::value' in C++11 and
+// later, and as 'DEFAULT' in C++03 with the value of 'DEFAULT' typically
+// chosen to not affect the constraint this macro appears in.
 #define BSLSTL_OPTIONAL_IS_ASSIGNABLE_V(U, V, DEFAULT)                        \
     std::is_assignable<U, V>::value
 
