@@ -222,21 +222,17 @@ extern const Optional_OptNoSuchType optNoSuchType;
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
-template <class U, class V, bool D>
-struct Optional_IsConstructible : std::is_constructible<U, V> {
-    // This metafunction is derived from 'std::is_constructible<U, V>' in
-    // C++11 and later and from 'bsl::integral_constant<D>' in C++03 with the
-    // value of 'D' typically chosen to not affect the constraint this
-    // metafunction appears in.
-};
+// This macro is defined as 'std::is_constructible<U, V>::value' in C++11 and
+// later, and as 'DEFAULT' in C++03 with the value of 'DEFAULT' typically
+// chosen to not affect the constraint this macro appears in.
+#define BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(U, V, DEFAULT)                     \
+    std::is_constructible<U, V>::value
 
-template <class U, class V, bool D>
-struct Optional_IsAssignable : std::is_assignable<U, V> {
-    // This metafunction is derived from 'std::is_assignable<U, V>' in C++11
-    // and later and from 'bsl::integral_constant<D>' in C++03 with the value
-    // of 'D' typically chosen to not affect the constraint this metafunction
-    // appears in.
-};
+// This macro is defined as 'std::is_assignable<U, V>::value' in C++11 and
+// later, and as 'DEFAULT' in C++03 with the value of 'DEFAULT' typically
+// chosen to not affect the constraint this macro appears in.
+#define BSLSTL_OPTIONAL_IS_ASSIGNABLE(U, V, DEFAULT)                        \
+    std::is_assignable<U, V>::value
 
 template <class TYPE>
 struct Optional_IsTriviallyDestructible
@@ -249,17 +245,9 @@ struct Optional_IsTriviallyDestructible
 
 #else
 
-template <class U, class V, bool D>
-struct Optional_IsConstructible : bsl::integral_constant<bool, D> {
-    // This metafunction is derived from 'bsl::integral_constant<bool, D>'.
-    // See the C++11 definition above for details.
-};
+#define BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(U, V, DEFAULT) DEFAULT
 
-template <class U, class V, bool D>
-struct Optional_IsAssignable : bsl::integral_constant<bool, D> {
-    // The 'bool' template parameter represents the desired value this trait
-    // should have in order not to affect the constraint it appears in.
-};
+#define BSLSTL_OPTIONAL_IS_ASSIGNABLE(U, V, DEFAULT) DEFAULT
 
 template <class TYPE>
 struct Optional_IsTriviallyDestructible : bsl::is_trivially_copyable<TYPE> {
@@ -277,152 +265,100 @@ struct Optional_RemoveCVRef {
         typename bsl::remove_reference<TYPE>::type>::type type;
 };
 
+// As in 'std' implementation, if the 'TYPE' converts from any value category
+// of an optional type 'OPT_TYPE', we consider it convertible from that
+// optional type.
+#define BSLSTL_OPTIONAL_CONVERTS_FROM(TYPE, OPT_TYPE)                         \
+    (bsl::is_convertible<const OPT_TYPE&, TYPE>::value ||                     \
+     bsl::is_convertible<OPT_TYPE&, TYPE>::value ||                           \
+     bsl::is_convertible<const OPT_TYPE, TYPE>::value ||                      \
+     bsl::is_convertible<OPT_TYPE, TYPE>::value ||                            \
+     BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, const OPT_TYPE&, false) ||      \
+     BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, OPT_TYPE&, false) ||            \
+     BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, const OPT_TYPE, false) ||       \
+     BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, OPT_TYPE, false))
 
-template <class TYPE, class OPT_TYPE>
-struct Optional_ConvertsFrom
-: bsl::integral_constant<
-      bool,
-      bsl::is_convertible<const OPT_TYPE&, TYPE>::value ||
-          bsl::is_convertible<OPT_TYPE&, TYPE>::value ||
-          bsl::is_convertible<const OPT_TYPE, TYPE>::value ||
-          bsl::is_convertible<OPT_TYPE, TYPE>::value ||
-          Optional_IsConstructible<TYPE, const OPT_TYPE&, false>::value ||
-          Optional_IsConstructible<TYPE, OPT_TYPE&, false>::value ||
-          Optional_IsConstructible<TYPE, const OPT_TYPE, false>::value ||
-          Optional_IsConstructible<TYPE, OPT_TYPE, false>::value> {
-    // This metafunction is derived from 'bsl::true_type' if 'TYPE' can be
-    // converted from an 'OPT_TYPE', and from 'bsl::false_type' otherwise.
-};
+// As in 'std' implementation, if the 'TYPE' can be assigned to from any value
+// category of of an optional type 'OPT_TYPE', we consider it convertible from
+// that optional type.
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
-template <class TYPE, class OPT_TYPE>
-struct Optional_AssignsFrom
-: bsl::integral_constant<
-      bool,
-      std::is_assignable<TYPE&, const OPT_TYPE&>::value ||
-          std::is_assignable<TYPE&, OPT_TYPE&>::value ||
-          std::is_assignable<TYPE&, const OPT_TYPE>::value ||
-          std::is_assignable<TYPE&, OPT_TYPE>::value> {
-    // This metafunction is derived from 'bsl::true_type' if 'OPT_TYPE' can
-    // be assigned to 'TYPE', from 'bsl::false_type' otherwise in C++11 and
-    // later, and from 'bsl::false_type' in C++03 to not affect the
-    // disjunction-form constraint this metafunction appears in.
-};
-#else
+#define BSLSTL_OPTIONAL_ASSIGNS_FROM(TYPE, OPT_TYPE)                          \
+    (std::is_assignable<TYPE&, const OPT_TYPE&>::value ||                     \
+     std::is_assignable<TYPE&, OPT_TYPE&>::value ||                           \
+     std::is_assignable<TYPE&, const OPT_TYPE>::value ||                      \
+     std::is_assignable<TYPE&, OPT_TYPE>::value)
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_AssignsFrom : bsl::integral_constant<bool, false> {
-    // This metafunction is derived from bsl::integral_constant<bool, false> to
-    // not affect the disjunction-form constraint this metafunction appears in.
-    // See the C++11 definition above for details.
-};
+#else
+// The value of this macro is chosen so it does not affect the disjunction-form
+// constraint this macro appears in.
+#define BSLSTL_OPTIONAL_ASSIGNS_FROM(TYPE, OPT_TYPE) false
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP11_BASELINE_LIBRARY
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_ConvertsFromBslOptional
-: bsl::integral_constant<
-      bool,
-      Optional_ConvertsFrom<TYPE,
-                            bsl::optional<typename Optional_RemoveCVRef<
-                                ANY_TYPE>::type> >::value> {
-    //  This metafunction is derived from 'bsl::true_type' if 'TYPE' can be
-    //  constructed from 'bsl::optional<ANY_TYPE>', and from 'bsl::false_type'
-    //  otherwise.  As in 'std' implementation, if the 'TYPE' converts from any
-    //  value category of 'bsl::optional<ANY_TYPE>', we consider convertible
-    // from 'bsl::optional<ANY_TYPE>'.
-};
+#define BSLSTL_OPTIONAL_CONVERTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)            \
+    BSLSTL_OPTIONAL_CONVERTS_FROM(                                            \
+        TYPE,                                                                 \
+        bsl::optional<typename BloombergLP::bslstl::Optional_RemoveCVRef<     \
+            ANY_TYPE>::type>)
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_AssignsFromBslOptional
-: bsl::integral_constant<
-      bool,
-      Optional_AssignsFrom<TYPE,
-                           bsl::optional<typename Optional_RemoveCVRef<
-                               ANY_TYPE>::type> >::value> {
-    //  This metafunction is derived from 'bsl::true_type' if
-    //  bsl::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
-    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
-    //  can be assigned to from any value category of
-    // 'bsl::optional<ANY_TYPE>', we consider it assignable from
-    // 'bsl::optional<ANY_TYPE>'.
-};
+#define BSLSTL_OPTIONAL_ASSIGNS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)             \
+    BSLSTL_OPTIONAL_ASSIGNS_FROM(                                             \
+        TYPE,                                                                 \
+        bsl::optional<typename BloombergLP::bslstl::Optional_RemoveCVRef<     \
+            ANY_TYPE>::type>)
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
-template <class TYPE, class ANY_TYPE>
-struct Optional_ConvertsFromStdOptional
-: bsl::integral_constant<
-      bool,
-      Optional_ConvertsFrom<TYPE,
-                            std::optional<typename Optional_RemoveCVRef<
-                                ANY_TYPE>::type> >::value> {
-    // 'Optional_ConvertsFromBslOptional' inherits from 'bsl::true_type' if
-    // 'TYPE' can be constructed from 'std::optional<ANY_TYPE>', and from
-    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
-    // converts from any value category of 'std::optional<ANY_TYPE>', we
-    // consider convertible from 'std::optional<ANY_TYPE>'.
-};
+#define BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)            \
+    BSLSTL_OPTIONAL_CONVERTS_FROM(                                            \
+        TYPE,                                                                 \
+        std::optional<typename BloombergLP::bslstl::Optional_RemoveCVRef<     \
+            ANY_TYPE>::type>)
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_AssignsFromStdOptional
-: bsl::integral_constant<
-      bool,
-      Optional_AssignsFrom<TYPE,
-                           std::optional<typename Optional_RemoveCVRef<
-                               ANY_TYPE>::type> >::value> {
-    // 'Optional_AssignsFromStdOptional' inherits from 'bsl::true_type' if
-    // 'std::optional<ANY_TYPE>' can be assigned to 'TYPE', and from
-    // 'bsl::false_type' otherwise.  As in 'std' implementation, if the 'TYPE'
-    //  can be assigned to from any value category of
-    // 'std::optional<ANY_TYPE>', we consider it assignable from
-    // 'std::optional<ANY_TYPE>'.
-};
-
+#define BSLSTL_OPTIONAL_ASSIGNS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)             \
+    BSLSTL_OPTIONAL_ASSIGNS_FROM(                                             \
+        TYPE,                                                                 \
+        std::optional<typename BloombergLP::bslstl::Optional_RemoveCVRef<     \
+            ANY_TYPE>::type>)
 #else
-template <class TYPE, class ANY_TYPE>
-struct Optional_ConvertsFromStdOptional : bsl::integral_constant<bool, false> {
-    // This metafunction is derived from bsl::integral_constant<bool, false> to
-    // not affect the disjunction-form constraint this metafunction appears in.
-    // See the C++17 definition above for details.
-};
 
-template <class TYPE, class ANY_TYPE>
-struct Optional_AssignsFromStdOptional : bsl::integral_constant<bool, false> {
-    // This metafunction is derived from bsl::integral_constant<bool, false> to
-    // not affect the disjunction-form constraint this metafunction appears in.
-    // See the C++17 definition above for details.
-};
+// The value of these macros is chosen to not affect the constraints these
+// macros appears in.
+#define BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) false
+#define BSLSTL_OPTIONAL_ASSIGNS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) false
+
 #endif  // BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_PropagatesAllocator
 : bsl::integral_constant<
       bool,
-      bslma::UsesBslmaAllocator<TYPE>::value &&
-          bsl::is_const<TYPE>::value &&
+      bslma::UsesBslmaAllocator<TYPE>::value && bsl::is_const<TYPE>::value &&
           bsl::is_same<ANY_TYPE, typename bsl::remove_cv<TYPE>::type>::value> {
-
     // This metafunction is derived from 'bsl::true_type' if 'TYPE' is an
     // allocator-aware const type, and if 'ANY_TYPE' is the same as 'TYPE',
     // minus the cv qualification.  This trait is used to enable a constructor
     // overload for a const qualified allocator-aware 'ValueType' taking an
-    // rvalue of optional of the non-const qualified 'ValueType'.
-    // Such an overload needs to propagate the allocator.
+    // rvalue of optional of the non-const qualified 'ValueType'.  Such an
+    // overload needs to propagate the allocator.
 };
-
 
 template <class TYPE, class ANY_TYPE>
 struct Optional_ConstructsFromType
 : bsl::integral_constant<
       bool,
       !bsl::is_same<ANY_TYPE, TYPE>::value &&
-          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
+          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
+                            ANY_TYPE>::type,
                         bsl::optional<TYPE> >::value &&
-          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
+          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
+                            ANY_TYPE>::type,
                         bsl::nullopt_t>::value &&
-          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
+          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
+                            ANY_TYPE>::type,
                         bsl::in_place_t>::value &&
-          !bsl::is_same<typename Optional_RemoveCVRef<ANY_TYPE>::type,
+          !bsl::is_same<typename BloombergLP::bslstl::Optional_RemoveCVRef<
+                            ANY_TYPE>::type,
                         bsl::allocator_arg_t>::value &&
-          Optional_IsConstructible<TYPE, ANY_TYPE, true>::value> {
+          BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true)> {
     // This metafunction is derived from 'bsl::true_type' if 'ANY_TYPE' is not
     // a tag type, if 'ANY_TYPE' and 'TYPE' are not a same type, and if 'TYPE'
     // is constructible from 'ANY_TYPE'.
@@ -433,10 +369,8 @@ struct Optional_ConstructsFromType
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,          \
                                                                ANY_TYPE)      \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::                                                \
-                Optional_ConvertsFromBslOptional<TYPE, ANY_TYPE>::value &&    \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,        \
+        !BSLSTL_OPTIONAL_CONVERTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &&        \
+            BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true),         \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
 #define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,         \
@@ -448,10 +382,8 @@ struct Optional_ConstructsFromType
 #define BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,          \
                                                                ANY_TYPE)      \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::                                                \
-                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value,        \
+        !BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &&        \
+            BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true),         \
         BloombergLP::bslstl::Optional_OptNoSuchType>::type
 
 #define BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL(TYPE,         \
@@ -537,26 +469,18 @@ struct Optional_ConstructsFromType
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE)       \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::                                                \
-                Optional_ConvertsFromBslOptional<TYPE, ANY_TYPE>::value &&    \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
-            BloombergLP::bslstl::                                             \
-                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
-            !BloombergLP::bslstl::                                            \
-                Optional_AssignsFromBslOptional<TYPE, ANY_TYPE>::value,       \
+        !BSLSTL_OPTIONAL_CONVERTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE) &&        \
+            BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true) &&       \
+            BSLSTL_OPTIONAL_IS_ASSIGNABLE(TYPE&, ANY_TYPE, true) &&         \
+            !BSLSTL_OPTIONAL_ASSIGNS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),       \
         optional<TYPE> >::type
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM_STD_OPTIONAL(TYPE, ANY_TYPE)       \
     typename bsl::enable_if<                                                  \
-        !BloombergLP::bslstl::                                                \
-                Optional_ConvertsFromStdOptional<TYPE, ANY_TYPE>::value &&    \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
-            BloombergLP::bslstl::                                             \
-                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value &&        \
-            !BloombergLP::bslstl::                                            \
-                Optional_AssignsFromStdOptional<TYPE, ANY_TYPE>::value,       \
+        !BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE) &&        \
+            BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true) &&       \
+            BSLSTL_OPTIONAL_IS_ASSIGNABLE(TYPE&, ANY_TYPE, true) &&         \
+            !BSLSTL_OPTIONAL_ASSIGNS_FROM_STD_OPTIONAL(TYPE, ANY_TYPE),       \
         optional<TYPE> >::type
 
 #define BSLSTL_OPTIONAL_ENABLE_ASSIGN_FROM(TYPE, ANY_TYPE)                    \
@@ -565,10 +489,8 @@ struct Optional_ConstructsFromType
             !(bsl::is_same<ANY_TYPE,                                          \
                            typename bsl::decay<TYPE>::type>::value &&         \
               std::is_scalar<TYPE>::value) &&                                 \
-            BloombergLP::bslstl::                                             \
-                Optional_IsConstructible<TYPE, ANY_TYPE, true>::value &&      \
-            BloombergLP::bslstl::                                             \
-                Optional_IsAssignable<TYPE&, ANY_TYPE, true>::value,          \
+            BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE(TYPE, ANY_TYPE, true) &&       \
+            BSLSTL_OPTIONAL_IS_ASSIGNABLE(TYPE&, ANY_TYPE, true),           \
         optional<TYPE> >::type
 
 #define BSLSTL_OPTIONAL_ENABLE_IF_NOT_ALLOCATOR_TAG(ARG)                      \
@@ -3018,19 +2940,88 @@ class optional<TYPE, false> : public std::optional<TYPE> {
     // PRIVATE TYPES
     typedef std::optional<TYPE> OptionalBase;
 
-    using OptionalBase::OptionalBase;
-
   public:
     // CREATORS
-    optional(const optional& original) = default;  // IMPLICIT
+    optional();
+        // Create a disengaged 'optional' object.
+
+    optional(bsl::nullopt_t);  // IMPLICIT
+        // Create a disengaged 'optional' object.
+
+    optional(const optional& original) = default;
         // Create an 'optional' object having the value of the specified
         // 'original' object.
 
-    optional(optional&& original) = default;  // IMPLICIT
+    optional(optional&& original) = default;
         // Create an 'optional' object having the same value as the specified
         // 'original' object by moving the contents of 'original' to the
         // newly-created object.  'original' is left in a valid, but
         // unspecified state.
+
+    template <class ANY_TYPE = TYPE>
+    optional(
+       ANY_TYPE&&                                                        value,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create an 'optional' object having the same value as the specified
+        // 'value' object by forwarding the contents of 'value' to the
+        // newly-created object.
+
+    template <class ANY_TYPE = TYPE>
+    explicit optional(
+           ANY_TYPE&&                                                    value,
+           BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create an 'optional' object having the same value as the specified
+        // 'value' object by forwarding the contents of 'value' to the
+        // newly-created object.
+
+    template <class ANY_TYPE>
+    optional(
+       const optional<ANY_TYPE>& original,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+           TYPE,
+           const ANY_TYPE&),
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
+                                                         const ANY_TYPE&));
+       // Create a disengaged 'optional' object if the specified 'original'
+       // object is disengaged, and an 'optional' object with the value of
+       // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+
+    template <class ANY_TYPE>
+    explicit optional(
+       const optional<ANY_TYPE>& original,
+       BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+       BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(
+           TYPE,
+           const ANY_TYPE&),
+       BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&));
+       // Create a disengaged 'optional' object if the specified 'original'
+       // object is disengaged, and an 'optional' object with the value of
+       // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+
+    template <class ANY_TYPE>
+    optional(optional<ANY_TYPE>&& original,
+             BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                     ANY_TYPE),
+             BSLSTL_OPTIONAL_DECLARE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE,
+                                                               ANY_TYPE));
+        // Create a disengaged 'optional' object if the specified 'original'
+        // object is disengaged, and an 'optional' object with the value of
+        // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+        // 'original' is left in a valid but unspecified state.
+
+    template <class ANY_TYPE>
+    explicit optional(
+        optional<ANY_TYPE>&& original,
+        BSLSTL_OPTIONAL_DECLARE_IF_NOT_SAME(TYPE, ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                                ANY_TYPE),
+        BSLSTL_OPTIONAL_DECLARE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE));
+        // Create a disengaged 'optional' object if the specified 'original'
+        // object is disengaged, and an 'optional' object with the value of
+        // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
+        // 'original' is left in a valid but unspecified state.
 
     template <class ANY_TYPE = TYPE>
     optional(const std::optional<ANY_TYPE>& original,
@@ -3075,6 +3066,20 @@ class optional<TYPE, false> : public std::optional<TYPE> {
         // object is disengaged, and an 'optional' object with the value of
         // 'original.value()' (of 'ANY_TYPE') converted to 'TYPE' otherwise.
         // 'original' is left in a valid but unspecified state.
+
+    template <class... ARGS>
+    explicit optional(bsl::in_place_t,
+                      ARGS&&... args);
+        // Create an 'optional' object having the value of the (template
+        // parameter) 'TYPE' created in place using the specified 'args'.
+
+    template <class INIT_LIST_TYPE, class... ARGS>
+    explicit optional(bsl::in_place_t,
+                      std::initializer_list<INIT_LIST_TYPE> il,
+                      ARGS&&... args);
+        // Create an 'optional' object having the value of the (template
+        // parameter) 'TYPE' created in place using the specified 'il' and
+        // the specified 'args'.
 
     // MANIPULATORS
     optional& operator=(bsl::nullopt_t) BSLS_KEYWORD_NOEXCEPT;
@@ -3364,12 +3369,18 @@ class optional<TYPE, false> {
 #if !BSLS_COMPILERFEATURES_SIMULATE_CPP11_FEATURES
     template <class... ARGS>
     explicit optional(bsl::in_place_t,
-                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
+                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args);
+        // Create an 'optional' object having the value of the (template
+        // parameter) 'TYPE' created in place using the specified 'args'.
+
 #if defined(BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS)
     template <class INIT_LIST_TYPE, class... ARGS>
     explicit optional(bsl::in_place_t,
-                      std::initializer_list<INIT_LIST_TYPE>,
-                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)...);
+                      std::initializer_list<INIT_LIST_TYPE> il,
+                      BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args);
+        // Create an 'optional' object having the value of the (template
+        // parameter) 'TYPE' created in place using the specified 'il' and
+        // the specified 'args'.
 #endif  // BSLS_COMPILERFEATURES_SUPPORT_GENERALIZED_INITIALIZERS
 #elif BSLS_COMPILERFEATURES_SIMULATE_VARIADIC_TEMPLATES
 // {{{ BEGIN GENERATED CODE
@@ -6269,8 +6280,8 @@ template <class TYPE>
 void Optional_DataImp<TYPE>::reset() BSLS_KEYWORD_NOEXCEPT
 {
     if (d_hasValue) {
-        bslma::DestructionUtil::destroy(d_buffer.address());
-        d_hasValue = false;
+      d_hasValue = false;
+      bslma::DestructionUtil::destroy(d_buffer.address());
     }
 }
 
@@ -9245,6 +9256,115 @@ const TYPE& optional<TYPE, USES_BSLMA_ALLOC>::dereferenceRaw() const
 
 #ifdef BSLS_LIBRARYFEATURES_HAS_CPP17_BASELINE_LIBRARY
 // CREATORS
+template <class TYPE>
+inline
+optional<TYPE, false>::optional()
+{
+}
+
+template <class TYPE>
+inline
+optional<TYPE, false>::optional(bsl::nullopt_t)
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    ANY_TYPE&& value,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+: OptionalBase(std::forward<ANY_TYPE>(value))
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    ANY_TYPE&& value,
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+: OptionalBase(std::forward<ANY_TYPE>(value))
+{
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    const optional<ANY_TYPE>& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
+{
+    if (original.has_value()) {
+        this->emplace(original.value());
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    const optional<ANY_TYPE>& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE,
+                                                           const ANY_TYPE&),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, const ANY_TYPE&))
+{
+    if (original.has_value()) {
+        this->emplace(original.value());
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+{
+    if (original.has_value()) {
+        this->emplace(std::move(original.value()));
+    }
+}
+
+template <class TYPE>
+template <class ANY_TYPE>
+inline
+optional<TYPE, false>::optional(
+    optional<ANY_TYPE>&& original,
+    BSLSTL_OPTIONAL_DEFINE_IF_NOT_SAME(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL(TYPE, ANY_TYPE),
+    BSLSTL_OPTIONAL_DEFINE_IF_EXPLICIT_CONSTRUCT(TYPE, ANY_TYPE))
+{
+    if (original.has_value()) {
+        this->emplace(std::move(original.value()));
+    }
+}
+
+template <class TYPE>
+template <class... ARGS>
+inline
+optional<TYPE, false>::optional(bsl::in_place_t, ARGS&&... args)
+: OptionalBase(bsl::in_place, std::forward<ARGS>(args)...)
+{
+}
+
+template <class TYPE>
+template <class INIT_LIST_TYPE, class... ARGS>
+inline
+optional<TYPE, false>::optional(
+    bsl::in_place_t,
+    std::initializer_list<INIT_LIST_TYPE>      il,
+    BSLS_COMPILERFEATURES_FORWARD_REF(ARGS)... args)
+: OptionalBase(bsl::in_place, il, std::forward<ARGS>(args)...)
+{
+}
+
 template <class TYPE>
 template <class ANY_TYPE>
 inline
@@ -13004,6 +13124,14 @@ bool operator>=(const std::optional<LHS_TYPE>& lhs,
 #endif
 }  // close namespace bsl
 
+#undef BSLSTL_OPTIONAL_IS_CONSTRUCTIBLE
+#undef BSLSTL_OPTIONAL_IS_ASSIGNABLE
+#undef BSLSTL_OPTIONAL_CONVERTS_FROM
+#undef BSLSTL_OPTIONAL_ASSIGNS_FROM
+#undef BSLSTL_OPTIONAL_CONVERTS_FROM_BSL_OPTIONAL
+#undef BSLSTL_OPTIONAL_CONVERTS_FROM_STD_OPTIONAL
+#undef BSLSTL_OPTIONAL_ASSIGNS_FROM_BSL_OPTIONAL
+#undef BSLSTL_OPTIONAL_ASSIGNS_FROM_STD_OPTIONAL
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL
 #undef BSLSTL_OPTIONAL_DEFINE_IF_CONSTRUCTS_FROM_BSL_OPTIONAL
 #undef BSLSTL_OPTIONAL_DECLARE_IF_CONSTRUCTS_FROM_STD_OPTIONAL
